@@ -5,12 +5,14 @@ type Rule struct {
 	Action  []Stmt
 }
 
-type Pattern struct {
+type Pattern interface{}
 
-	//Expr Expr
+type BeginPattern struct {
 }
 
-//type Stmt interface{}
-type Stmt struct {
-	Message string
+type EndPattern struct {
+}
+
+type ExprPattern struct {
+	Expr Expr
 }

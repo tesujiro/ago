@@ -18,7 +18,21 @@ type Lexer struct {
 var tokenTab = map[string]int{
 	"BEGIN": LEX_BEGIN,
 	"END":   LEX_END,
-	"print": LEX_PRINT,
+}
+
+var compSymbols = map[string]int{
+	"==": EQEQ,
+	"!=": NEQ,
+	">=": GE,
+	"<=": LE,
+	"&&": ANDAND,
+	"||": OROR,
+	"++": PLUSPLUS,
+	"--": MINUSMINUS,
+	"+=": PLUSEQ,
+	"-=": MINUSEQ,
+	"*=": MULEQ,
+	"/=": DIVEQ,
 }
 
 func (l *Lexer) Lex(lval *yySymType) (token_id int) {
@@ -43,34 +57,9 @@ func (l *Lexer) Lex(lval *yySymType) (token_id int) {
 			lit = lit[1 : len(lit)-1]
 		}
 	default:
-		switch tok.String() {
-		/*
-			case "==":
-				token_id = EQEQ
-			case "!=":
-				token_id = NEQ
-			case ">=":
-				token_id = GE
-			case "<=":
-				token_id = LE
-			case "&&":
-				token_id = ANDAND
-			case "||":
-				token_id = OROR
-			case "++":
-				token_id = PLUSPLUS
-			case "--":
-				token_id = MINUSMINUS
-			case "+=":
-				token_id = PLUSEQ
-			case "-=":
-				token_id = MINUSEQ
-			case "*=":
-				token_id = MULEQ
-			case "/=":
-				token_id = DIVEQ
-		*/
-		default:
+		if symbol, ok := compSymbols[tok.String()]; ok {
+			token_id = symbol
+		} else {
 			if len(tok.String()) == 1 {
 				token_id = int(tok.String()[0])
 			}

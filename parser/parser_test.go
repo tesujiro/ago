@@ -14,11 +14,15 @@ func TestParser(t *testing.T) {
 		errMessage string
 	}{
 		{script: "", result: nil},
-		{script: "{print}", result: nil},
-		{script: "{print;}", result: nil},
-		//{script: "${print;}", result: nil},
-		{script: "{print;print;}", result: nil},
-		{script: "BEGIN{print;}{print;print;}END{print;}", result: nil},
+		{script: "{x}", result: nil},
+		{script: "{x=x+1;}", result: nil},
+		//{script: "${x;}", result: nil},
+		{script: "{x;x;}", result: nil},
+		{script: "BEGIN{x;}{x=1;y=x+1;}END{x;}", result: nil},
+		{script: "a==1{x}", result: nil},
+		{script: "$1==1{x}", result: nil},
+		{script: "$NR==1{x}", result: nil},
+		{script: "$(NF+1)==1{x}", result: nil},
 	}
 	for _, test := range tests {
 		fmt.Println("*************************\nTEST SCRIPT:", test.script)
@@ -35,7 +39,8 @@ func TestParser(t *testing.T) {
 			}
 			continue
 		}
-		fmt.Printf("script\t:%v\nast\t:%#v\n", test.script, ast)
+		//fmt.Printf("script\t:%v\nast\t:%#v\n", test.script, ast)
+		Dump(ast)
 	}
 
 }
