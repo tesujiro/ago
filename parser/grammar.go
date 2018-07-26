@@ -585,7 +585,7 @@ yynewstate:
 		}
 	case 4:
 		{
-			yyVAL.pattern = nil
+			yyVAL.pattern = &ast.ExprPattern{}
 		}
 	case 5:
 		{

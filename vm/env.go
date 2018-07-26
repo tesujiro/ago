@@ -1,14 +1,19 @@
 package vm
 
 import (
+	"errors"
 	"fmt"
 	"reflect"
+	"strings"
 )
 
 type Env struct {
 	env    map[string]interface{}
 	val    map[string]reflect.Value
 	parent *Env
+	NF, NR int
+	FS     string
+	FIELD  []string
 }
 
 // Global Scope
@@ -82,4 +87,28 @@ func (e *Env) Dump() {
 	}
 	dump_helper(e)
 	return
+}
+
+func (e *Env) incNR() {
+	e.NR++
+}
+
+func (e *Env) setFS(fs string) {
+	e.FS = fs
+}
+
+func (e *Env) setFIELD(line string) error {
+	if len(e.FS) == 0 {
+		return errors.New("Field Seaparotor not set")
+	}
+
+	fs := strings.Split(line, e.FS)     //TODO: REGEX
+	e.FIELD = make([]string, len(fs)+1) //TODO:
+	e.FIELD[0] = line
+	for i, f := range fs {
+		e.FIELD[i+1] = f
+	}
+	e.NF = len(fs)
+
+	return nil
 }

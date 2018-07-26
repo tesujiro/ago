@@ -55,6 +55,12 @@ program
 	}
 
 rule
+	/*
+	: LEX_BEGIN action
+	{
+		$$ = &ast.BeginRule{Pattern: $1, Action: $2}
+	}
+	*/
 	: pattern action
 	{
 		$$ = ast.Rule{Pattern: $1, Action: $2}
@@ -66,7 +72,7 @@ rule
 pattern
 	: /* empty */
 	{
-		$$ = nil
+		$$ = &ast.ExprPattern{}
 	}
 	| LEX_BEGIN
 	{

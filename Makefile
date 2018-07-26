@@ -1,6 +1,6 @@
 all : goa
 
-goa : goa.go ./parser/*.y ./parser/*.go ./ast/*.go
+goa : goa.go ./parser/*.y ./parser/*.go ./ast/*.go ./vm/*.go
 	go build -o goa .
 
 test: *_test.go

@@ -14,6 +14,7 @@ import (
 	"github.com/tesujiro/goa/vm"
 )
 
+var FS = flag.String("f", " ", "Field separator") //TODO: REGEX
 var dbg = flag.Bool("d", false, "debug option")
 var ast_dump = flag.Bool("a", false, "AST dump option")
 var mem_prof = flag.Bool("m", false, "Memory Profile")
@@ -42,31 +43,25 @@ func main() {
 		defer profile.Start(profile.MemProfile).Stop()
 	}
 
-	/*
-		var sourceBytes []byte
-		var err error
-		if file != "" {
-			sourceBytes, err = ioutil.ReadFile(file)
-			if err != nil {
-				fmt.Println("ReadFile error:", err)
-				return
-			}
-		} else {
-			sourceBytes, err = ioutil.ReadAll(os.Stdin)
-			if err != nil {
-				fmt.Println("Read Stdin error:", err)
-				return
-			}
+	var fp *os.File
+	var err error
+	if file != "" {
+		fp, err = os.Open(os.Args[1])
+		if err != nil {
+			fmt.Println("file open error:", err)
+			return
 		}
-		source := string(sourceBytes)
-	*/
-	runScriptFile(script, file)
+		defer fp.Close()
+	} else {
+		fp = os.Stdin
+	}
+
+	runScriptFile(script, fp)
 }
 
-func runScriptFile(source, file string) {
+func runScriptFile(source string, fp *os.File) {
 
 	env := vm.NewEnv()
-	_ = env
 
 	fmt.Println("script:", source)
 	l := new(parser.Lexer)
@@ -85,71 +80,29 @@ func runScriptFile(source, file string) {
 	if *ast_dump {
 		parser.Dump(ast)
 	}
-	/*
-		if res, err := vm.Run(ast, env); err != nil {
-			fmt.Printf("Eval error:%v\n", err)
-			return
-		} else {
-			debug.Printf("ENV=%#v\n", env)
-			fmt.Printf("%#v\n", res)
+
+	//vm.Init() // TODO: NR=0
+	env.FS = *FS //TODO
+
+	// Begin
+	vm.RunBeginRules(ast, env)
+
+	// Main
+	file_scanner := bufio.NewScanner(fp)
+	for file_scanner.Scan() {
+		file_line := file_scanner.Text()
+		res, err := vm.RunMainRules(ast, env, file_line)
+		if err != nil {
+			fmt.Printf("error:%v\n", err)
 		}
-	*/
-	return
-}
-
-func run() {
-	env := vm.NewEnv()
-	_ = env
-	line_scanner := bufio.NewScanner(os.Stdin) // This Scanner
-	var source string
-
-	for line_scanner.Scan() {
-		source += line_scanner.Text()
-		//if source == "" {
-		//continue
-		//}
-		if source == "exit" || source == "quit" {
-			break
+		debug.Printf("ENV=%#v\n", env)
+		debug.Printf("%#v\n", res)
+		for k, v := range env.FIELD {
+			debug.Println("Field[", k, "]=\t", v)
 		}
-
-		l := new(parser.Lexer)
-		//l.Init(strings.NewReader(source))
-
-		fset := token.NewFileSet()                         // positions are relative to fset
-		file := fset.AddFile("", fset.Base(), len(source)) // register input "file"
-		l.Init(file, []byte(source), nil /* no error handler */, scanner.ScanComments)
-
-		ast, parseError := parser.Parse(l)
-		/*
-			for _, stmt := range ast {
-				debug.Printf("%#v\n", stmt)
-			}
-		*/
-		if *ast_dump {
-			parser.Dump(ast)
-		}
-		if parseError != nil {
-			debug.Println("[", parseError.Error(), "]")
-			//if parseError.Error() == "unexpected $end" || parseError.Error() == "comment not terminated" { //Does not work
-			if parseError.Error() == "unexpected $end" {
-				// note: scanner.Scan() does not return "end of line" ,
-				// this is just for separating tokens
-				source += "\n"
-				//fmt.Println("source;[" + source + "]")
-				continue
-			} else {
-				fmt.Printf("Syntax error: %v \n", parseError)
-				//fmt.Printf("Syntax error: %v at %v\n", e, l.Position) //TODO
-			}
-		}
-		/*
-			if res, err := vm.Run(ast, env); err != nil {
-				fmt.Printf("Eval error:%v\n", err)
-			} else {
-				debug.Printf("ENV=%#v\n", env)
-				fmt.Printf("%#v\n", res)
-			}
-		*/
-		source = ""
 	}
+	// End
+	vm.RunEndRules(ast, env)
+
+	return
 }
