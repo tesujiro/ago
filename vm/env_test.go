@@ -6,42 +6,45 @@ import (
 
 func TestSetGet(t *testing.T) {
 	cases := []struct {
-		testSet    bool
-		testDefine bool
-		k          string
-		v          interface{}
-		errMessage string
+		checkSet    bool
+		checkDefine bool
+		key         string
+		value       interface{}
+		message     string
 	}{
-		{testSet: true, testDefine: false, k: "NF", v: "abc", errMessage: "type of NF must be int ,not string."},
-		{testSet: true, testDefine: false, k: "NF", v: 123},
-		{testSet: true, testDefine: false, k: "KEY", v: 123, errMessage: "unknown symbol 'KEY'"},
-		{testSet: false, testDefine: true, k: "KEY", v: 123},
-		{testSet: false, testDefine: true, k: "NF", v: 123, errMessage: "cannot define builtin variable 'NF'"},
+		{checkSet: true, checkDefine: false, key: "NF", value: "abc", message: "type of NF must be int ,not string."},
+		{checkSet: true, checkDefine: false, key: "NF", value: 123},
+		{checkSet: true, checkDefine: false, key: "KEY", value: 123, message: "unknown symbol 'KEY'"},
+		{checkSet: false, checkDefine: true, key: "KEY", value: 123},
+		{checkSet: false, checkDefine: true, key: "NF", value: 123, message: "cannot define builtin variable 'NF'"},
 	}
 	for _, c := range cases {
 		e := NewEnv()
-		if c.testSet {
-			if err := e.Set(c.k, c.v); err != nil {
-				if err.Error() != c.errMessage {
-					t.Errorf("env.Set() got %v\nwant %v", err, c.errMessage)
+		if c.checkSet {
+			if err := e.Set(c.key, c.value); err != nil {
+				if err.Error() != c.message {
+					t.Errorf("env.Set() got %v\nwant %v", err, c.message)
 				}
 				continue
 			}
 		}
-		if c.testDefine {
-			if err := e.Define(c.k, c.v); err != nil {
-				if err.Error() != c.errMessage {
-					t.Errorf("env.Define() got %v\nwant %v", err, c.errMessage)
+		if c.checkDefine {
+			if err := e.Define(c.key, c.value); err != nil {
+				if err.Error() != c.message {
+					t.Errorf("env.Define() got %v\nwant %v", err, c.message)
 				}
 				continue
 			}
 		}
-		if actual, err := e.Get(c.k); err != nil && err.Error() != c.errMessage {
-			t.Errorf("env.Get() got %v\nwant %v", err, c.errMessage)
+		if actual, err := e.Get(c.key); err != nil && err.Error() != c.message {
+			t.Errorf("env.Get() got %v\nwant %v", err, c.message)
 			continue
-		} else if actual != c.v {
-			t.Errorf("env.Get() got %v\nwant %v", actual, c.v)
+		} else if actual != c.value {
+			t.Errorf("env.Get() got %v\nwant %v", actual, c.value)
 			continue
+		}
+		if c.message != "" {
+			t.Errorf("no error message want %v", c.message)
 		}
 		//e.Dump()
 	}
@@ -49,37 +52,37 @@ func TestSetGet(t *testing.T) {
 
 func TestChildEnv(t *testing.T) {
 	tests := []struct {
-		k string
-		v interface{}
+		key   string
+		value interface{}
 	}{
-		{k: "int", v: 123},
-		{k: "float", v: 1.1},
+		{key: "int", value: 123},
+		{key: "float", value: 1.1},
 	}
 
 	root := NewEnv()
 	for _, test := range tests {
-		if err := root.Define(test.k, test.v); err != nil {
+		if err := root.Define(test.key, test.value); err != nil {
 			t.Errorf("Env.Set error :%v", err)
 			return
-		} else if actual, err := root.Get(test.k); err != nil {
+		} else if actual, err := root.Get(test.key); err != nil {
 			t.Errorf("Env.Get error :%v", err)
 			return
-		} else if actual != test.v {
-			t.Errorf("got %v\nwant %v", actual, test.v)
+		} else if actual != test.value {
+			t.Errorf("got %v\nwant %v", actual, test.value)
 			return
 		}
 	}
 
 	child := root.NewEnv()
 	for _, test := range tests {
-		if err := child.Define(test.k, test.v); err != nil {
+		if err := child.Define(test.key, test.value); err != nil {
 			t.Errorf("Env.Set error :%v", err)
 			return
-		} else if actual, err := child.Get(test.k); err != nil {
+		} else if actual, err := child.Get(test.key); err != nil {
 			t.Errorf("Env.Get error :%v", err)
 			return
-		} else if actual != test.v {
-			t.Errorf("got %v\nwant %v", actual, test.v)
+		} else if actual != test.value {
+			t.Errorf("got %v\nwant %v", actual, test.value)
 			return
 		}
 	}
