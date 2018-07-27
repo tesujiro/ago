@@ -56,10 +56,10 @@ func main() {
 		fp = os.Stdin
 	}
 
-	runScriptFile(script, fp)
+	runScript(script, fp)
 }
 
-func runScriptFile(source string, fp *os.File) {
+func runScript(source string, fp *os.File) {
 
 	env := vm.NewEnv()
 
@@ -82,7 +82,7 @@ func runScriptFile(source string, fp *os.File) {
 	}
 
 	//vm.Init() // TODO: NR=0
-	env.FS = *FS //TODO
+	env.SetFS(*FS)
 
 	// Begin
 	vm.RunBeginRules(ast, env)
@@ -97,7 +97,7 @@ func runScriptFile(source string, fp *os.File) {
 		}
 		debug.Printf("ENV=%#v\n", env)
 		debug.Printf("%#v\n", res)
-		for k, v := range env.FIELD {
+		for k, v := range env.GetField() {
 			debug.Println("Field[", k, "]=\t", v)
 		}
 	}

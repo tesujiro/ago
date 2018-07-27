@@ -3,17 +3,20 @@ package vm
 import (
 	"errors"
 	"fmt"
-	"reflect"
 	"strings"
 )
 
 type Env struct {
-	env    map[string]interface{}
-	val    map[string]reflect.Value
-	parent *Env
+	env map[string]interface{}
+	//val     map[string]reflect.Value
+	parent  *Env
+	builtin *builtin
+}
+
+type builtin struct {
 	NF, NR int
 	FS     string
-	FIELD  []string
+	field  []string
 }
 
 // Global Scope
@@ -21,15 +24,17 @@ func NewEnv() *Env {
 	return &Env{
 		env: make(map[string]interface{}),
 		//val:    make(map[string]reflect.Value),
-		parent: nil,
+		parent:  nil,
+		builtin: &builtin{},
 	}
 }
 
 func (e *Env) NewEnv() *Env {
 	return &Env{
-		env:    make(map[string]interface{}),
-		val:    make(map[string]reflect.Value),
-		parent: e,
+		env: make(map[string]interface{}),
+		//val:    make(map[string]reflect.Value),
+		parent:  e,
+		builtin: e.builtin,
 	}
 }
 
@@ -90,25 +95,31 @@ func (e *Env) Dump() {
 }
 
 func (e *Env) incNR() {
-	e.NR++
+	e.builtin.NR++
 }
 
-func (e *Env) setFS(fs string) {
-	e.FS = fs
+func (e *Env) SetFS(fs string) {
+	e.builtin.FS = fs
+
+	e.Dump()
 }
 
-func (e *Env) setFIELD(line string) error {
-	if len(e.FS) == 0 {
+func (e *Env) GetField() []string {
+	return e.builtin.field
+}
+
+func (e *Env) SetField(line string) error {
+	if len(e.builtin.FS) == 0 {
 		return errors.New("Field Seaparotor not set")
 	}
 
-	fs := strings.Split(line, e.FS)     //TODO: REGEX
-	e.FIELD = make([]string, len(fs)+1) //TODO:
-	e.FIELD[0] = line
+	fs := strings.Split(line, e.builtin.FS)     //TODO: REGEX
+	e.builtin.field = make([]string, len(fs)+1) //TODO:
+	e.builtin.field[0] = line
 	for i, f := range fs {
-		e.FIELD[i+1] = f
+		e.builtin.field[i+1] = f
 	}
-	e.NF = len(fs)
+	e.builtin.NF = len(fs)
 
 	return nil
 }
