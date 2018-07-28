@@ -110,10 +110,6 @@ func (e *Env) Dump() {
 	return
 }
 
-func (e *Env) incNR() {
-	e.builtin.NR++
-}
-
 func (e *Env) setNR(i int) {
 	e.builtin.NR = i
 }
@@ -127,8 +123,12 @@ func (e *Env) SetFS(fs string) {
 	//e.Dump()
 }
 
-func (e *Env) GetField() []string {
-	return e.builtin.field
+func (e *Env) GetField(i int) (string, error) {
+	// TODO: out of index
+	if i < 0 || i >= len(e.builtin.field) {
+		return "", nil
+	}
+	return e.builtin.field[i], nil
 }
 
 func (e *Env) SetField(line string) error {
@@ -142,7 +142,7 @@ func (e *Env) SetField(line string) error {
 	for i, f := range fs {
 		e.builtin.field[i+1] = f
 	}
-	e.builtin.NF = len(fs)
+	e.setNF(len(fs))
 
 	return nil
 }
