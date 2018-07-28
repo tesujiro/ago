@@ -43,23 +43,23 @@ func main() {
 		defer profile.Start(profile.MemProfile).Stop()
 	}
 
-	var fp *os.File
-	var err error
-	if file != "" {
+	runScript(script, file)
+}
+
+func openInputFile(f string) (fp *os.File, err error) {
+	if f != "" {
 		fp, err = os.Open(os.Args[1])
 		if err != nil {
 			fmt.Println("file open error:", err)
-			return
+			return nil, err
 		}
-		defer fp.Close()
+		return fp, nil
 	} else {
-		fp = os.Stdin
+		return os.Stdin, nil
 	}
-
-	runScript(script, fp)
 }
 
-func runScript(source string, fp *os.File) {
+func runScript(source string, file string) {
 
 	env := vm.NewEnv()
 
@@ -87,14 +87,25 @@ func runScript(source string, fp *os.File) {
 	var result interface{}
 	var err error
 
-	// Begin
+	// BEGIN
 	result, err = vm.RunBeginRules(ast, env)
 	debug.Printf("%#v\n", result)
 	if err != nil {
 		fmt.Printf("error:%v\n", err)
+		return
 	}
 
-	// Main
+	//TODO:Check There is main rules
+	fp, err := openInputFile(file)
+	if err != nil {
+		fmt.Printf("error:%v\n", err)
+		return
+	}
+	if fp != os.Stdin {
+		defer fp.Close()
+	}
+
+	// MAIN
 	file_scanner := bufio.NewScanner(fp)
 	var number int
 	for file_scanner.Scan() {
@@ -116,7 +127,8 @@ func runScript(source string, fp *os.File) {
 			}
 		*/
 	}
-	// End
+
+	// END
 	result, err = vm.RunEndRules(ast, env)
 	debug.Printf("%#v\n", result)
 	if err != nil {
