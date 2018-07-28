@@ -9,6 +9,9 @@ import (
 	"github.com/tesujiro/goa/ast"
 )
 
+var defaultExpr = ast.FieldExpr{Expr: &ast.NumExpr{Literal: "0"}}
+var defaultExprs = []ast.Expr{&defaultExpr}
+
 type yySymType struct {
 	yys     int
 	token   ast.Token
@@ -631,7 +634,7 @@ yynewstate:
 		}
 	case 14:
 		{
-			yyVAL.stmt = &ast.PrintStmt{}
+			yyVAL.stmt = &ast.PrintStmt{Exprs: defaultExprs}
 		}
 	case 15:
 		{

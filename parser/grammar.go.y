@@ -4,6 +4,9 @@
 		//"fmt"
 		"github.com/tesujiro/goa/ast"
 	)
+
+var defaultExpr = ast.FieldExpr{Expr: &ast.NumExpr{Literal: "0"}}
+var defaultExprs = []ast.Expr{&defaultExpr}
 %}
 
 %union{
@@ -118,7 +121,7 @@ stmt
 	}
 	| LEX_PRINT 
 	{
-		$$ = &ast.PrintStmt{}
+		$$ = &ast.PrintStmt{Exprs: defaultExprs }
 	}
 	| LEX_PRINT exprs
 	{
@@ -223,4 +226,3 @@ opt_semi
 	| semi
 
 %%
-
