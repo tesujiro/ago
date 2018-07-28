@@ -116,6 +116,14 @@ stmt
 	{
 		$$ = &ast.ExprStmt{Expr: $1}
 	}
+	| LEX_PRINT 
+	{
+		$$ = &ast.PrintStmt{}
+	}
+	| LEX_PRINT exprs
+	{
+		$$ = &ast.PrintStmt{Exprs: $2}
+	}
 
 /*
 stmt_term
@@ -124,9 +132,9 @@ stmt_term
 */
 
 exprs
-	: /* empty */
+	: expr
 	{
-		$$ = []ast.Expr{}
+		$$ = []ast.Expr{$1}
 	}
 	| exprs ',' opt_nls expr
 	{

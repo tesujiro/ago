@@ -189,6 +189,23 @@ func runSingleStmt(stmt ast.Stmt, env *Env) (interface{}, error) {
 			}
 		}
 		return nil, nil
+	case *ast.PrintStmt:
+		printStmt := stmt.(*ast.PrintStmt)
+		if len(printStmt.Exprs) == 0 {
+			//printStmt.Exprs = defaultExprs //TODO ==> yacc
+			printStmt.Exprs = []ast.Expr{ast.FieldExpr{Expr: ast.NumExpr{Literal: "0"}}}
+		}
+		for i, expr := range printStmt.Exprs {
+			result, err := evalExpr(expr, env)
+			if err != nil {
+				return nil, err
+			}
+			if 0 < i && i < len(printStmt.Exprs) {
+				fmt.Printf("%v", env.builtin.FS)
+			}
+			fmt.Printf("%v", result)
+		}
+		fmt.Printf("\n")
 	}
 	return nil, nil
 }

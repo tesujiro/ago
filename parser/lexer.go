@@ -18,6 +18,7 @@ type Lexer struct {
 var tokenTab = map[string]int{
 	"BEGIN": LEX_BEGIN,
 	"END":   LEX_END,
+	"print": LEX_PRINT,
 }
 
 var compSymbols = map[string]int{

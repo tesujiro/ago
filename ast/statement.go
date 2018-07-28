@@ -32,3 +32,7 @@ type BreakStmt struct {
 
 type ContinueStmt struct {
 }
+
+type PrintStmt struct {
+	Exprs []Expr
+}
