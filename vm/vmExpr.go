@@ -48,7 +48,11 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 	case *ast.IdentExpr:
 		id := expr.(*ast.IdentExpr).Literal
 		if val, err := env.Get(id); err != nil {
-			return nil, err
+			//
+			if serr := env.Set(id, nil); serr != nil {
+				return nil, err
+			}
+			return nil, nil
 		} else {
 			return val, nil
 		}

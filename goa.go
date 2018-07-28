@@ -63,7 +63,7 @@ func runScript(source string, file string) {
 
 	env := vm.NewEnv()
 
-	fmt.Println("script:", source)
+	debug.Println("script:", source)
 	l := new(parser.Lexer)
 	//l.Init(strings.NewReader(source))
 
@@ -111,7 +111,7 @@ func runScript(source string, file string) {
 	for file_scanner.Scan() {
 		number++
 		file_line := file_scanner.Text()
-		_, err := vm.RunMainRules(ast, env, file_line, number)
+		result, err := vm.RunMainRules(ast, env, file_line, number)
 		if err != nil {
 			fmt.Printf("error:%v\n", err)
 			return
@@ -121,6 +121,7 @@ func runScript(source string, file string) {
 		if *dbg {
 			env.Dump()
 		}
+		debug.Printf("%#v\n", result)
 		/*
 			for k, v := range env.GetField() {
 				debug.Println("Field[", k, "]=\t", v)
