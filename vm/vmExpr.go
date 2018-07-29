@@ -48,7 +48,6 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 	case *ast.IdentExpr:
 		id := expr.(*ast.IdentExpr).Literal
 		if val, err := env.Get(id); err != nil {
-			//
 			if serr := env.Define(id, nil); serr != nil {
 				return nil, err
 			}
@@ -226,7 +225,10 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 			if ident, ok := left.(*ast.IdentExpr); ok {
 				v, err := env.Get(ident.Literal)
 				if err != nil {
-					return nil, err
+					if serr := env.Define(ident.Literal, nil); serr != nil {
+						return nil, err
+					}
+					v = 0
 				}
 				switch reflect.TypeOf(v).Kind() {
 				case reflect.Int, reflect.Int32, reflect.Int64:
@@ -246,7 +248,10 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 			if ident, ok := left.(*ast.IdentExpr); ok {
 				v, err := env.Get(ident.Literal)
 				if err != nil {
-					return nil, err
+					if serr := env.Define(ident.Literal, nil); serr != nil {
+						return nil, err
+					}
+					v = 0
 				}
 				switch reflect.TypeOf(v).Kind() {
 				case reflect.Int, reflect.Int32, reflect.Int64:

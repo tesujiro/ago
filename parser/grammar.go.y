@@ -161,6 +161,32 @@ expr
 	{
 		$$ = &ast.StringExpr{Literal: $1.Literal}
 	}
+	/* COMPOSITE EXPRESSION */
+	| expr PLUSPLUS
+	{
+		$$ = &ast.CompExpr{Left: $1, Operator: "++"}
+	}
+	| expr MINUSMINUS
+	{
+		$$ = &ast.CompExpr{Left: $1, Operator: "--"}
+	}
+	| expr PLUSEQ expr
+	{
+		$$ = &ast.CompExpr{Left: $1, Operator: "+=", Right: $3}
+	}
+	| expr MINUSEQ expr
+	{
+		$$ = &ast.CompExpr{Left: $1, Operator: "-=", Right: $3}
+	}
+	| expr MULEQ expr
+	{
+		$$ = &ast.CompExpr{Left: $1, Operator: "*=", Right: $3}
+	}
+	| expr DIVEQ expr
+	{
+		$$ = &ast.CompExpr{Left: $1, Operator: "/=", Right: $3}
+	}
+	/* RELATION EXPRESSION */
 	| expr EQEQ expr
 	{
 		$$ = &ast.BinOpExpr{Left: $1, Operator: "==", Right: $3}
@@ -185,6 +211,7 @@ expr
 	{
 		$$ = &ast.BinOpExpr{Left: $1, Operator: "<=", Right: $3}
 	}
+	/* ARITHMETIC EXPRESSION */
 	| '(' expr ')'
 	{
 		$$ = &ast.ParentExpr{SubExpr: $2}
