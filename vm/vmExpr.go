@@ -51,7 +51,7 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 			if serr := env.Define(id, nil); serr != nil {
 				return nil, err
 			}
-			return nil, nil
+			return "", nil
 		} else {
 			return val, nil
 		}
