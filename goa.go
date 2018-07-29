@@ -48,7 +48,7 @@ func main() {
 
 func openInputFile(f string) (fp *os.File, err error) {
 	if f != "" {
-		fp, err = os.Open(os.Args[1])
+		fp, err = os.Open(f)
 		if err != nil {
 			fmt.Println("file open error:", err)
 			return nil, err
