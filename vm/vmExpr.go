@@ -398,6 +398,27 @@ func evalAssExpr(lexp ast.Expr, val interface{}, env *Env) (interface{}, error) 
 		if err := env.Set(id, val); err != nil {
 			env.Define(id, val)
 		}
+	case *ast.FieldExpr:
+		expr := lexp.(*ast.FieldExpr).Expr
+		i_val, err := evalExpr(expr, env)
+		if err != nil {
+			fmt.Println("FieldExpr index error") //TODO
+			return nil, err
+		}
+		index, ok := i_val.(int)
+		if !ok {
+			return nil, fmt.Errorf("Field index not int :%v", reflect.TypeOf(i_val))
+		}
+		val_string, ok := val.(string)
+		if !ok {
+			return nil, fmt.Errorf("Field value is not string :%v", reflect.TypeOf(val))
+		}
+		err = env.SetField(index, val_string)
+		if err != nil {
+			fmt.Println("FieldExpr SetField error") //TODO
+			return nil, err
+		}
+		return nil, nil
 	case *ast.ItemExpr:
 		index, err := evalExpr(lexp.(*ast.ItemExpr).Index, env)
 		if err != nil {
