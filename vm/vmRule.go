@@ -24,7 +24,7 @@ func RunBeginRules(rules []ast.Rule, env *Env) (result interface{}, err error) {
 
 func RunMainRules(rules []ast.Rule, env *Env, line string, line_number int) (result interface{}, err error) {
 	env.setNR(line_number)
-	if err := env.SetField(line); err != nil {
+	if err := env.SetFieldFromLine(line); err != nil {
 		return nil, err
 	}
 	for _, rule := range rules {

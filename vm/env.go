@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
-	"strings"
+	"regexp"
 )
 
 type Env struct {
@@ -131,18 +131,61 @@ func (e *Env) GetField(i int) (string, error) {
 	return e.builtin.field[i], nil
 }
 
-func (e *Env) SetField(line string) error {
-	if len(e.builtin.FS) == 0 {
-		return errors.New("Field Seaparotor not set")
+func (e *Env) SetFieldZero() error {
+	//fmt.Println("SetFieldZero:", e.builtin.field)
+	if len(e.builtin.field) <= 1 {
+		e.builtin.field[0] = ""
+		return nil
 	}
+	str := e.builtin.field[1]
+	//fmt.Println("len:", len(e.builtin.field))
+	for i := 2; i < len(e.builtin.field); i++ {
+		str += e.builtin.FS + e.builtin.field[i]
+	}
+	e.builtin.field[0] = str
+	return nil
+}
 
-	fs := strings.Split(line, e.builtin.FS)     //TODO: REGEX
-	e.builtin.field = make([]string, len(fs)+1) //TODO:
-	e.builtin.field[0] = line
-	for i, f := range fs {
-		e.builtin.field[i+1] = f
+func (e *Env) SetField(index int, str string) error {
+	if index < 0 {
+		return fmt.Errorf("Field Index Out of Range:%v\n", index)
 	}
-	e.setNF(len(fs))
+	if index > len(e.builtin.field) {
+		//TODO
+	} else {
+		e.builtin.field[index] = str
+	}
+	e.SetFieldZero()
+	return nil
+}
+
+var re_org_awk_truncate = regexp.MustCompile("^[ \t]*([^ \t].*[^ \t])[ \t]*$")
+
+func (e *Env) SetFieldFromLine(line string) error {
+	split := func(regex, line string) {
+		re := regexp.MustCompile(regex) //TODO: STORE PRE COMPILED VALUE TO ENV FOR PERFORMANCE
+		result := re.Split(line, -1)
+		e.builtin.field = make([]string, len(result)+1)
+		for i, f := range result {
+			e.builtin.field[i+1] = f
+		}
+	}
+	switch e.builtin.FS {
+	case "":
+		return errors.New("Field Seaparotor not set")
+	case " ":
+		//THIS IS SPECIAL CASE FOR ORIGINAL AWK
+		//fmt.Printf("line %v:[%v]\n", e.builtin.NR, line)
+		line = re_org_awk_truncate.ReplaceAllString(line, "$1")
+		//fmt.Printf("line %v:[%v]\n", e.builtin.NR, line)
+		split("[ \t]+", line)
+	default:
+		fmt.Printf("line %v:FS[%v]\n", e.builtin.NR, e.builtin.FS)
+		split(e.builtin.FS, line)
+	}
+	//e.builtin.field[0] = line
+	e.SetFieldZero()
+	e.setNF(len(e.builtin.field) - 1)
 
 	return nil
 }
