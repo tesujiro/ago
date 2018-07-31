@@ -98,37 +98,39 @@ func runScript(source string, file string) {
 	}
 
 	//TODO:Check There is main rules
-	fp, err := openInputFile(file)
-	if err != nil {
-		fmt.Printf("error:%v\n", err)
-		return
-	}
-	if fp != os.Stdin {
-		defer fp.Close()
-	}
-
-	// MAIN
-	file_scanner := bufio.NewScanner(fp)
-	var number int
-	for file_scanner.Scan() {
-		number++
-		file_line := file_scanner.Text()
-		result, err := vm.RunMainRules(mainRules, env, file_line, number)
+	if len(mainRules) > 0 {
+		fp, err := openInputFile(file)
 		if err != nil {
 			fmt.Printf("error:%v\n", err)
 			return
 		}
-		//debug.Printf("ENV=%#v\n", env)
-		//debug.Printf("%#v\n", res)
-		if *dbg {
-			env.Dump()
+		if fp != os.Stdin {
+			defer fp.Close()
 		}
-		debug.Printf("%#v\n", result)
-		/*
-			for k, v := range env.GetField() {
-				debug.Println("Field[", k, "]=\t", v)
+
+		// MAIN
+		file_scanner := bufio.NewScanner(fp)
+		var number int
+		for file_scanner.Scan() {
+			number++
+			file_line := file_scanner.Text()
+			result, err := vm.RunMainRules(mainRules, env, file_line, number)
+			if err != nil {
+				fmt.Printf("error:%v\n", err)
+				return
 			}
-		*/
+			//debug.Printf("ENV=%#v\n", env)
+			//debug.Printf("%#v\n", res)
+			if *dbg {
+				env.Dump()
+			}
+			debug.Printf("%#v\n", result)
+			/*
+				for k, v := range env.GetField() {
+					debug.Println("Field[", k, "]=\t", v)
+				}
+			*/
+		}
 	}
 
 	// END
