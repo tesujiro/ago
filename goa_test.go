@@ -125,7 +125,9 @@ func TestGoa(t *testing.T) {
 		test_ok, _ := ioutil.ReadAll(fp_ok)
 
 		// Result Check
-		if resultOut != string(test_ok) {
+		if resultOut != strings.Replace(string(test_ok), "\r", "", -1) { //replace for Windows
+			//if strings.Replace(resultOut, "\r", "", -1) != strings.Replace(string(test_ok), "\r", "", -1) { //for Windows
+			//if resultOut != string(test_ok) {
 			t.Fatalf("Stdout - received: %v - expected: %v - runSource: %v", resultOut, string(test_ok), string(test_script))
 		}
 	}
