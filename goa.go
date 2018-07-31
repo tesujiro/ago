@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"go/scanner"
 	"go/token"
+	"io/ioutil"
 	"os"
 
 	"github.com/pkg/profile"
@@ -14,7 +15,8 @@ import (
 	"github.com/tesujiro/goa/vm"
 )
 
-var FS = flag.String("f", " ", "Field separator") //TODO: REGEX
+var FS = flag.String("F", " ", "Field separator")
+var program_file = flag.String("f", " ", "Program file")
 var dbg = flag.Bool("d", false, "debug option")
 var ast_dump = flag.Bool("a", false, "AST dump option")
 var mem_prof = flag.Bool("m", false, "Memory Profile")
@@ -24,9 +26,15 @@ var ver = flag.Bool("v", false, "version")
 const version = "0.0.0"
 
 func main() {
+	var file, script string
 	flag.Parse()
-	script := flag.Arg(0)
-	file := flag.Arg(1)
+	switch len(flag.Args()) {
+	case 1:
+		file = flag.Arg(0)
+	case 2:
+		script = flag.Arg(0)
+		file = flag.Arg(1)
+	}
 
 	if *ver {
 		fmt.Println("Version:", version)
@@ -42,6 +50,20 @@ func main() {
 	if *mem_prof {
 		defer profile.Start(profile.MemProfile).Stop()
 	}
+
+	if *program_file != "" {
+		fp, err := openInputFile(*program_file)
+		if err != nil {
+			os.Exit(1)
+		}
+		defer fp.Close()
+		bytes, err := ioutil.ReadAll(fp)
+		if err != nil {
+			os.Exit(1)
+		}
+		script = string(bytes)
+	}
+	//fmt.Println("script:", script)
 
 	runScript(script, file)
 }
