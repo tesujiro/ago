@@ -8,15 +8,26 @@ import (
 	"github.com/tesujiro/goa/debug"
 )
 
-func RunBeginRules(rules []ast.Rule, env *Env) (result interface{}, err error) {
+func SeparateRules(rules []ast.Rule) (Begin, Main, End []ast.Rule) {
 	for _, rule := range rules {
 		switch rule.Pattern.(type) {
 		case *ast.BeginPattern:
-			debug.Println("BEGIN")
-			result, err = runStmts(rule.Action, env)
-			if err != nil {
-				return
-			}
+			Begin = append(Begin, rule)
+		case *ast.ExprPattern:
+			Main = append(Main, rule)
+		case *ast.EndPattern:
+			End = append(End, rule)
+		}
+	}
+	return
+}
+
+func RunBeginRules(rules []ast.Rule, env *Env) (result interface{}, err error) {
+	for _, rule := range rules {
+		debug.Println("BEGIN")
+		result, err = runStmts(rule.Action, env)
+		if err != nil {
+			return
 		}
 	}
 	return
@@ -28,31 +39,27 @@ func RunMainRules(rules []ast.Rule, env *Env, line string, line_number int) (res
 		return nil, err
 	}
 	for _, rule := range rules {
-		switch rule.Pattern.(type) {
-		case *ast.ExprPattern:
-			debug.Println(env.builtin.NR, ":MAIN")
-
-			expr := rule.Pattern.(*ast.ExprPattern).Expr
-			if expr != nil {
-				if b, err := evalExpr(expr, env); err != nil {
+		debug.Println(env.builtin.NR, ":MAIN")
+		expr := rule.Pattern.(*ast.ExprPattern).Expr
+		if expr != nil {
+			if b, err := evalExpr(expr, env); err != nil {
+				return result, err
+			} else {
+				if reflect.ValueOf(b).Kind() != reflect.Bool {
+					err = errors.New("pattern is not bool")
 					return result, err
-				} else {
-					if reflect.ValueOf(b).Kind() != reflect.Bool {
-						err = errors.New("pattern is not bool")
-						return result, err
-					}
+				}
 
-					if reflect.ValueOf(b).Interface() != true {
-						debug.Printf("Line: %v skipped\n", env.builtin.NR)
-						continue
-					}
+				if reflect.ValueOf(b).Interface() != true {
+					debug.Printf("Line: %v skipped\n", env.builtin.NR)
+					continue
 				}
 			}
+		}
 
-			result, err = runStmts(rule.Action, env)
-			if err != nil {
-				return
-			}
+		result, err = runStmts(rule.Action, env)
+		if err != nil {
+			return
 		}
 	}
 	return
@@ -60,13 +67,10 @@ func RunMainRules(rules []ast.Rule, env *Env, line string, line_number int) (res
 
 func RunEndRules(rules []ast.Rule, env *Env) (result interface{}, err error) {
 	for _, rule := range rules {
-		switch rule.Pattern.(type) {
-		case *ast.EndPattern:
-			debug.Println("END")
-			result, err = runStmts(rule.Action, env)
-			if err != nil {
-				return
-			}
+		debug.Println("END")
+		result, err = runStmts(rule.Action, env)
+		if err != nil {
+			return
 		}
 	}
 	return

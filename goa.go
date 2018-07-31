@@ -87,8 +87,10 @@ func runScript(source string, file string) {
 	var result interface{}
 	var err error
 
+	beginRules, mainRules, endRules := vm.SeparateRules(ast)
+
 	// BEGIN
-	result, err = vm.RunBeginRules(ast, env)
+	result, err = vm.RunBeginRules(beginRules, env)
 	debug.Printf("%#v\n", result)
 	if err != nil {
 		fmt.Printf("error:%v\n", err)
@@ -111,7 +113,7 @@ func runScript(source string, file string) {
 	for file_scanner.Scan() {
 		number++
 		file_line := file_scanner.Text()
-		result, err := vm.RunMainRules(ast, env, file_line, number)
+		result, err := vm.RunMainRules(mainRules, env, file_line, number)
 		if err != nil {
 			fmt.Printf("error:%v\n", err)
 			return
@@ -130,7 +132,7 @@ func runScript(source string, file string) {
 	}
 
 	// END
-	result, err = vm.RunEndRules(ast, env)
+	result, err = vm.RunEndRules(endRules, env)
 	debug.Printf("%#v\n", result)
 	if err != nil {
 		fmt.Printf("error:%v\n", err)
