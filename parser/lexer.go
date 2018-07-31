@@ -38,6 +38,29 @@ var compSymbols = map[string]int{
 
 func (l *Lexer) Lex(lval *yySymType) (token_id int) {
 	//TODO: Position
+	/*
+		if IN_REGEXP {
+			fmt.Println("IN_REGEXP")
+			regexp := ""
+			for {
+				_, tok, lit := l.Scan()
+				if tok == token.QUO || tok == token.EOF || lit == "\n" {
+					break
+				}
+				fmt.Printf("lit=[%v] tok=[%v]\n", lit, tok)
+				if lit == "" {
+					regexp += tok.String()
+					//TODO; '\\'
+				} else {
+					regexp += lit
+				}
+			}
+			token_id = LEX_REGEXP
+			lval.token = ast.Token{Token: token_id, Literal: regexp}
+			//IN_REGEXP = false
+			return token_id
+		}
+	*/
 	_, tok, lit := l.Scan()
 	if name, ok := tokenTab[lit]; ok {
 		token_id = name

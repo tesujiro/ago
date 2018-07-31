@@ -1,12 +1,13 @@
 %{
 	package parser
 	import (
-		//"fmt"
+		"fmt"
 		"github.com/tesujiro/goa/ast"
 	)
 
 var defaultExpr = ast.FieldExpr{Expr: &ast.NumExpr{Literal: "0"}}
 var defaultExprs = []ast.Expr{&defaultExpr}
+//var IN_REGEXP bool
 %}
 
 %union{
@@ -29,7 +30,7 @@ var defaultExprs = []ast.Expr{&defaultExpr}
 %type <expr>	expr
 %type <exprs>	exprs
 
-%token<token> IDENT NUMBER STRING BEGIN END LEX_BEGIN LEX_END LEX_PRINT TRUE FALSE NIL FUNC RETURN EQEQ NEQ GE LE IF ELSE ANDAND OROR LEN FOR BREAK CONTINUE PLUSPLUS MINUSMINUS PLUSEQ MINUSEQ MULEQ DIVEQ
+%token<token> IDENT NUMBER STRING BEGIN END LEX_BEGIN LEX_END LEX_PRINT LEX_REGEXP TRUE FALSE NIL FUNC RETURN EQEQ NEQ GE LE IF ELSE ANDAND OROR LEN FOR BREAK CONTINUE PLUSPLUS MINUSMINUS PLUSEQ MINUSEQ MULEQ DIVEQ
 
 %right '='
 %left OROR
@@ -161,6 +162,19 @@ expr
 	{
 		$$ = &ast.StringExpr{Literal: $1.Literal}
 	}
+	/*
+	| '/' 
+	{
+		fmt.Println("path1")
+		IN_REGEXP=true
+	}
+	| LEX_REGEXP
+	{
+		fmt.Println("path2:",$1.Literal)
+		IN_REGEXP=false
+		$$ = &ast.IdentExpr{Literal: $1.Literal}
+	}
+	*/
 	/* COMPOSITE EXPRESSION */
 	| expr PLUSPLUS
 	{
@@ -230,6 +244,7 @@ expr
 	}
 	| expr '/' expr
 	{
+		fmt.Println("path3")
 		$$ = &ast.BinOpExpr{Left: $1, Operator: "/", Right: $3}
 	}
 	| expr '%' expr

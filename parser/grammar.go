@@ -5,12 +5,14 @@ package parser
 import __yyfmt__ "fmt"
 
 import (
-	//"fmt"
+	"fmt"
 	"github.com/tesujiro/goa/ast"
 )
 
 var defaultExpr = ast.FieldExpr{Expr: &ast.NumExpr{Literal: "0"}}
 var defaultExprs = []ast.Expr{&defaultExpr}
+
+//var IN_REGEXP bool
 
 type yySymType struct {
 	yys     int
@@ -29,40 +31,41 @@ type yyXError struct {
 }
 
 const (
-	yyDefault  = 57378
+	yyDefault  = 57379
 	yyEofCode  = 57344
-	ANDAND     = 57365
+	ANDAND     = 57366
 	BEGIN      = 57349
-	BREAK      = 57369
-	CONTINUE   = 57370
-	DIVEQ      = 57376
-	ELSE       = 57364
+	BREAK      = 57370
+	CONTINUE   = 57371
+	DIVEQ      = 57377
+	ELSE       = 57365
 	END        = 57350
-	EQEQ       = 57359
-	FALSE      = 57355
-	FOR        = 57368
-	FUNC       = 57357
-	GE         = 57361
+	EQEQ       = 57360
+	FALSE      = 57356
+	FOR        = 57369
+	FUNC       = 57358
+	GE         = 57362
 	IDENT      = 57346
-	IF         = 57363
-	LE         = 57362
-	LEN        = 57367
+	IF         = 57364
+	LE         = 57363
+	LEN        = 57368
 	LEX_BEGIN  = 57351
 	LEX_END    = 57352
 	LEX_PRINT  = 57353
-	MINUSEQ    = 57374
-	MINUSMINUS = 57372
-	MULEQ      = 57375
-	NEQ        = 57360
-	NIL        = 57356
+	LEX_REGEXP = 57354
+	MINUSEQ    = 57375
+	MINUSMINUS = 57373
+	MULEQ      = 57376
+	NEQ        = 57361
+	NIL        = 57357
 	NUMBER     = 57347
-	OROR       = 57366
-	PLUSEQ     = 57373
-	PLUSPLUS   = 57371
-	RETURN     = 57358
+	OROR       = 57367
+	PLUSEQ     = 57374
+	PLUSPLUS   = 57372
+	RETURN     = 57359
 	STRING     = 57348
-	TRUE       = 57354
-	UNARY      = 57377
+	TRUE       = 57355
+	UNARY      = 57378
 	yyErrCode  = 57345
 
 	yyMaxDepth = 200
@@ -113,51 +116,52 @@ var (
 		47:    15, // '/' (28x)
 		60:    16, // '<' (28x)
 		62:    17, // '>' (28x)
-		57376: 18, // DIVEQ (28x)
-		57359: 19, // EQEQ (28x)
-		57361: 20, // GE (28x)
-		57362: 21, // LE (28x)
-		57374: 22, // MINUSEQ (28x)
-		57372: 23, // MINUSMINUS (28x)
-		57375: 24, // MULEQ (28x)
-		57360: 25, // NEQ (28x)
-		57373: 26, // PLUSEQ (28x)
-		57371: 27, // PLUSPLUS (28x)
+		57377: 18, // DIVEQ (28x)
+		57360: 19, // EQEQ (28x)
+		57362: 20, // GE (28x)
+		57363: 21, // LE (28x)
+		57375: 22, // MINUSEQ (28x)
+		57373: 23, // MINUSMINUS (28x)
+		57376: 24, // MULEQ (28x)
+		57361: 25, // NEQ (28x)
+		57374: 26, // PLUSEQ (28x)
+		57372: 27, // PLUSPLUS (28x)
 		61:    28, // '=' (25x)
 		41:    29, // ')' (23x)
-		57380: 30, // expr (23x)
+		57381: 30, // expr (23x)
 		57344: 31, // $end (12x)
 		57351: 32, // LEX_BEGIN (12x)
 		57352: 33, // LEX_END (12x)
-		57381: 34, // exprs (3x)
-		57382: 35, // nls (3x)
-		57383: 36, // opt_nls (3x)
-		57384: 37, // opt_semi (2x)
-		57388: 38, // semi (2x)
-		57379: 39, // action (1x)
-		57385: 40, // pattern (1x)
-		57386: 41, // program (1x)
-		57387: 42, // rule (1x)
-		57389: 43, // stmt (1x)
-		57390: 44, // stmts (1x)
-		57378: 45, // $default (0x)
-		57365: 46, // ANDAND (0x)
+		57382: 34, // exprs (3x)
+		57383: 35, // nls (3x)
+		57384: 36, // opt_nls (3x)
+		57385: 37, // opt_semi (2x)
+		57389: 38, // semi (2x)
+		57380: 39, // action (1x)
+		57386: 40, // pattern (1x)
+		57387: 41, // program (1x)
+		57388: 42, // rule (1x)
+		57390: 43, // stmt (1x)
+		57391: 44, // stmts (1x)
+		57379: 45, // $default (0x)
+		57366: 46, // ANDAND (0x)
 		57349: 47, // BEGIN (0x)
-		57369: 48, // BREAK (0x)
-		57370: 49, // CONTINUE (0x)
-		57364: 50, // ELSE (0x)
+		57370: 48, // BREAK (0x)
+		57371: 49, // CONTINUE (0x)
+		57365: 50, // ELSE (0x)
 		57350: 51, // END (0x)
 		57345: 52, // error (0x)
-		57355: 53, // FALSE (0x)
-		57368: 54, // FOR (0x)
-		57357: 55, // FUNC (0x)
-		57363: 56, // IF (0x)
-		57367: 57, // LEN (0x)
-		57356: 58, // NIL (0x)
-		57366: 59, // OROR (0x)
-		57358: 60, // RETURN (0x)
-		57354: 61, // TRUE (0x)
-		57377: 62, // UNARY (0x)
+		57356: 53, // FALSE (0x)
+		57369: 54, // FOR (0x)
+		57358: 55, // FUNC (0x)
+		57364: 56, // IF (0x)
+		57368: 57, // LEN (0x)
+		57354: 58, // LEX_REGEXP (0x)
+		57357: 59, // NIL (0x)
+		57367: 60, // OROR (0x)
+		57359: 61, // RETURN (0x)
+		57355: 62, // TRUE (0x)
+		57378: 63, // UNARY (0x)
 	}
 
 	yySymNames = []string{
@@ -219,6 +223,7 @@ var (
 		"FUNC",
 		"IF",
 		"LEN",
+		"LEX_REGEXP",
 		"NIL",
 		"OROR",
 		"RETURN",
@@ -748,6 +753,7 @@ yynewstate:
 		}
 	case 38:
 		{
+			fmt.Println("path3")
 			yyVAL.expr = &ast.BinOpExpr{Left: yyS[yypt-2].expr, Operator: "/", Right: yyS[yypt-0].expr}
 		}
 	case 39:
