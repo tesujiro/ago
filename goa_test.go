@@ -2,69 +2,48 @@ package main
 
 import (
 	"bufio"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"os"
-	"path/filepath"
 	"strings"
 	"testing"
 )
 
-const scriptDir = "./test"
-const scriptExt = ".goa"
-const scriptOk = ".ok"
-const scriptInput = ".in"
+const scriptPath = "./goa_test.json"
 
-type test struct {
-	script string
-	in     string
-	ok     string
+type Test struct {
+	Script string `json:script`
+	In     string `json:in`
+	Ok     string `json:ok`
 }
 
-func TestGoa(t *testing.T) {
-	files, err := ioutil.ReadDir(scriptDir)
+func TestGoaJson(t *testing.T) {
+	tests := []Test{}
+
+	bytes, err := ioutil.ReadFile(scriptPath)
 	if err != nil {
 		panic(err)
 	}
-
-	exists := func(name string) bool {
-		_, err := os.Stat(name)
-		return !os.IsNotExist(err)
+	if err := json.Unmarshal(bytes, &tests); err != nil {
+		panic(err)
 	}
-	tests := []test{}
-	for _, file := range files {
-		if filepath.Ext(file.Name()) == scriptExt {
-			var script, in, ok string
-			script = filepath.Join(scriptDir, file.Name())
-			basename := file.Name()[:len(file.Name())-len(filepath.Ext(file.Name()))]
-			in_file := filepath.Join(scriptDir, basename+scriptInput)
-			if exists(in_file) {
-				in = in_file
-			}
-			ok_file := filepath.Join(scriptDir, basename+scriptOk)
-			if exists(ok_file) {
-				ok = ok_file
-			}
-			tests = append(tests, test{script: script, in: in, ok: ok})
-		}
-	}
-
-	fmt.Println("tests:", tests)
+	//fmt.Println("tests:", tests)
 
 	realStdin := os.Stdin
 	realStdout := os.Stdout
 	realStderr := os.Stderr
 
-	// IN PIPE
-	//readFromIn, writeToIn, err := os.Pipe()
-	readFromIn, _, err := os.Pipe()
-	if err != nil {
-		t.Fatal("Pipe error:", err)
-	}
-	os.Stdin = readFromIn
-	//logger.Print("pipe in created")
-
 	for _, test := range tests {
+
+		// IN PIPE
+		readFromIn, writeToIn, err := os.Pipe()
+		if err != nil {
+			t.Fatal("Pipe error:", err)
+		}
+		os.Stdin = readFromIn
+		_ = writeToIn
+		//logger.Print("pipe in created")
 
 		// OUT PIPE
 		readFromOut, writeToOut, err := os.Pipe()
@@ -87,17 +66,9 @@ func TestGoa(t *testing.T) {
 			return
 		}()
 
-		// Read Script
-		fp_script, err := os.Open(test.script)
-		if err != nil {
-			fmt.Println(err)
-			panic(err)
-		}
-		test_script, _ := ioutil.ReadAll(fp_script)
-
 		// Run Script goroutine
 		go func() {
-			runScript(string(test_script), test.in)
+			runScript(string(test.Script), test.In)
 			//close(chanDone) //NG
 			writeToOut.Close()
 		}()
@@ -116,19 +87,10 @@ func TestGoa(t *testing.T) {
 			}
 		}
 
-		// Read OK iile
-		fp_ok, err := os.Open(test.ok)
-		if err != nil {
-			fmt.Println(err)
-			panic(err)
-		}
-		test_ok, _ := ioutil.ReadAll(fp_ok)
-
 		// Result Check
-		if resultOut != strings.Replace(string(test_ok), "\r", "", -1) { //replace for Windows
-			//if strings.Replace(resultOut, "\r", "", -1) != strings.Replace(string(test_ok), "\r", "", -1) { //for Windows
-			//if resultOut != string(test_ok) {
-			t.Fatalf("Stdout - received: %v - expected: %v - runSource: %v", resultOut, string(test_ok), string(test_script))
+		//fmt.Fprintf(realStdout, "result:[%v]\ttest.Ok:[%v]\n", resultOut, test.Ok)
+		if resultOut != strings.Replace(test.Ok, "\r", "", -1) { //replace for Windows
+			t.Fatalf("Stdout - received: %v - expected: %v - runSource: %v", resultOut, test.Ok, test.Script)
 		}
 	}
 

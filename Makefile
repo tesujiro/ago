@@ -8,9 +8,9 @@ goa : goa.go ./parser/*.y ./parser/*.go ./ast/*.go ./vm/*.go
 	gofmt -s -w ./parser
 
 .PHONY: test
-test: *_test.go test/*.goa test/*.in test/*.ok
+test: goa_test.go goa_test.json 
 	#go test -v . ./vm ./lib
-	go test -v -count=1 . 
+	go test -v -count=1 .
 
 .PHONY: prof
 prof:
