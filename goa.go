@@ -16,7 +16,7 @@ import (
 )
 
 var FS = flag.String("F", " ", "Field separator")
-var program_file = flag.String("f", " ", "Program file")
+var program_file = flag.String("f", "", "Program file")
 var dbg = flag.Bool("d", false, "debug option")
 var ast_dump = flag.Bool("a", false, "AST dump option")
 var mem_prof = flag.Bool("m", false, "Memory Profile")
@@ -30,7 +30,11 @@ func main() {
 	flag.Parse()
 	switch len(flag.Args()) {
 	case 1:
-		file = flag.Arg(0)
+		if *program_file != "" {
+			file = flag.Arg(0)
+		} else {
+			script = flag.Arg(0)
+		}
 	case 2:
 		script = flag.Arg(0)
 		file = flag.Arg(1)
@@ -52,6 +56,7 @@ func main() {
 	}
 
 	if *program_file != "" {
+		fmt.Println("program_file=", *program_file)
 		fp, err := openInputFile(*program_file)
 		if err != nil {
 			os.Exit(1)
