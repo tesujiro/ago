@@ -1,7 +1,7 @@
 %{
 	package parser
 	import (
-		"fmt"
+		//"fmt"
 		"github.com/tesujiro/goa/ast"
 	)
 
@@ -175,6 +175,15 @@ expr
 		$$ = &ast.IdentExpr{Literal: $1.Literal}
 	}
 	*/
+	/* UNARY EXPRESSION */
+	| '+' expr %prec UNARY
+	{
+		$$ = &ast.UnaryExpr{Operator: "+", Expr:$2}
+	}
+	| '-' expr %prec UNARY
+	{
+		$$ = &ast.UnaryExpr{Operator: "-", Expr:$2}
+	}
 	/* COMPOSITE EXPRESSION */
 	| expr PLUSPLUS
 	{
@@ -244,7 +253,6 @@ expr
 	}
 	| expr '/' expr
 	{
-		fmt.Println("path3")
 		$$ = &ast.BinOpExpr{Left: $1, Operator: "/", Right: $3}
 	}
 	| expr '%' expr
