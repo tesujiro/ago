@@ -259,6 +259,16 @@ expr
 	{
 		$$ = &ast.BinOpExpr{Left: $1, Operator: "<=", Right: $3}
 	}
+	/* BOOL EXPRESSION */
+	| expr OROR expr
+	{
+		$$ = &ast.BinOpExpr{Left: $1, Operator: "||", Right: $3}
+	}
+	| expr ANDAND expr
+	{
+		$$ = &ast.BinOpExpr{Left: $1, Operator: "&&", Right: $3}
+	}
+	// TODO: 'NOT'
 	/* ARITHMETIC EXPRESSION */
 	| '(' expr ')'
 	{
