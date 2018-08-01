@@ -19,6 +19,8 @@ var tokenTab = map[string]int{
 	"BEGIN": LEX_BEGIN,
 	"END":   LEX_END,
 	"print": LEX_PRINT,
+	"if":    IF,
+	"else":  ELSE,
 }
 
 var compSymbols = map[string]int{

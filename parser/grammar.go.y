@@ -17,6 +17,7 @@ var defaultExprs = []ast.Expr{&defaultExpr}
 	pattern ast.Pattern
 	stmt ast.Stmt
 	stmts []ast.Stmt
+	stmt_if ast.Stmt
 	expr ast.Expr
 	exprs []ast.Expr
 }
@@ -24,9 +25,10 @@ var defaultExprs = []ast.Expr{&defaultExpr}
 %type <rules>	program
 %type <rule>	rule
 %type <pattern> pattern
+%type <stmt>	stmt
 %type <stmts>	action
 %type <stmts>	stmts
-%type <stmt>	stmt
+%type <stmt_if>	stmt_if
 %type <expr>	expr
 %type <exprs>	exprs
 
@@ -128,12 +130,35 @@ stmt
 	{
 		$$ = &ast.PrintStmt{Exprs: $2}
 	}
+	| stmt_if
+	{
+		$$ = $1
+	}
 
 /*
 stmt_term
 	: nls
 	| semi opt_nls
 */
+
+stmt_if
+    : IF expr '{' stmts '}'
+    {
+        $$ = &ast.IfStmt{If: $2, Then: $4, Else: nil}
+    }
+    | stmt_if ELSE IF expr '{' stmts '}'
+    {
+            $$.(*ast.IfStmt).ElseIf = append($$.(*ast.IfStmt).ElseIf, &ast.IfStmt{If: $4, Then: $6} )
+    }
+    | stmt_if ELSE '{' stmts '}'
+    {
+        if $$.(*ast.IfStmt).Else != nil {
+            yylex.Error("multiple else statement")
+        } else {
+            //$$.(*ast.IfStmt).Else = append($$.(*ast.IfStmt).Else, $4...)
+            $$.(*ast.IfStmt).Else = $4
+        }
+    }
 
 exprs
 	: expr

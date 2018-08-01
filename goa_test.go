@@ -35,6 +35,7 @@ func TestGoaJson(t *testing.T) {
 	realStderr := os.Stderr
 
 	for _, test := range tests {
+		fmt.Fprintf(realStdin, "script:%v\n", test.Script)
 
 		// IN PIPE
 		readFromIn, writeToIn, err := os.Pipe()
