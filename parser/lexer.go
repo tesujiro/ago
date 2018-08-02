@@ -16,11 +16,14 @@ type Lexer struct {
 
 // tokenTab is a correction of operation names.
 var tokenTab = map[string]int{
-	"BEGIN": LEX_BEGIN,
-	"END":   LEX_END,
-	"print": LEX_PRINT,
-	"if":    IF,
-	"else":  ELSE,
+	"BEGIN":    BEGIN,
+	"END":      END,
+	"print":    PRINT,
+	"if":       IF,
+	"else":     ELSE,
+	"for":      FOR,
+	"break":    BREAK,
+	"continue": CONTINUE,
 }
 
 var compSymbols = map[string]int{
@@ -57,7 +60,7 @@ func (l *Lexer) Lex(lval *yySymType) (token_id int) {
 					regexp += lit
 				}
 			}
-			token_id = LEX_REGEXP
+			token_id = REGEXP
 			lval.token = ast.Token{Token: token_id, Literal: regexp}
 			//IN_REGEXP = false
 			return token_id

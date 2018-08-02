@@ -40,7 +40,7 @@ func TestGoaJson(t *testing.T) {
 		if test.Skip {
 			continue
 		}
-		t.Logf("script:%v\n", test.Script)
+		//t.Logf("script:%v\n", test.Script)
 
 		// IN PIPE
 		readFromIn, writeToIn, err := os.Pipe()

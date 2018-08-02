@@ -32,7 +32,12 @@ var defaultExprs = []ast.Expr{&defaultExpr}
 %type <expr>	expr
 %type <exprs>	exprs
 
-%token<token> IDENT NUMBER STRING BEGIN END LEX_BEGIN LEX_END LEX_PRINT LEX_REGEXP TRUE FALSE NIL FUNC RETURN EQEQ NEQ GE LE IF ELSE ANDAND OROR LEN FOR BREAK CONTINUE PLUSPLUS MINUSMINUS PLUSEQ MINUSEQ MULEQ DIVEQ
+%token<token> IDENT NUMBER STRING TRUE FALSE NIL
+%token<token> EQEQ NEQ GE LE ANDAND OROR LEN 
+%token<token> PLUSPLUS MINUSMINUS PLUSEQ MINUSEQ MULEQ DIVEQ
+%token<token> BEGIN END PRINT REGEXP
+%token<token> IF ELSE FOR BREAK CONTINUE
+%token<token> FUNC RETURN
 
 %right '='
 %left OROR
@@ -62,7 +67,7 @@ program
 
 rule
 	/*
-	: LEX_BEGIN action
+	: BEGIN action
 	{
 		$$ = &ast.BeginRule{Pattern: $1, Action: $2}
 	}
@@ -80,11 +85,11 @@ pattern
 	{
 		$$ = &ast.ExprPattern{}
 	}
-	| LEX_BEGIN
+	| BEGIN
 	{
 		$$ = &ast.BeginPattern{}
 	}
-	| LEX_END
+	| END
 	{
 		$$ = &ast.EndPattern{}
 	}
@@ -122,17 +127,33 @@ stmt
 	{
 		$$ = &ast.ExprStmt{Expr: $1}
 	}
-	| LEX_PRINT 
+	| PRINT 
 	{
 		$$ = &ast.PrintStmt{Exprs: defaultExprs }
 	}
-	| LEX_PRINT exprs
+	| PRINT exprs
 	{
 		$$ = &ast.PrintStmt{Exprs: $2}
 	}
 	| stmt_if
 	{
 		$$ = $1
+	}
+	| FOR '{' stmts '}'
+	{
+		$$ = &ast.LoopStmt{Stmts: $3}
+	}
+	| FOR expr '{' stmts '}'
+	{
+		$$ = &ast.LoopStmt{Stmts: $4, Expr: $2}
+	}
+	| BREAK
+	{
+		$$ = &ast.BreakStmt{}
+	}
+	| CONTINUE
+	{
+		$$ = &ast.ContinueStmt{}
 	}
 
 /*
@@ -193,7 +214,7 @@ expr
 		fmt.Println("path1")
 		IN_REGEXP=true
 	}
-	| LEX_REGEXP
+	| REGEXP
 	{
 		fmt.Println("path2:",$1.Literal)
 		IN_REGEXP=false
