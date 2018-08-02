@@ -1,11 +1,12 @@
 [
+	{ "comment":"----- BASIC EXPRESSION -----","skip":true},
 	{ "script":"BEGIN{print 1+1}", "ok":"2\n" },
 	{ "script":"BEGIN{print 1+2}", "ok":"3\n" },
 	{ "script":"BEGIN{print true}", "ok": "\n"},
 	{ "script":"BEGIN{print false}", "ok": "\n"},
 	{ "script":"BEGIN{print nil}", "ok": "\n"},
 	{ "script":"BEGIN{print 1}", "ok": "1\n"},
-	{ "script":"BEGIN{print 9223372036854775807}", "ok": "9223372036854775807\n"},
+	{ "skip":false,"script":"BEGIN{print 9223372036854775807}", "ok": "9223372036854775807\n"},
 	{ "script":"BEGIN{print 1.1}", "ok": "1.1\n"},
 	{ "script":"BEGIN{print 123}", "ok": "123\n"},
 	{ "script":"BEGIN{print 123.456}", "ok": "123.456\n"},
@@ -45,6 +46,7 @@
 	{ "script":"BEGIN{a=1;b=0.1;c=15;print (a+b)*c}", "ok": "16.5\n"},
 	{ "script":"BEGIN{a=1;b=0.1;c=15;print (a+b)*c/0.5}", "ok": "33\n"},
 
+	{ "comment":"----- bool -----","skip":true},
 	{ "script": "BEGIN{a=1;b=2;print a+1==b}", "ok": "true\n"},
 	{ "script": "BEGIN{a=1;b=2;print a+1!=b}", "ok": "false\n"},
 	{ "script": "BEGIN{a=1;b=2;print a<b}", "ok": "true\n"},
@@ -59,6 +61,7 @@
 	{ "script": "BEGIN{a=1;b=2;print a==2||b==2}", "ok": "true\n"},
 	{ "script": "BEGIN{print 12&&34}", "ok": "error:cannot convert to bool\n"},
 
+	{ "comment":"----- composite expression -----","skip":true},
 	{ "script": "BEGIN{a=10;print a++}", "ok": "11\n"},
 	{ "script": "BEGIN{a=1.9;print a++}", "ok": "2.9\n"},
 	{ "script": "BEGIN{print 10++}", "ok": "error:Invalid operation\n"},
@@ -74,11 +77,13 @@
 	{ "script": "BEGIN{a=10;a*=2;print a}", "ok": "20\n"},
 	{ "script": "BEGIN{a=10;a/=2;print a}", "ok": "5\n"},
 
+	{ "comment":"----- multi expressions -----","skip":true},
 	{ "script": "BEGIN{a,b=1,2;print a}", "ok": "1\n"},
 	{ "script": "BEGIN{a,b=1,2;print b}", "ok": "2\n"},
 	{ "script": "BEGIN{a,b=1,2,3;print b}", "ok": "2\n"},
 	{ "script": "BEGIN{a,b,c=1,2;print b}", "ok": "2\n"},
 
+	{ "comment":"----- if statement -----","skip":true},
 	{ "script":"BEGIN{a=1;if a==1 { a=2 ;print a;}}", "ok": "2\n"},
 	{ "script":"BEGIN{a=1;if a==1 { a=2 };print a}", "ok": "2\n"},
 	{ "script":"BEGIN{a=1;if a==1 { env_test=2 };print env_test}", "ok": "\n"},
@@ -91,5 +96,5 @@
 	{ "script":"BEGIN{a=2;if a==1 { env_test=11 } else if a==2 { env_test=12 } else { env_test=13 };print env_test}", "ok": "\n"},
 	{ "script":"BEGIN{a=3;if a==1 { env_test=11 } else if a==2 { env_test=12 } else { env_test=13 };print env_test}", "ok": "\n"},
 
-	{ "script":"BEGIN{print 1+1}", "ok":"2\n" }
+	{ "skip":true }
 ]

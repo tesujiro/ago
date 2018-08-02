@@ -13,9 +13,11 @@ import (
 const scriptPath = "./goa_test.json"
 
 type Test struct {
-	Script string `json:script`
-	In     string `json:in`
-	Ok     string `json:ok`
+	Script  string `json:script`
+	In      string `json:in`
+	Ok      string `json:ok`
+	Comment string `json:comment`
+	Skip    bool   `json:skip`
 }
 
 func TestGoaJson(t *testing.T) {
@@ -35,7 +37,10 @@ func TestGoaJson(t *testing.T) {
 	realStderr := os.Stderr
 
 	for _, test := range tests {
-		fmt.Fprintf(realStdin, "script:%v\n", test.Script)
+		if test.Skip {
+			continue
+		}
+		t.Logf("script:%v\n", test.Script)
 
 		// IN PIPE
 		readFromIn, writeToIn, err := os.Pipe()
@@ -91,7 +96,7 @@ func TestGoaJson(t *testing.T) {
 		// Result Check
 		//fmt.Fprintf(realStdout, "result:[%v]\ttest.Ok:[%v]\n", resultOut, test.Ok)
 		if resultOut != strings.Replace(test.Ok, "\r", "", -1) { //replace for Windows
-			t.Fatalf("Stdout - received: %v - expected: %v - runSource: %v", resultOut, test.Ok, test.Script)
+			t.Errorf("Stdout - received: %v - expected: %v - runSource: %v", resultOut, test.Ok, test.Script)
 		}
 	}
 
