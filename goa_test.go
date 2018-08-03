@@ -2,9 +2,7 @@ package main
 
 import (
 	"bufio"
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"strings"
 	"testing"
@@ -13,24 +11,142 @@ import (
 
 const scriptPath = "./goa_test.json"
 
-type Test struct {
-	Script  string `json:script`
-	In      string `json:in`
-	Ok      string `json:ok`
-	Comment string `json:comment`
-	Skip    bool   `json:skip`
+type test struct {
+	script string
+	in     string
+	ok     string
 }
 
 func TestGoaJson(t *testing.T) {
-	tests := []Test{}
+	tests := []test{
+		//BASIC EXPRESSION
+		{script: "BEGIN{print 1+1}", ok: "2\n"},
+		{script: "BEGIN{print 1+2}", ok: "3\n"},
+		{script: "BEGIN{print true}", ok: "\n"},
+		{script: "BEGIN{print false}", ok: "\n"},
+		{script: "BEGIN{print nil}", ok: "\n"},
+		{script: "BEGIN{print 1}", ok: "1\n"},
+		//{script: "BEGIN{print 9223372036854775807}", ok: "9223372036854775807\n"},
+		{script: "BEGIN{print 1.1}", ok: "1.1\n"},
+		{script: "BEGIN{print 123}", ok: "123\n"},
+		{script: "BEGIN{print 123.456}", ok: "123.456\n"},
+		{script: "BEGIN{print \"abc\"}", ok: "abc\n"},
+		{script: "BEGIN{print +1+4}", ok: "5\n"},
+		{script: "BEGIN{print -1+3}", ok: "2\n"},
+		{script: "BEGIN{print 1+1}", ok: "2\n"},
+		{script: "BEGIN{print 1+1.1}", ok: "2.1\n"},
+		{script: "BEGIN{print 1.1+4}", ok: "5.1\n"},
+		{script: "BEGIN{print 1.1+1.1}", ok: "2.2\n"},
+		{script: "BEGIN{print 3-1.1}", ok: "1.9\n"},
+		{script: "BEGIN{print 2.2-1.1}", ok: "1.1\n"},
+		{script: "BEGIN{print 3-1-1}", ok: "1\n"},
+		{script: "BEGIN{print 3-(1-1)}", ok: "3\n"},
+		{script: "BEGIN{print 3*5}", ok: "15\n"},
+		{script: "BEGIN{print 1.5*2}", ok: "3\n"},
+		{script: "BEGIN{print 5*1.2}", ok: "6\n"},
+		{script: "BEGIN{print 15/5}", ok: "3\n"},
+		{script: "BEGIN{print 16/5}", ok: "3\n"},
+		{script: "BEGIN{print 3/1.5}", ok: "2\n"},
+		{script: "BEGIN{print 3/0}", ok: "error:devision by zero\n"},
+		{script: "BEGIN{print 15%5}", ok: "0\n"},
+		{script: "BEGIN{print 16%5}", ok: "1\n"},
+		{script: "BEGIN{print 15%4.1}", ok: "3\n"},
+		{script: "BEGIN{print \"a b c\"+\" d e f\"}", ok: "a b c d e f\n"},
+		{script: "BEGIN{print \"a b c\"-\" d e f\"}", ok: "0\n"},
+		{script: "BEGIN{print 15.2%7.1}", ok: "1\n"},
 
-	bytes, err := ioutil.ReadFile(scriptPath)
-	if err != nil {
-		panic(err)
+		{script: "BEGIN{a=1;b=2;print a+b}", ok: "3\n"},
+		{script: "BEGIN{a=1;b=2;print a+1==b}", ok: "true\n"},
+		{script: "BEGIN{a=1;b=2;print a+1!=b}", ok: "false\n"},
+		{script: "BEGIN{a=1;b=2;print a<b}", ok: "true\n"},
+		{script: "BEGIN{a=1;b=1;print a<=b}", ok: "true\n"},
+		{script: "BEGIN{a=1;b=2;print a>b}", ok: "false\n"},
+		{script: "BEGIN{a=1;b=1;print a>=b}", ok: "true\n"},
+		{script: "BEGIN{a=1;b=0.1;print a>b}", ok: "true\n"},
+		{script: "BEGIN{a=1;b=0.1;c=15;print (a+b)*c}", ok: "16.5\n"},
+		{script: "BEGIN{a=1;b=0.1;c=15;print (a+b)*c/0.5}", ok: "33\n"},
+
+		// bool expression
+		{script: "BEGIN{a=1;b=2;print a+1==b}", ok: "true\n"},
+		{script: "BEGIN{a=1;b=2;print a+1!=b}", ok: "false\n"},
+		{script: "BEGIN{a=1;b=2;print a<b}", ok: "true\n"},
+		{script: "BEGIN{a=1;b=1;print a<=b}", ok: "true\n"},
+		{script: "BEGIN{a=1;b=2;print a>b}", ok: "false\n"},
+		{script: "BEGIN{a=1;b=1;print a>=b}", ok: "true\n"},
+		{script: "BEGIN{a=1;b=0.1;print a>b}", ok: "true\n"},
+		{script: "BEGIN{a=1;print a==1}", ok: "true\n"},
+		{script: "BEGIN{a=1;b=2;print a==1&&b==2}", ok: "true\n"},
+		{script: "BEGIN{a=1;b=2;print a==2&&b==2}", ok: "false\n"},
+		{script: "BEGIN{a=1;b=2;print a==1||b==2}", ok: "true\n"},
+		{script: "BEGIN{a=1;b=2;print a==2||b==2}", ok: "true\n"},
+		{script: "BEGIN{print 12&&34}", ok: "error:cannot convert to bool\n"},
+
+		// composite expression
+		{script: "BEGIN{a=10;print a++}", ok: "11\n"},
+		{script: "BEGIN{a=1.9;print a++}", ok: "2.9\n"},
+		{script: "BEGIN{print 10++}", ok: "error:Invalid operation\n"},
+		{script: "BEGIN{a=\"a\";print a++}", ok: "error:Invalid operation\n"},
+		{script: "BEGIN{a=10;print a--}", ok: "9\n"},
+		{script: "BEGIN{a=2.9;print a--}", ok: "1.9\n"},
+		{script: "BEGIN{print 10--}", ok: "error:Invalid operation\n"},
+		{script: "BEGIN{a=\"a\";print a--}", ok: "error:Invalid operation\n"},
+		{script: "BEGIN{a=10;a+=2;print a}", ok: "12\n"},
+		{script: "BEGIN{a=10;a+=2.5;print a}", ok: "12.5\n"},
+		{script: "BEGIN{a=10;a+=2;print a}", ok: "12\n"},
+		{script: "BEGIN{a=10;a-=2;print a}", ok: "8\n"},
+		{script: "BEGIN{a=10;a*=2;print a}", ok: "20\n"},
+		{script: "BEGIN{a=10;a/=2;print a}", ok: "5\n"},
+
+		// multi expressions
+		{script: "BEGIN{a,b=1,2;print a}", ok: "1\n"},
+		{script: "BEGIN{a,b=1,2;print b}", ok: "2\n"},
+		{script: "BEGIN{a,b=1,2,3;print b}", ok: "2\n"},
+		{script: "BEGIN{a,b,c=1,2;print b}", ok: "2\n"},
+
+		// if statement
+		{script: "BEGIN{a=1;if a==1 { a=2 ;print a;}}", ok: "2\n"},
+		{script: "BEGIN{a=1;if a==1 { a=2 };print a}", ok: "2\n"},
+		{script: "BEGIN{a=1;if a==1 { env_test=2 };print env_test}", ok: "\n"},
+		{script: "BEGIN{a=2;if a==1 { a=2 } else { a=3;b=4;print b }}", ok: "4\n"},
+		{script: "BEGIN{a=1;b=1;if a==1 { b=2 };print b}", ok: "2\n"},
+		{script: "BEGIN{a=1;if a==1 { a=11 } else if a==2 { a=12 } else if a==3 { a=13 };print a}", ok: "11\n"},
+		{script: "BEGIN{a=2;if a==1 { a=11 } else if a==2 { a=12 } else if a==3 { a=13 };print a}", ok: "12\n"},
+		{script: "BEGIN{a=3;if a==1 { a=11 } else if a==2 { a=12 } else if a==3 { a=13 };print a}", ok: "13\n"},
+		{script: "BEGIN{a=1;if a==1 { env_test=11 } else if a==2 { env_test=12 } else { env_test=13 };print env_test}", ok: "\n"},
+		{script: "BEGIN{a=2;if a==1 { env_test=11 } else if a==2 { env_test=12 } else { env_test=13 };print env_test}", ok: "\n"},
+		{script: "BEGIN{a=3;if a==1 { env_test=11 } else if a==2 { env_test=12 } else { env_test=13 };print env_test}", ok: "\n"},
+
+		// for statement
+		{script: "BEGIN{a=0;for{ if a==10 { break }; a= a+1 };print a}", ok: "10\n"},
+		{script: "BEGIN{a=0;b=0;for{ a=a+1;if a==10 { break }; if b==5 {continue};b= b+1 };print b}", ok: "5\n"},
+		{script: "BEGIN{a=0;for a<=10 { a= a+1 };print a}", ok: "11\n"},
+		{script: "BEGIN{a=0;for b { a= a+1 };print a}", ok: "error:for condition type string cannot convert to bool\n"},
+		{script: "BEGIN{a=0;for a { a= a+1 };print a}", ok: "error:for condition type int cannot convert to bool\n"},
+		//{script: "BEGIN{a=0;for{ a=a+1;if a==10 { return a; };};print a}", ok: "10\n"},
+		//{script: "BEGIN{a=0;for{ a=10;return a };print a}", ok: "10\n"},
+
+		// array
+
+		// map
+		//{script: "BEGIN{a[1]=1;print a[1]}", ok: "1\n"},
+		//{script: "BEGIN{a[1]=1;print a[2]}", ok: "\n"},
+		//{script: "BEGIN{a[1]=1;print a}", ok: "error\n"},
+		//{script: "BEGIN{a[\"a\"]=1;print a[\"a\"]}", ok: "1\n"},
+		//{script: "BEGIN{a[\"a\"]=1;print a[\"b\"]}", ok: "\n"},
+		//{script: "BEGIN{a[1]=\"a\";print a[1]}", ok: "a\n"},
+		//{script: "BEGIN{a[1]=\"a\";print a[2]}", ok: "\n"},
+		//{script: "BEGIN{a[\"a\"]=\"a\";print a[\"a\"]}", ok: "a\n"},
+		//{script: "BEGIN{a[\"a\"]=\"a\";print a[\"b\"]}", ok: "\n"},
+		//{script: "BEGIN{}", ok: "\n"},
+
+		// command parameter
+
+		// field
+		{script: "{print $1}", in: "Hello World!\n", ok: "Hello\n"},
+		{script: " $1==\"AAA\"{print; COUNT++} END{ print COUNT}", in: "AAA BBB CCC\nAAA BBB CCC\n", ok: "AAA BBB CCC\nAAA BBB CCC\n2\n"},
+		{script: "NR==1{ $2=$1 ;print $0,NF } NR==2{ $5=$1; print $0,NF }", in: "AAA BBB CCC\nAAA BBB CCC\n", ok: "AAA AAA CCC 3\nAAA BBB CCC  AAA 5\n"},
 	}
-	if err := json.Unmarshal(bytes, &tests); err != nil {
-		panic(err)
-	}
+
 	//fmt.Println("tests:", tests)
 
 	realStdin := os.Stdin
@@ -38,10 +154,7 @@ func TestGoaJson(t *testing.T) {
 	realStderr := os.Stderr
 
 	for _, test := range tests {
-		if test.Skip {
-			continue
-		}
-		//t.Logf("script:%v\n", test.Script)
+		//t.Logf("script:%v\n", test.script)
 
 		// IN PIPE
 		readFromIn, writeToIn, err := os.Pipe()
@@ -74,23 +187,23 @@ func TestGoaJson(t *testing.T) {
 
 		// Run Script goroutine
 		go func() {
-			//runScript(string(test.Script), test.In)
-			script_reader := strings.NewReader(test.Script)
+			script_reader := strings.NewReader(test.script)
 			runScript(script_reader, os.Stdin)
 			//close(chanDone) //NG
 			writeToOut.Close()
 		}()
 
 		// Write to Stdin goroutine
-		scanner := bufio.NewScanner(strings.NewReader(test.In))
 		go func() {
-			// TODO: reading test.In fails without wait
+			scanner := bufio.NewScanner(strings.NewReader(test.in))
+			// TODO: reading test.in fails without wait
 			waited := false
 			for scanner.Scan() {
 				if !waited {
-					readTimeout := 10 * time.Millisecond
+					readTimeout := 100 * time.Millisecond
 					time.Sleep(readTimeout)
 					waited = true
+					fmt.Fprintf(realStdout, "test.in:%v\n", scanner.Text())
 				}
 				_, err = writeToIn.WriteString(scanner.Text() + "\n")
 				if err != nil {
@@ -115,9 +228,9 @@ func TestGoaJson(t *testing.T) {
 		}
 
 		// Result Check
-		//fmt.Fprintf(realStdout, "result:[%v]\ttest.Ok:[%v]\n", resultOut, test.Ok)
-		if resultOut != strings.Replace(test.Ok, "\r", "", -1) { //replace for Windows
-			t.Errorf("Stdout - received: %v - expected: %v - runSource: %v", resultOut, test.Ok, test.Script)
+		//fmt.Fprintf(realStdout, "result:[%v]\ttest.ok:[%v]\n", resultOut, test.ok)
+		if resultOut != strings.Replace(test.ok, "\r", "", -1) { //replace for Windows
+			t.Errorf("Stdout - received: %v - expected: %v - runSource: %v", resultOut, test.ok, test.script)
 		}
 	}
 
