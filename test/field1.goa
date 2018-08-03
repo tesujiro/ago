@@ -1,7 +1,0 @@
-$1=="AAA"{
-	print
-	COUNT++
-}
-END{
-	print COUNT
-}
