@@ -6,7 +6,6 @@ import (
 	"os"
 	"strings"
 	"testing"
-	"time"
 )
 
 const scriptPath = "./goa_test.json"
@@ -143,8 +142,8 @@ func TestGoaJson(t *testing.T) {
 
 		// field
 		{script: "{print $1}", in: "Hello World!\n", ok: "Hello\n"},
-		{script: " $1==\"AAA\"{print; COUNT++} END{ print COUNT}", in: "AAA BBB CCC\nAAA BBB CCC\n", ok: "AAA BBB CCC\nAAA BBB CCC\n2\n"},
-		{script: "NR==1{ $2=$1 ;print $0,NF } NR==2{ $5=$1; print $0,NF }", in: "AAA BBB CCC\nAAA BBB CCC\n", ok: "AAA AAA CCC 3\nAAA BBB CCC  AAA 5\n"},
+		{script: "$1==\"AAA\"{print;COUNT++} END{print COUNT}", in: "AAA BBB CCC\nAAA BBB CCC\n", ok: "AAA BBB CCC\nAAA BBB CCC\n2\n"},
+		{script: "NR==1{$2=$1 ;print $0,NF} NR==2{$5=$1; print $0,NF}", in: "AAA BBB CCC\nAAA BBB CCC\n", ok: "AAA AAA CCC 3\nAAA BBB CCC  AAA 5\n"},
 	}
 
 	//fmt.Println("tests:", tests)
@@ -161,6 +160,7 @@ func TestGoaJson(t *testing.T) {
 		if err != nil {
 			t.Fatal("Pipe error:", err)
 		}
+		//os.Stdin.Sync()
 		os.Stdin = readFromIn
 		//logger.Print("pipe in created")
 
@@ -196,21 +196,14 @@ func TestGoaJson(t *testing.T) {
 		// Write to Stdin goroutine
 		go func() {
 			scanner := bufio.NewScanner(strings.NewReader(test.in))
-			// TODO: reading test.in fails without wait
-			waited := false
 			for scanner.Scan() {
-				if !waited {
-					readTimeout := 100 * time.Millisecond
-					time.Sleep(readTimeout)
-					waited = true
-					fmt.Fprintf(realStdout, "test.in:%v\n", scanner.Text())
-				}
 				_, err = writeToIn.WriteString(scanner.Text() + "\n")
 				if err != nil {
 					t.Fatal("Stdin WriteString error:", err)
 				}
 			}
-			readFromIn.Close()
+			//readFromIn.Close() //NG
+			writeToIn.Close()
 		}()
 
 		// Get Result
