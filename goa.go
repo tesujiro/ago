@@ -6,8 +6,10 @@ import (
 	"fmt"
 	"go/scanner"
 	"go/token"
+	"io"
 	"io/ioutil"
 	"os"
+	"strings"
 
 	"github.com/pkg/profile"
 	"github.com/tesujiro/goa/debug"
@@ -55,53 +57,54 @@ func main() {
 		defer profile.Start(profile.MemProfile).Stop()
 	}
 
+	var script_reader io.Reader
 	if *program_file != "" {
 		fmt.Println("program_file=", *program_file)
-		fp, err := openInputFile(*program_file)
+		fp, err := os.Open(*program_file)
 		if err != nil {
+			fmt.Println("script file open error:", err)
 			os.Exit(1)
 		}
 		defer fp.Close()
-		bytes, err := ioutil.ReadAll(fp)
+		script_reader = bufio.NewReader(fp)
+	} else {
+		script_reader = strings.NewReader(script)
+	}
+
+	var file_reader io.Reader
+	if file != "" {
+		file_reader, err := os.Open(file)
 		if err != nil {
+			fmt.Println("input file open error:", err)
 			os.Exit(1)
 		}
-		script = string(bytes)
-	}
-	//fmt.Println("script:", script)
-
-	runScript(script, file)
-}
-
-func openInputFile(f string) (fp *os.File, err error) {
-	if f != "" {
-		fp, err = os.Open(f)
-		if err != nil {
-			fmt.Println("file open error:", err)
-			return nil, err
-		}
-		return fp, nil
+		defer file_reader.Close()
 	} else {
-		return os.Stdin, nil
+		file_reader = os.Stdin
 	}
+
+	runScript(script_reader, file_reader)
 }
 
-func runScript(source string, file string) {
+func runScript(script_reader io.Reader, file_reader io.Reader) {
 
 	env := vm.NewEnv()
 
+	bytes, err := ioutil.ReadAll(script_reader)
+	if err != nil {
+		os.Exit(1)
+	}
+	source := string(bytes)
 	debug.Println("script:", source)
 	l := new(parser.Lexer)
-	//l.Init(strings.NewReader(source))
 
 	fset := token.NewFileSet()                      // positions are relative to fset
 	f := fset.AddFile("", fset.Base(), len(source)) // register input "file"
-	l.Init(f, []byte(source), nil /* no error handler */, scanner.ScanComments)
+	l.Init(f, []byte(source), nil, scanner.ScanComments)
 
 	ast, parseError := parser.Parse(l)
 	if parseError != nil {
 		fmt.Printf("Syntax error: %v \n", parseError)
-		//fmt.Printf("Syntax error: %v at %v\n", e, l.Position) //TODO
 		return
 	}
 	if *ast_dump {
@@ -112,7 +115,6 @@ func runScript(source string, file string) {
 	env.SetFS(*FS)
 
 	var result interface{}
-	var err error
 
 	beginRules, mainRules, endRules := vm.SeparateRules(ast)
 
@@ -124,19 +126,9 @@ func runScript(source string, file string) {
 		return
 	}
 
-	//TODO:Check There is main rules
 	if len(mainRules) > 0 {
-		fp, err := openInputFile(file)
-		if err != nil {
-			fmt.Printf("error:%v\n", err)
-			return
-		}
-		if fp != os.Stdin {
-			defer fp.Close()
-		}
-
 		// MAIN
-		file_scanner := bufio.NewScanner(fp)
+		file_scanner := bufio.NewScanner(file_reader)
 		var number int
 		for file_scanner.Scan() {
 			number++
