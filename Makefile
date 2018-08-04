@@ -8,8 +8,7 @@ goa : goa.go ./parser/*.y ./parser/*.go ./ast/*.go ./vm/*.go
 	gofmt -s -w ./parser
 
 .PHONY: test
-test: ./*_test.go ./vm/*_test.go
-	#go test -v . ./vm ./lib
+test: ./*_test.go ./vm/*_test.go ./parser/grammar.go
 	go test -v -count=1 . ./vm
 
 .PHONY: prof
