@@ -28,6 +28,21 @@ func toFloat64(val interface{}) float64 {
 	return f
 }
 
+func toBool(val interface{}) bool {
+	switch reflect.ValueOf(val).Kind() {
+	case reflect.Bool:
+		return val.(bool)
+	case reflect.Int64, reflect.Int32, reflect.Int16, reflect.Int8, reflect.Int:
+		return val.(int) != 0
+	case reflect.Float32, reflect.Float64:
+		return val.(float64) != 0
+	case reflect.String:
+		return val.(string) != ""
+	default:
+		return true
+	}
+}
+
 func toString(val interface{}) string {
 	switch reflect.ValueOf(val).Kind() {
 	case reflect.String:
@@ -204,6 +219,8 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 			case reflect.Float64, reflect.Float32:
 				return -1 * toFloat64(val), nil
 			}
+		case "!":
+			return !toBool(val), nil
 		}
 	case *ast.CompExpr:
 		/*

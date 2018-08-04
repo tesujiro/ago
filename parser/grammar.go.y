@@ -200,6 +200,18 @@ expr
 	{
 		$$ = &ast.NumExpr{Literal: $1.Literal}
 	}
+	| TRUE
+	{
+		$$ = &ast.ConstExpr{Literal: $1.Literal}
+	}
+	| FALSE
+	{
+		$$ = &ast.ConstExpr{Literal: $1.Literal}
+	}
+	| NIL
+	{
+		$$ = &ast.ConstExpr{Literal: $1.Literal}
+	}
 	| '$' expr
 	{
 		$$ = &ast.FieldExpr{Expr: $2}
@@ -229,6 +241,10 @@ expr
 	| '-' expr %prec UNARY
 	{
 		$$ = &ast.UnaryExpr{Operator: "-", Expr:$2}
+	}
+	| '!' expr %prec UNARY
+	{
+		$$ = &ast.UnaryExpr{Operator: "!", Expr:$2}
 	}
 	/* COMPOSITE EXPRESSION */
 	| expr PLUSPLUS

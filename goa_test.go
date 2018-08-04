@@ -16,14 +16,12 @@ type test struct {
 	ok     string
 }
 
-func TestGoaJson(t *testing.T) {
+func TestGoa(t *testing.T) {
 	tests := []test{
 		//BASIC EXPRESSION
 		{script: "BEGIN{print 1+1}", ok: "2\n"},
 		{script: "BEGIN{print 1+2}", ok: "3\n"},
-		{script: "BEGIN{print true}", ok: "\n"},
-		{script: "BEGIN{print false}", ok: "\n"},
-		{script: "BEGIN{print nil}", ok: "\n"},
+		{script: "BEGIN{print nil}", ok: "<nil>\n"},
 		{script: "BEGIN{print 1}", ok: "1\n"},
 		//{script: "BEGIN{print 9223372036854775807}", ok: "9223372036854775807\n"},
 		{script: "BEGIN{print 1.1}", ok: "1.1\n"},
@@ -54,20 +52,22 @@ func TestGoaJson(t *testing.T) {
 		{script: "BEGIN{print \"a b c\"-\" d e f\"}", ok: "0\n"},
 		{script: "BEGIN{print 15.2%7.1}", ok: "1\n"},
 
-		{script: "BEGIN{a=1;b=2;print a+b}", ok: "3\n"},
-		{script: "BEGIN{a=1;b=2;print a+1==b}", ok: "true\n"},
-		{script: "BEGIN{a=1;b=2;print a+1!=b}", ok: "false\n"},
-		{script: "BEGIN{a=1;b=2;print a<b}", ok: "true\n"},
-		{script: "BEGIN{a=1;b=1;print a<=b}", ok: "true\n"},
-		{script: "BEGIN{a=1;b=2;print a>b}", ok: "false\n"},
-		{script: "BEGIN{a=1;b=1;print a>=b}", ok: "true\n"},
-		{script: "BEGIN{a=1;b=0.1;print a>b}", ok: "true\n"},
-		{script: "BEGIN{a=1;b=0.1;c=15;print (a+b)*c}", ok: "16.5\n"},
-		{script: "BEGIN{a=1;b=0.1;c=15;print (a+b)*c/0.5}", ok: "33\n"},
-
 		// bool expression
+		{script: "BEGIN{print true}", ok: "true\n"},
+		{script: "BEGIN{print false}", ok: "false\n"},
+		{script: "BEGIN{print !true}", ok: "false\n"},
+		{script: "BEGIN{print !false}", ok: "true\n"},
+		{script: "BEGIN{print !0}", ok: "true\n"},
+		{script: "BEGIN{print !1}", ok: "false\n"},
+		{script: "BEGIN{print !11}", ok: "false\n"},
+		{script: "BEGIN{print !1.1}", ok: "false\n"},
+		{script: "BEGIN{print !\"\"}", ok: "true\n"},
+		{script: "BEGIN{print !\"aa\"}", ok: "false\n"},
 		{script: "BEGIN{a=1;b=2;print a+1==b}", ok: "true\n"},
 		{script: "BEGIN{a=1;b=2;print a+1!=b}", ok: "false\n"},
+		{script: "BEGIN{a=1;b=2;print a!=b}", ok: "true\n"},
+		{script: "BEGIN{a=1;b=2;print !(a+1==b)}", ok: "false\n"},
+		{script: "BEGIN{a=1;b=2;print !(a==b)}", ok: "true\n"},
 		{script: "BEGIN{a=1;b=2;print a<b}", ok: "true\n"},
 		{script: "BEGIN{a=1;b=1;print a<=b}", ok: "true\n"},
 		{script: "BEGIN{a=1;b=2;print a>b}", ok: "false\n"},
@@ -79,6 +79,18 @@ func TestGoaJson(t *testing.T) {
 		{script: "BEGIN{a=1;b=2;print a==1||b==2}", ok: "true\n"},
 		{script: "BEGIN{a=1;b=2;print a==2||b==2}", ok: "true\n"},
 		{script: "BEGIN{print 12&&34}", ok: "error:cannot convert to bool\n"},
+
+		// assignment
+		{script: "BEGIN{a=1;b=2;print a+b}", ok: "3\n"},
+		{script: "BEGIN{a=1;b=2;print a+1==b}", ok: "true\n"},
+		{script: "BEGIN{a=1;b=2;print a+1!=b}", ok: "false\n"},
+		{script: "BEGIN{a=1;b=2;print a<b}", ok: "true\n"},
+		{script: "BEGIN{a=1;b=1;print a<=b}", ok: "true\n"},
+		{script: "BEGIN{a=1;b=2;print a>b}", ok: "false\n"},
+		{script: "BEGIN{a=1;b=1;print a>=b}", ok: "true\n"},
+		{script: "BEGIN{a=1;b=0.1;print a>b}", ok: "true\n"},
+		{script: "BEGIN{a=1;b=0.1;c=15;print (a+b)*c}", ok: "16.5\n"},
+		{script: "BEGIN{a=1;b=0.1;c=15;print (a+b)*c/0.5}", ok: "33\n"},
 
 		// composite expression
 		{script: "BEGIN{a=10;print a++}", ok: "11\n"},

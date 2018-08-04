@@ -24,6 +24,9 @@ var tokenTab = map[string]int{
 	"for":      FOR,
 	"break":    BREAK,
 	"continue": CONTINUE,
+	"true":     TRUE,
+	"false":    FALSE,
+	"nil":      NIL,
 }
 
 var compSymbols = map[string]int{
