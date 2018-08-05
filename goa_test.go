@@ -52,6 +52,34 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{print \"a b c\"-\" d e f\"}", ok: "0\n"},
 		{script: "BEGIN{print 15.2%7.1}", ok: "1\n"},
 
+		// variable and scope
+		// builtin
+		{script: "BEGIN{NF++;print NF}", ok: "1\n"},
+		{script: "BEGIN{NF++}END{print NF}", ok: "1\n"},
+		{script: "BEGIN{NF=1}END{print NF}", ok: "1\n"},
+		{script: "BEGIN{NF=1.1}END{print NF}", ok: "error:type of NF must be int ,not float64.\n"},
+		{script: "BEGIN{NF=\"aaa\"}", ok: "error:type of NF must be int ,not string.\n"},
+		//TODO:{script: "BEGIN{$0=\"aaa\";print}", ok: "aaa\n"},
+		{script: "BEGIN{print FS}", ok: "\n"},
+		{script: "BEGIN{FS=\"X\"}END{print FS}", ok: "X\n"},
+		{script: "BEGIN{FS=123}END{print FS}", ok: "error:type of FS must be string ,not int.\n"},
+		// global
+		{script: "BEGIN{A++;print A}", ok: "1\n"},
+		{script: "BEGIN{A++}END{print A}", ok: "1\n"},
+		{script: "BEGIN{A=1;print A}", ok: "1\n"},
+		{script: "BEGIN{A=1.1;print A}", ok: "1.1\n"},
+		{script: "BEGIN{A=1.1}END{print A}", ok: "1.1\n"},
+		{script: "BEGIN{A=\"AAA\";print A}", ok: "AAA\n"},
+		{script: "BEGIN{A=\"AAA\"}END{print A}", ok: "AAA\n"},
+		// TODO:local
+		//{script: "BEGIN{l++;print l}", ok: "1\n"},
+		//{script: "BEGIN{l++}END{print l}", ok: "\n"},
+		//{script: "BEGIN{l=1;print l}", ok: "1\n"},
+		//{script: "BEGIN{l=1.1;print l}", ok: "1.1\n"},
+		//{script: "BEGIN{l=1.1}END{print l}", ok: "\n"},
+		//{script: "BEGIN{l=\"AAA\";print l}", ok: "AAA\n"},
+		//{script: "BEGIN{l=\"AAA\"}END{print l}", ok: "\n"},
+
 		// bool expression
 		{script: "BEGIN{print true}", ok: "true\n"},
 		{script: "BEGIN{print false}", ok: "false\n"},

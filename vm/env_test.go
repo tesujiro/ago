@@ -14,9 +14,9 @@ func TestSetGet(t *testing.T) {
 	}{
 		{checkSet: true, checkDefine: false, key: "NF", value: "abc", message: "type of NF must be int ,not string."},
 		{checkSet: true, checkDefine: false, key: "NF", value: 123},
+		{checkSet: false, checkDefine: true, key: "NF", value: 123, message: "cannot define builtin variable 'NF'"},
 		{checkSet: true, checkDefine: false, key: "KEY", value: 123},
 		{checkSet: false, checkDefine: true, key: "KEY", value: 123},
-		{checkSet: false, checkDefine: true, key: "NF", value: 123, message: "cannot define builtin variable 'NF'"},
 	}
 	for _, c := range cases {
 		e := NewEnv()
