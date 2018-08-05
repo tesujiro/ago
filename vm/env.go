@@ -5,10 +5,13 @@ import (
 	"reflect"
 )
 
+const defaultValue = ""
+
 type Env struct {
 	env     map[string]interface{}
 	parent  *Env
 	builtin *builtin
+	global  map[string]interface{}
 }
 
 type builtin struct {
@@ -23,6 +26,7 @@ func NewEnv() *Env {
 		env:     make(map[string]interface{}),
 		parent:  nil,
 		builtin: &builtin{},
+		global:  make(map[string]interface{}),
 	}
 }
 
@@ -31,11 +35,21 @@ func (e *Env) NewEnv() *Env {
 		env:     make(map[string]interface{}),
 		parent:  e,
 		builtin: e.builtin,
+		global:  e.global,
 	}
 }
 
+func isGlobalVarName(s string) bool {
+	if len(s) == 0 {
+		return false
+	}
+	r := s[0]
+	return ('A' <= r && r <= 'Z')
+}
+
 func (e *Env) Set(k string, v interface{}) error {
-	// BuiltIn
+	//fmt.Printf("Set(%v,%v)\n", k, v)
+	// BuiltIn variable
 	bv := reflect.ValueOf(e.builtin).Elem()
 	bt := reflect.TypeOf(e.builtin).Elem()
 	if f, ok := bt.FieldByName(k); ok {
@@ -50,7 +64,24 @@ func (e *Env) Set(k string, v interface{}) error {
 		return nil
 	}
 
-	// not Builtin
+	// global variable
+	if isGlobalVarName(k) {
+		//fmt.Printf("==>global var\n")
+		if _, ok := e.global[k]; ok {
+			e.global[k] = v
+			return nil
+		}
+		return e.define(k, v)
+	}
+
+	// local variable
+	if err := e.setLocalVar(k, v); err != nil {
+		return e.define(k, v)
+	}
+	return nil
+}
+
+func (e *Env) setLocalVar(k string, v interface{}) error {
 	if _, ok := e.env[k]; ok {
 		e.env[k] = v
 		return nil
@@ -58,15 +89,26 @@ func (e *Env) Set(k string, v interface{}) error {
 	if e.parent == nil {
 		return fmt.Errorf("unknown symbol '%s'", k)
 	}
-	return e.parent.Set(k, v)
+	return e.parent.setLocalVar(k, v)
 }
 
 func (e *Env) Define(k string, v interface{}) error {
+	return e.define(k, v)
+}
+
+func (e *Env) define(k string, v interface{}) error {
+	// builtin
 	bt := reflect.TypeOf(e.builtin).Elem()
 	if _, ok := bt.FieldByName(k); ok {
 		return fmt.Errorf("cannot define builtin variable '%v'", k)
 	}
-	e.env[k] = v
+	if isGlobalVarName(k) {
+		// global var
+		e.global[k] = v
+	} else {
+		// local var
+		e.env[k] = v
+	}
 	return nil
 }
 
@@ -79,14 +121,28 @@ func (e *Env) Get(k string) (interface{}, error) {
 		return fv.Interface(), nil
 	}
 
-	// Not Builtin
+	// global variable
+	if v, ok := e.global[k]; ok {
+		return v, nil
+	}
+
+	// local variable
+	if v, err := e.getLocalVar(k); err != nil {
+		return defaultValue, e.define(k, defaultValue)
+	} else {
+		return v, nil
+	}
+}
+
+func (e *Env) getLocalVar(k string) (interface{}, error) {
+
 	if v, ok := e.env[k]; ok {
 		return v, nil
 	}
 	if e.parent == nil {
 		return nil, fmt.Errorf("unknown symbol '%s'", k)
 	}
-	return e.parent.Get(k)
+	return e.parent.getLocalVar(k)
 }
 
 func (e *Env) Dump() {
@@ -102,6 +158,7 @@ func (e *Env) Dump() {
 			fmt.Println(indent, k, ":", v)
 		}
 		fmt.Println("builtin:", e.builtin)
+		fmt.Println("global:", e.global)
 		return indent + "\t"
 	}
 	dump_helper(e)

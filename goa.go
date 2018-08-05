@@ -125,6 +125,9 @@ func runScript(script_reader io.Reader, file_reader io.Reader) {
 		fmt.Printf("error:%v\n", err)
 		return
 	}
+	if *dbg {
+		env.Dump()
+	}
 
 	if len(mainRules) > 0 {
 		// MAIN

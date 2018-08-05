@@ -96,11 +96,11 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{a=10;print a++}", ok: "11\n"},
 		{script: "BEGIN{a=1.9;print a++}", ok: "2.9\n"},
 		{script: "BEGIN{print 10++}", ok: "error:Invalid operation\n"},
-		{script: "BEGIN{a=\"a\";print a++}", ok: "error:Invalid operation\n"},
+		{script: "BEGIN{a=\"a\";print a++}", ok: "1\n"},
 		{script: "BEGIN{a=10;print a--}", ok: "9\n"},
 		{script: "BEGIN{a=2.9;print a--}", ok: "1.9\n"},
 		{script: "BEGIN{print 10--}", ok: "error:Invalid operation\n"},
-		{script: "BEGIN{a=\"a\";print a--}", ok: "error:Invalid operation\n"},
+		{script: "BEGIN{a=\"a\";print a--}", ok: "-1\n"},
 		{script: "BEGIN{a=10;a+=2;print a}", ok: "12\n"},
 		{script: "BEGIN{a=10;a+=2.5;print a}", ok: "12.5\n"},
 		{script: "BEGIN{a=10;a+=2;print a}", ok: "12\n"},
@@ -154,7 +154,6 @@ func TestGoa(t *testing.T) {
 		//{script: "BEGIN{a[1]=\"a\";print a[2]}", ok: "\n"},
 		//{script: "BEGIN{a[\"a\"]=\"a\";print a[\"a\"]}", ok: "a\n"},
 		//{script: "BEGIN{a[\"a\"]=\"a\";print a[\"b\"]}", ok: "\n"},
-		//{script: "BEGIN{}", ok: "\n"},
 
 		// command parameter
 

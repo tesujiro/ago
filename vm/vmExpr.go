@@ -62,14 +62,7 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 	switch expr.(type) {
 	case *ast.IdentExpr:
 		id := expr.(*ast.IdentExpr).Literal
-		if val, err := env.Get(id); err != nil {
-			if serr := env.Define(id, nil); serr != nil {
-				return nil, err
-			}
-			return "", nil
-		} else {
-			return val, nil
-		}
+		return env.Get(id)
 	case *ast.FieldExpr:
 		expr := expr.(*ast.FieldExpr).Expr
 		index, err := evalExpr(expr, env)
@@ -242,16 +235,15 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 			if ident, ok := left.(*ast.IdentExpr); ok {
 				v, err := env.Get(ident.Literal)
 				if err != nil {
-					if serr := env.Define(ident.Literal, nil); serr != nil {
-						return nil, err
-					}
-					v = 0
+					return nil, err
 				}
 				switch reflect.TypeOf(v).Kind() {
 				case reflect.Int, reflect.Int32, reflect.Int64:
 					v = toInt(v) + 1
 				case reflect.Float32, reflect.Float64:
 					v = toFloat64(v) + 1.0
+				case reflect.String:
+					v = 1
 				default:
 					return nil, errors.New("Invalid operation")
 				}
@@ -265,16 +257,15 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 			if ident, ok := left.(*ast.IdentExpr); ok {
 				v, err := env.Get(ident.Literal)
 				if err != nil {
-					if serr := env.Define(ident.Literal, nil); serr != nil {
-						return nil, err
-					}
-					v = 0
+					return nil, err
 				}
 				switch reflect.TypeOf(v).Kind() {
 				case reflect.Int, reflect.Int32, reflect.Int64:
 					v = toInt(v) - 1
 				case reflect.Float32, reflect.Float64:
 					v = toFloat64(v) - 1.0
+				case reflect.String:
+					v = -1
 				default:
 					return nil, errors.New("Invalid operation")
 				}
@@ -413,7 +404,7 @@ func evalAssExpr(lexp ast.Expr, val interface{}, env *Env) (interface{}, error) 
 	case *ast.IdentExpr:
 		id := lexp.(*ast.IdentExpr).Literal
 		if err := env.Set(id, val); err != nil {
-			env.Define(id, val)
+			return nil, err
 		}
 	case *ast.FieldExpr:
 		expr := lexp.(*ast.FieldExpr).Expr
