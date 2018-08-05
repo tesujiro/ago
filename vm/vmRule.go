@@ -25,7 +25,8 @@ func SeparateRules(rules []ast.Rule) (Begin, Main, End []ast.Rule) {
 func RunBeginRules(rules []ast.Rule, env *Env) (result interface{}, err error) {
 	for _, rule := range rules {
 		debug.Println("BEGIN")
-		result, err = runStmts(rule.Action, env)
+		childEnv := env.NewEnv()
+		result, err = runStmts(rule.Action, childEnv)
 		if err != nil {
 			return
 		}
@@ -40,9 +41,10 @@ func RunMainRules(rules []ast.Rule, env *Env, line string, line_number int) (res
 	}
 	for _, rule := range rules {
 		debug.Println(env.builtin.NR, ":MAIN")
+		childEnv := env.NewEnv()
 		expr := rule.Pattern.(*ast.ExprPattern).Expr
 		if expr != nil {
-			if b, err := evalExpr(expr, env); err != nil {
+			if b, err := evalExpr(expr, childEnv); err != nil {
 				return result, err
 			} else {
 				if reflect.ValueOf(b).Kind() != reflect.Bool {
@@ -51,13 +53,13 @@ func RunMainRules(rules []ast.Rule, env *Env, line string, line_number int) (res
 				}
 
 				if reflect.ValueOf(b).Interface() != true {
-					debug.Printf("Line: %v skipped\n", env.builtin.NR)
+					debug.Printf("Line: %v skipped\n", childEnv.builtin.NR)
 					continue
 				}
 			}
 		}
 
-		result, err = runStmts(rule.Action, env)
+		result, err = runStmts(rule.Action, childEnv)
 		if err != nil {
 			return
 		}
@@ -68,7 +70,8 @@ func RunMainRules(rules []ast.Rule, env *Env, line string, line_number int) (res
 func RunEndRules(rules []ast.Rule, env *Env) (result interface{}, err error) {
 	for _, rule := range rules {
 		debug.Println("END")
-		result, err = runStmts(rule.Action, env)
+		childEnv := env.NewEnv()
+		result, err = runStmts(rule.Action, childEnv)
 		if err != nil {
 			return
 		}
