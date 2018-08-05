@@ -44,8 +44,8 @@ func (e *Env) SetFieldZero() error {
 }
 
 func (e *Env) SetField(index int, str string) error {
-	if index < 0 {
-		return fmt.Errorf("Field Index Out of Range:%v\n", index)
+	if index <= 0 {
+		return fmt.Errorf("Field Index Out of Range:%v", index)
 	}
 	if index > len(e.builtin.field) {
 		newField := make([]string, index+1)

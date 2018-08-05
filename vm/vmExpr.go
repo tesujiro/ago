@@ -410,7 +410,7 @@ func evalAssExpr(lexp ast.Expr, val interface{}, env *Env) (interface{}, error) 
 		expr := lexp.(*ast.FieldExpr).Expr
 		i_val, err := evalExpr(expr, env)
 		if err != nil {
-			fmt.Println("FieldExpr index error") //TODO
+			//fmt.Println("FieldExpr index error") //TODO
 			return nil, err
 		}
 		index, ok := i_val.(int)
@@ -423,7 +423,7 @@ func evalAssExpr(lexp ast.Expr, val interface{}, env *Env) (interface{}, error) 
 		}
 		err = env.SetField(index, val_string)
 		if err != nil {
-			fmt.Println("FieldExpr SetField error") //TODO
+			//fmt.Println("FieldExpr SetField error") //TODO
 			return nil, err
 		}
 		return nil, nil
