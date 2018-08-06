@@ -220,6 +220,14 @@ expr
 	{
 		$$ = &ast.StringExpr{Literal: $1.Literal}
 	}
+	| IDENT '[' exprs ']'
+	{
+		$$ = &ast.ItemExpr{Value: &ast.IdentExpr{Literal: $1.Literal}, Index:$3}
+	}
+	| expr '[' exprs ']'
+	{
+		$$ = &ast.ItemExpr{Value: $1, Index:$3}
+	}
 	/*
 	| '/' 
 	{
