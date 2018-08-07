@@ -170,14 +170,14 @@ func TestGoa(t *testing.T) {
 		//{script: "BEGIN{a=0;for{ a=a+1;if a==10 { return a; };};print a}", ok: "10\n"},
 		//{script: "BEGIN{a=0;for{ a=10;return a };print a}", ok: "10\n"},
 
-		// map: awk-array
-		//{script: "BEGIN{a[1]=1;print a[1]}", ok: "1\n"},
-		//{script: "BEGIN{a[1]=1;print a[2]}", ok: "\n"},
-		//{script: "BEGIN{a[\"a\"]=1;print a[\"a\"]}", ok: "1\n"},
-		//{script: "BEGIN{a[1,2]=1;print a[1,2]}", ok: "1\n"},
+		// map: awk-array (associated array = map)
+		{script: "BEGIN{a[1]=1;print a[1]}", ok: "1\n"},
+		{script: "BEGIN{a[1]=1;print a[2]}", ok: "\n"},
+		{script: "BEGIN{a[\"a\"]=1;print a[\"a\"]}", ok: "1\n"},
+		{script: "BEGIN{a[1,2]=1;print a[1,2]}", ok: "1\n"},
 		//{script: "BEGIN{a[1]=1;a=2;print a[1]}", ok: "some error\n"},
-		//{script: "BEGIN{a[\"a\"]=1;print a[\"a\"]}", ok: "1\n"},
-		//{script: "BEGIN{a[1]=1;print a[2]}", ok: " \n"},
+		{script: "BEGIN{a[\"a\"]=1;print a[\"a\"]}", ok: "1\n"},
+		{script: "BEGIN{a[1]=1;print a[2]}", ok: "\n"},
 		//{script: "BEGIN{a[1]=1;print a}", ok: "error\n"},
 		//{script: "BEGIN{a[1]=1;a[2]=2;for (i in a) {print i,a[i]}}", ok: "1 1\n2 2\n"},
 		//{script: "BEGIN{a[\"1\"]=1;a[\"2\"]=2;for (i in a) {print i,a[i]}}", ok: "1 1\n2 2\n"},

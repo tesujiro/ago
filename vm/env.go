@@ -50,6 +50,10 @@ func isGlobalVarName(s string) bool {
 	return ('A' <= r && r <= 'Z')
 }
 
+func (e *Env) GetDefaultValue() interface{} {
+	return defaultValue
+}
+
 func (e *Env) Set(k string, v interface{}) error {
 	//fmt.Printf("Set(%v,%v)\n", k, v)
 	// BuiltIn variable
@@ -97,6 +101,13 @@ func (e *Env) setLocalVar(k string, v interface{}) error {
 
 func (e *Env) DefineDefaultValue(k string) (interface{}, error) {
 	v := defaultValue
+	return v, e.Define(k, v)
+}
+
+// TODO: DefineDefaultMapValue should be implemented in vmExpr using Env.GetDefaultValue()
+func (e *Env) DefineDefaultMapValue(k string, idx interface{}) (interface{}, error) {
+	v := make(map[interface{}]interface{}, 1)
+	v[idx] = defaultValue
 	return v, e.Define(k, v)
 }
 

@@ -71,8 +71,8 @@ type ArrayExpr struct {
 }
 
 type ItemExpr struct {
-	Value Expr
-	Index Expr
+	Literal string
+	Index   []Expr
 }
 
 type MapExpr struct {

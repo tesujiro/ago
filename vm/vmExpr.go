@@ -87,6 +87,7 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 		}
 	case *ast.NumExpr:
 		lit := expr.(*ast.NumExpr).Literal
+		//fmt.Println("NumExpr:", lit)
 		if strings.Contains(lit, ".") {
 			if f, err := strconv.ParseFloat(lit, 64); err != nil {
 				return 0.0, err
@@ -98,6 +99,7 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 		if i, err := strconv.ParseInt(lit, 10, 0); err != nil {
 			return 0, err
 		} else {
+			//fmt.Println("==> return :", int(i))
 			return int(i), nil
 		}
 	case *ast.StringExpr:
@@ -146,32 +148,43 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 		}
 		return array, nil
 	case *ast.ItemExpr:
-		//var index, value interface{}
-		////var err error
-		index, err := evalExpr(expr.(*ast.ItemExpr).Index, env)
-		if err != nil {
-			fmt.Println("ItemExpr index error") //TODO
-			return nil, err
+		var index string
+		for _, expr := range expr.(*ast.ItemExpr).Index {
+			//fmt.Printf("Index[%v]:%v\n", k, expr)
+			val, err := evalExpr(expr, env)
+			if err != nil {
+				return nil, err
+			}
+			index = fmt.Sprintf("%v%v%v", index, ":", val) //TODO
 		}
-		value, err := evalExpr(expr.(*ast.ItemExpr).Value, env)
-		if err != nil {
-			fmt.Println("ItemExpr value error") //TODO
+		id := expr.(*ast.ItemExpr).Literal
+		//fmt.Printf("ItemExpr\tid:%v\tindex:%v\n", id, index)
+		value, err := env.Get(id)
+		if err == ErrUnknownSymbol {
+			v, err := env.DefineDefaultMapValue(id, index)
+			if err != nil {
+				return nil, err
+			}
+			value = v
+		} else if err != nil {
 			return nil, err
 		}
 
 		// TODO:Elem()
 
 		switch reflect.ValueOf(value).Kind() {
-		case reflect.Slice, reflect.Array:
-			// index change to int
-			if i, ok := index.(int); !ok {
-				return nil, errors.New("index cannot convert to int")
-			} else {
-				if i < 0 || reflect.ValueOf(value).Len() <= i {
-					return nil, errors.New("index out of range")
+		/*
+			case reflect.Slice, reflect.Array:
+				// index change to int
+				if i, ok := index.(int); !ok {
+					return nil, errors.New("index cannot convert to int")
+				} else {
+					if i < 0 || reflect.ValueOf(value).Len() <= i {
+						return nil, errors.New("index out of range")
+					}
+					return reflect.ValueOf(value).Index(i).Interface(), nil
 				}
-				return reflect.ValueOf(value).Index(i).Interface(), nil
-			}
+		*/
 		case reflect.Map:
 			m, ok := value.(map[interface{}]interface{})
 			if !ok {
@@ -179,7 +192,19 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 			}
 			v, ok := m[index]
 			if !ok {
-				return nil, nil
+				//return nil, nil
+				defaultValue := env.GetDefaultValue()
+				newMap := make(map[interface{}]interface{}, len(m)+1)
+				newMap[index] = defaultValue
+				for k, v := range m {
+					newMap[k] = v
+				}
+
+				err := env.Set(id, newMap)
+				if err != nil {
+					return nil, err
+				}
+				return defaultValue, nil
 			}
 			return v, nil
 
@@ -467,35 +492,47 @@ func evalAssExpr(lexp ast.Expr, val interface{}, env *Env) (interface{}, error) 
 		}
 		return nil, nil
 	case *ast.ItemExpr:
-		index, err := evalExpr(lexp.(*ast.ItemExpr).Index, env)
-		if err != nil {
-			fmt.Println("ItemExpr index error") //TODO
-			return nil, err
+		var index string
+		for _, expr := range lexp.(*ast.ItemExpr).Index {
+			//fmt.Printf("Index[%v]:%v\n", k, expr)
+			val, err := evalExpr(expr, env)
+			if err != nil {
+				return nil, err
+			}
+			index = fmt.Sprintf("%v%v%v", index, ":", val) //TODO
 		}
-		value, err := evalExpr(lexp.(*ast.ItemExpr).Value, env)
-		if err != nil {
-			fmt.Println("ItemExpr value error") //TODO
+		id := lexp.(*ast.ItemExpr).Literal
+		value, err := env.Get(id)
+		if err == ErrUnknownSymbol {
+			v, err := env.DefineDefaultMapValue(id, index)
+			if err != nil {
+				return nil, err
+			}
+			value = v
+		} else if err != nil {
 			return nil, err
 		}
 
 		switch reflect.TypeOf(value).Kind() {
-		case reflect.Slice | reflect.Array:
-			if i, ok := index.(int); !ok {
-				return nil, errors.New("index cannot convert to int")
-			} else {
-				if i < 0 || reflect.ValueOf(value).Len() < i {
-					return nil, errors.New("index out of range")
-				}
-				if i == reflect.ValueOf(value).Len() {
-					// append val to array
-					ar := reflect.Append(reflect.ValueOf(value), reflect.ValueOf(val)).Interface()
-					return evalAssExpr(lexp.(*ast.ItemExpr).Value, ar, env)
-				}
+		/*
+			case reflect.Slice | reflect.Array:
+				if i, ok := index.(int); !ok {
+					return nil, errors.New("index cannot convert to int")
+				} else {
+					if i < 0 || reflect.ValueOf(value).Len() < i {
+						return nil, errors.New("index out of range")
+					}
+					if i == reflect.ValueOf(value).Len() {
+						// append val to array
+						ar := reflect.Append(reflect.ValueOf(value), reflect.ValueOf(val)).Interface()
+						return evalAssExpr(lexp.(*ast.ItemExpr).Value, ar, env)
+					}
 
-				// Set Val To Array
-				reflect.ValueOf(value).Index(i).Set(reflect.ValueOf(val))
-				return val, nil
-			}
+					// Set Val To Array
+					reflect.ValueOf(value).Index(i).Set(reflect.ValueOf(val))
+					return val, nil
+				}
+		*/
 		case reflect.Map:
 			m, ok := value.(map[interface{}]interface{})
 			if !ok {
@@ -511,7 +548,12 @@ func evalAssExpr(lexp ast.Expr, val interface{}, env *Env) (interface{}, error) 
 				for k, v := range m {
 					newMap[k] = v
 				}
-				return evalAssExpr(lexp.(*ast.ItemExpr).Value, newMap, env)
+
+				err := env.Set(id, newMap)
+				if err != nil {
+					return nil, err
+				}
+				return newMap, nil
 			}
 		default:
 			return nil, errors.New("type " + reflect.TypeOf(value).Kind().String() + " does not support index operation")
