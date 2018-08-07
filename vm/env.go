@@ -1,11 +1,14 @@
 package vm
 
 import (
+	"errors"
 	"fmt"
 	"reflect"
 )
 
 const defaultValue = ""
+
+var ErrUnknownSymbol = errors.New("unknown symbol")
 
 type Env struct {
 	env     map[string]interface{}
@@ -71,12 +74,12 @@ func (e *Env) Set(k string, v interface{}) error {
 			e.global[k] = v
 			return nil
 		}
-		return e.define(k, v)
+		return e.Define(k, v)
 	}
 
 	// local variable
 	if err := e.setLocalVar(k, v); err != nil {
-		return e.define(k, v)
+		return ErrUnknownSymbol
 	}
 	return nil
 }
@@ -87,16 +90,17 @@ func (e *Env) setLocalVar(k string, v interface{}) error {
 		return nil
 	}
 	if e.parent == nil {
-		return fmt.Errorf("unknown symbol '%s'", k)
+		return ErrUnknownSymbol
 	}
 	return e.parent.setLocalVar(k, v)
 }
 
-func (e *Env) Define(k string, v interface{}) error {
-	return e.define(k, v)
+func (e *Env) DefineDefaultValue(k string) (interface{}, error) {
+	v := defaultValue
+	return v, e.Define(k, v)
 }
 
-func (e *Env) define(k string, v interface{}) error {
+func (e *Env) Define(k string, v interface{}) error {
 	// builtin
 	bt := reflect.TypeOf(e.builtin).Elem()
 	if _, ok := bt.FieldByName(k); ok {
@@ -128,7 +132,7 @@ func (e *Env) Get(k string) (interface{}, error) {
 
 	// local variable
 	if v, err := e.getLocalVar(k); err != nil {
-		return defaultValue, e.define(k, defaultValue)
+		return nil, ErrUnknownSymbol
 	} else {
 		return v, nil
 	}
@@ -140,7 +144,7 @@ func (e *Env) getLocalVar(k string) (interface{}, error) {
 		return v, nil
 	}
 	if e.parent == nil {
-		return nil, fmt.Errorf("unknown symbol '%s'", k)
+		return nil, ErrUnknownSymbol
 	}
 	return e.parent.getLocalVar(k)
 }

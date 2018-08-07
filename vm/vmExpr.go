@@ -62,7 +62,17 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 	switch expr.(type) {
 	case *ast.IdentExpr:
 		id := expr.(*ast.IdentExpr).Literal
-		return env.Get(id)
+		v, err := env.Get(id)
+		if err == ErrUnknownSymbol {
+			val, err := env.DefineDefaultValue(id)
+			if err != nil {
+				return nil, err
+			}
+			return val, nil
+		} else if err != nil {
+			return nil, err
+		}
+		return v, nil
 	case *ast.FieldExpr:
 		expr := expr.(*ast.FieldExpr).Expr
 		index, err := evalExpr(expr, env)
@@ -234,7 +244,13 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 		case "++":
 			if ident, ok := left.(*ast.IdentExpr); ok {
 				v, err := env.Get(ident.Literal)
-				if err != nil {
+				if err == ErrUnknownSymbol {
+					val, err := env.DefineDefaultValue(ident.Literal)
+					if err != nil {
+						return nil, err
+					}
+					v = val
+				} else if err != nil {
 					return nil, err
 				}
 				switch reflect.TypeOf(v).Kind() {
@@ -247,7 +263,13 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 				default:
 					return nil, errors.New("Invalid operation")
 				}
-				env.Set(ident.Literal, v)
+				if err := env.Set(ident.Literal, v); err == ErrUnknownSymbol {
+					if err := env.Define(ident.Literal, v); err != nil {
+						return nil, err
+					}
+				} else if err != nil {
+					return nil, err
+				}
 				return v, nil
 
 			} else {
@@ -256,7 +278,13 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 		case "--":
 			if ident, ok := left.(*ast.IdentExpr); ok {
 				v, err := env.Get(ident.Literal)
-				if err != nil {
+				if err == ErrUnknownSymbol {
+					val, err := env.DefineDefaultValue(ident.Literal)
+					if err != nil {
+						return nil, err
+					}
+					v = val
+				} else if err != nil {
 					return nil, err
 				}
 				switch reflect.TypeOf(v).Kind() {
@@ -269,7 +297,13 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 				default:
 					return nil, errors.New("Invalid operation")
 				}
-				env.Set(ident.Literal, v)
+				if err := env.Set(ident.Literal, v); err == ErrUnknownSymbol {
+					if err := env.Define(ident.Literal, v); err != nil {
+						return nil, err
+					}
+				} else if err != nil {
+					return nil, err
+				}
 				return v, nil
 
 			} else {
@@ -403,9 +437,14 @@ func evalAssExpr(lexp ast.Expr, val interface{}, env *Env) (interface{}, error) 
 	switch lexp.(type) {
 	case *ast.IdentExpr:
 		id := lexp.(*ast.IdentExpr).Literal
-		if err := env.Set(id, val); err != nil {
+		if err := env.Set(id, val); err == ErrUnknownSymbol {
+			if err := env.Define(id, val); err != nil {
+				return nil, err
+			}
+		} else if err != nil {
 			return nil, err
 		}
+		return val, nil
 	case *ast.FieldExpr:
 		expr := lexp.(*ast.FieldExpr).Expr
 		i_val, err := evalExpr(expr, env)
