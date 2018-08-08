@@ -466,6 +466,12 @@ func evalAssExpr(lexp ast.Expr, val interface{}, env *Env) (interface{}, error) 
 	switch lexp.(type) {
 	case *ast.IdentExpr:
 		id := lexp.(*ast.IdentExpr).Literal
+		// Check the type of id in env for Safety
+		if env_val, err := env.Get(id); err == nil {
+			if reflect.TypeOf(env_val).Kind() == reflect.Map {
+				return nil, fmt.Errorf("can't assign to %v; it's an associated array name.", id)
+			}
+		}
 		if err := env.Set(id, val); err == ErrUnknownSymbol {
 			if err := env.Define(id, val); err != nil {
 				return nil, err
