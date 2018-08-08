@@ -149,13 +149,17 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 		return array, nil
 	case *ast.ItemExpr:
 		var index string
-		for _, expr := range expr.(*ast.ItemExpr).Index {
+		for i, expr := range expr.(*ast.ItemExpr).Index {
 			//fmt.Printf("Index[%v]:%v\n", k, expr)
 			val, err := evalExpr(expr, env)
 			if err != nil {
 				return nil, err
 			}
-			index = fmt.Sprintf("%v%v%v", index, ":", val) //TODO
+			if i == 0 {
+				index = fmt.Sprintf("%v", val)
+			} else {
+				index = fmt.Sprintf("%v%v%v", index, env.builtin.SUBSEP, val)
+			}
 		}
 		id := expr.(*ast.ItemExpr).Literal
 		//fmt.Printf("ItemExpr\tid:%v\tindex:%v\n", id, index)
@@ -493,13 +497,17 @@ func evalAssExpr(lexp ast.Expr, val interface{}, env *Env) (interface{}, error) 
 		return nil, nil
 	case *ast.ItemExpr:
 		var index string
-		for _, expr := range lexp.(*ast.ItemExpr).Index {
+		for i, expr := range lexp.(*ast.ItemExpr).Index {
 			//fmt.Printf("Index[%v]:%v\n", k, expr)
 			val, err := evalExpr(expr, env)
 			if err != nil {
 				return nil, err
 			}
-			index = fmt.Sprintf("%v%v%v", index, ":", val) //TODO
+			if i == 0 {
+				index = fmt.Sprintf("%v", val)
+			} else {
+				index = fmt.Sprintf("%v%v%v", index, env.builtin.SUBSEP, val)
+			}
 		}
 		id := lexp.(*ast.ItemExpr).Literal
 		value, err := env.Get(id)

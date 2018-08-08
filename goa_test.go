@@ -175,6 +175,7 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{a[1]=1;print a[2]}", ok: "\n"},
 		{script: "BEGIN{a[\"a\"]=1;print a[\"a\"]}", ok: "1\n"},
 		{script: "BEGIN{a[1,2]=1;print a[1,2]}", ok: "1\n"},
+		{script: "BEGIN{SUBSEP=\":\";a[1,2]=1;print a[1,2]}", ok: "1\n"},
 		//{script: "BEGIN{a[1]=1;a=2;print a[1]}", ok: "some error\n"},
 		{script: "BEGIN{a[\"a\"]=1;print a[\"a\"]}", ok: "1\n"},
 		{script: "BEGIN{a[1]=1;print a[2]}", ok: "\n"},

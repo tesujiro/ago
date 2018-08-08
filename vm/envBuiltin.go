@@ -6,6 +6,19 @@ import (
 	"regexp"
 )
 
+type builtin struct {
+	NF, NR int
+	FS     string
+	SUBSEP string
+	field  []string
+}
+
+func NewBuiltIn() *builtin {
+	return &builtin{
+		SUBSEP: string([]byte{0x1c}),
+	}
+}
+
 func (e *Env) setNR(i int) {
 	e.builtin.NR = i
 }
@@ -17,6 +30,10 @@ func (e *Env) SetNF() {
 func (e *Env) SetFS(fs string) {
 	e.builtin.FS = fs
 	//e.Dump()
+}
+
+func (e *Env) SetSUBSEP(ss string) {
+	e.builtin.SUBSEP = ss
 }
 
 func (e *Env) GetField(i int) (string, error) {

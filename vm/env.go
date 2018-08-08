@@ -17,18 +17,12 @@ type Env struct {
 	global  map[string]interface{}
 }
 
-type builtin struct {
-	NF, NR int
-	FS     string
-	field  []string
-}
-
 // Global Scope
 func NewEnv() *Env {
 	return &Env{
 		env:     make(map[string]interface{}),
 		parent:  nil,
-		builtin: &builtin{},
+		builtin: NewBuiltIn(),
 		global:  make(map[string]interface{}),
 	}
 }
