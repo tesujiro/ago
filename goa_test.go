@@ -21,7 +21,7 @@ func TestGoa(t *testing.T) {
 		//BASIC EXPRESSION
 		{script: "BEGIN{print 1+1}", ok: "2\n"},
 		{script: "BEGIN{print 1+2}", ok: "3\n"},
-		{script: "BEGIN{print nil}", ok: "<nil>\n"},
+		{script: "BEGIN{print nil}", ok: "\n"},
 		{script: "BEGIN{print 1}", ok: "1\n"},
 		//{script: "BEGIN{print 9223372036854775807}", ok: "9223372036854775807\n"},
 		{script: "BEGIN{print 1.1}", ok: "1.1\n"},
@@ -178,7 +178,7 @@ func TestGoa(t *testing.T) {
 		//{script: "BEGIN{a[1]=1;a=2;print a[1]}", ok: "some error\n"},
 		{script: "BEGIN{a[\"a\"]=1;print a[\"a\"]}", ok: "1\n"},
 		{script: "BEGIN{a[1]=1;print a[2]}", ok: "\n"},
-		//{script: "BEGIN{a[1]=1;print a}", ok: "error\n"},
+		{script: "BEGIN{a[1]=1;print a}", ok: "error:type map does not support print operation\n"},
 		//{script: "BEGIN{a[1]=1;a[2]=2;for (i in a) {print i,a[i]}}", ok: "1 1\n2 2\n"},
 		//{script: "BEGIN{a[\"1\"]=1;a[\"2\"]=2;for (i in a) {print i,a[i]}}", ok: "1 1\n2 2\n"},
 

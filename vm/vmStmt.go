@@ -199,7 +199,15 @@ func runSingleStmt(stmt ast.Stmt, env *Env) (interface{}, error) {
 			if 0 < i && i < len(printStmt.Exprs) {
 				fmt.Printf("%v", env.builtin.OFS)
 			}
-			fmt.Printf("%v", result)
+			//fmt.Printf("%v", result)
+			switch reflect.ValueOf(result).Kind() {
+			case reflect.Int, reflect.Float64, reflect.Bool, reflect.String:
+				fmt.Printf("%v", result)
+			case reflect.Invalid:
+				fmt.Printf("")
+			default:
+				return nil, fmt.Errorf("type %s does not support print operation", reflect.ValueOf(result).Kind().String())
+			}
 		}
 		fmt.Printf("%v", env.builtin.ORS)
 	}
