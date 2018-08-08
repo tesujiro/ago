@@ -175,7 +175,6 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{a[1]=1;print a[2]}", ok: "\n"},
 		{script: "BEGIN{a[\"a\"]=1;print a[\"a\"]}", ok: "1\n"},
 		{script: "BEGIN{a[1,2]=1;print a[1,2]}", ok: "1\n"},
-		{script: "BEGIN{SUBSEP=\":\";a[1,2]=1;print a[1,2]}", ok: "1\n"},
 		//{script: "BEGIN{a[1]=1;a=2;print a[1]}", ok: "some error\n"},
 		{script: "BEGIN{a[\"a\"]=1;print a[\"a\"]}", ok: "1\n"},
 		{script: "BEGIN{a[1]=1;print a[2]}", ok: "\n"},
@@ -195,6 +194,13 @@ func TestGoa(t *testing.T) {
 		//{script: "BEGIN{a[\"a\"]=\"a\";print a[\"b\"]}", ok: "\n"},
 
 		// command parameter
+
+		// built in variables
+		{script: "BEGIN{FS=\":\"}{print $2}", in: "AAA:BBB:CCC\nAAA:BBB:CCC\n", ok: "BBB\nBBB\n"},
+		//{script: "{print}", in: "AAA BBB  CCC\n", ok: "AAA BBB  CCC\n"},  // TODO: NG
+		{script: "BEGIN{OFS=\":\"}{$1=$1;print}", in: "AAA BBB  CCC\n", ok: "AAA:BBB:CCC\n"},
+		//{script: "BEGIN{OFS=\"\n\"}{$1=$1;print}", in: "AAA BBB CCC\nAAA BBB CCC\n", ok: "AAA\nBBB\nCCC\nAAA\nBBB\nCCC\n"}, //TODO
+		{script: "BEGIN{ORS=\":\"}{$1=$1;print}", in: "AAA BBB CCC\nCCC DDD EEE\n", ok: "AAA BBB CCC:CCC DDD EEE:\n"},
 
 		// field
 		{script: "{print $1}", in: "Hello World!\n", ok: "Hello\n"},

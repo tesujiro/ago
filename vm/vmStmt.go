@@ -197,11 +197,11 @@ func runSingleStmt(stmt ast.Stmt, env *Env) (interface{}, error) {
 				return nil, err
 			}
 			if 0 < i && i < len(printStmt.Exprs) {
-				fmt.Printf("%v", env.builtin.FS)
+				fmt.Printf("%v", env.builtin.OFS)
 			}
 			fmt.Printf("%v", result)
 		}
-		fmt.Printf("\n")
+		fmt.Printf("%v", env.builtin.ORS)
 	}
 	return nil, nil
 }

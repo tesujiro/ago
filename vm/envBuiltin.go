@@ -7,15 +7,24 @@ import (
 )
 
 type builtin struct {
-	NF, NR int
-	FS     string
-	SUBSEP string
-	field  []string
+	//ARGC,ARGV,FILENAME
+	NF, NR  int
+	FS, OFS string
+	ORS     string
+	SUBSEP  string
+	//OFMT,FNR,
+	//RLENGTH,RSTART //for MATCH
+	//RS
+	//ENVIRON
+	//CONVFMT
+	field []string
 }
 
 func NewBuiltIn() *builtin {
 	return &builtin{
 		SUBSEP: string([]byte{0x1c}),
+		ORS:    "\n",
+		OFS:    " ",
 	}
 }
 
@@ -29,6 +38,16 @@ func (e *Env) SetNF() {
 
 func (e *Env) SetFS(fs string) {
 	e.builtin.FS = fs
+	//e.Dump()
+}
+
+func (e *Env) SetOFS(fs string) {
+	e.builtin.OFS = fs
+	//e.Dump()
+}
+
+func (e *Env) SetORS(fs string) {
+	e.builtin.ORS = fs
 	//e.Dump()
 }
 
@@ -53,7 +72,7 @@ func (e *Env) SetFieldZero() error {
 	str := e.builtin.field[1]
 	//fmt.Println("len:", len(e.builtin.field))
 	for i := 2; i < len(e.builtin.field); i++ {
-		str += e.builtin.FS + e.builtin.field[i]
+		str += e.builtin.OFS + e.builtin.field[i]
 	}
 	e.builtin.field[0] = str
 	e.SetNF()
@@ -97,7 +116,7 @@ func (e *Env) SetFieldFromLine(line string) error {
 		//fmt.Printf("line %v:[%v]\n", e.builtin.NR, line)
 		split("[ \t]+", line)
 	default:
-		fmt.Printf("line %v:FS[%v]\n", e.builtin.NR, e.builtin.FS)
+		//fmt.Printf("line %v:FS[%v]\n", e.builtin.NR, e.builtin.FS)
 		split(e.builtin.FS, line)
 	}
 	//e.builtin.field[0] = line
