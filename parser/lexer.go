@@ -18,6 +18,7 @@ type Lexer struct {
 var tokenTab = map[string]int{
 	"BEGIN":    BEGIN,
 	"END":      END,
+	"delete":   DELETE,
 	"print":    PRINT,
 	"if":       IF,
 	"else":     ELSE,

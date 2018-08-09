@@ -11,6 +11,10 @@ type ExprStmt struct {
 	Expr Expr
 }
 
+type DelStmt struct {
+	Expr Expr
+}
+
 type IfStmt struct {
 	If     Expr
 	Then   []Stmt

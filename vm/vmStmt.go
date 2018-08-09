@@ -98,6 +98,79 @@ func runSingleStmt(stmt ast.Stmt, env *Env) (interface{}, error) {
 		}
 	case *ast.ExprStmt:
 		return evalExpr(stmt.(*ast.ExprStmt).Expr, env)
+	case *ast.DelStmt:
+		expr := stmt.(*ast.DelStmt).Expr
+		//fmt.Println("TypeOf(Expr):", reflect.TypeOf(expr))
+		var id string
+		var index string
+		switch expr.(type) {
+		case *ast.IdentExpr:
+			id = expr.(*ast.IdentExpr).Literal
+		case *ast.ItemExpr:
+			id = expr.(*ast.ItemExpr).Literal
+			for i, expr := range expr.(*ast.ItemExpr).Index {
+				//fmt.Printf("Index[%v]:%v\n", k, expr)
+				val, err := evalExpr(expr, env)
+				if err != nil {
+					return nil, err
+				}
+				if i == 0 {
+					index = fmt.Sprintf("%v", val)
+				} else {
+					index = fmt.Sprintf("%v%v%v", index, env.builtin.SUBSEP, val)
+				}
+			}
+		default:
+			return nil, fmt.Errorf("type %s does not support delete operation", reflect.TypeOf(expr))
+		}
+		val, err := env.Get(id)
+		if err == ErrUnknownSymbol {
+			// Set Default Map to env
+			val, err = env.DefineDefaultMapValue(id, index)
+			if err != nil {
+				return nil, err
+			}
+		} else if err != nil {
+			return nil, err
+		}
+		if reflect.ValueOf(val).Kind() == reflect.Map {
+			m := val.(map[interface{}]interface{})
+			if index == "" {
+				// Delete All Map Elements
+				_, err := env.DefineDefaultMapValue(id, index)
+				if err != nil {
+					return nil, err
+				}
+			} else {
+				// Delete Map Element
+				delete(m, index)
+			}
+		} else {
+			// Error
+			return nil, fmt.Errorf("type %s does not support delete operation", reflect.ValueOf(val).Kind())
+		}
+		return nil, nil
+	case *ast.PrintStmt:
+		printStmt := stmt.(*ast.PrintStmt)
+		for i, expr := range printStmt.Exprs {
+			result, err := evalExpr(expr, env)
+			if err != nil {
+				return nil, err
+			}
+			if 0 < i && i < len(printStmt.Exprs) {
+				fmt.Printf("%v", env.builtin.OFS)
+			}
+			//fmt.Printf("%v", result)
+			switch reflect.ValueOf(result).Kind() {
+			case reflect.Int, reflect.Float64, reflect.Bool, reflect.String:
+				fmt.Printf("%v", result)
+			case reflect.Invalid:
+				fmt.Printf("")
+			default:
+				return nil, fmt.Errorf("type %s does not support print operation", reflect.ValueOf(result).Kind().String())
+			}
+		}
+		fmt.Printf("%v", env.builtin.ORS)
 	case *ast.IfStmt:
 		child := env.NewEnv()
 		//defer child.Destroy() // TODO:
@@ -189,27 +262,6 @@ func runSingleStmt(stmt ast.Stmt, env *Env) (interface{}, error) {
 			}
 		}
 		return nil, nil
-	case *ast.PrintStmt:
-		printStmt := stmt.(*ast.PrintStmt)
-		for i, expr := range printStmt.Exprs {
-			result, err := evalExpr(expr, env)
-			if err != nil {
-				return nil, err
-			}
-			if 0 < i && i < len(printStmt.Exprs) {
-				fmt.Printf("%v", env.builtin.OFS)
-			}
-			//fmt.Printf("%v", result)
-			switch reflect.ValueOf(result).Kind() {
-			case reflect.Int, reflect.Float64, reflect.Bool, reflect.String:
-				fmt.Printf("%v", result)
-			case reflect.Invalid:
-				fmt.Printf("")
-			default:
-				return nil, fmt.Errorf("type %s does not support print operation", reflect.ValueOf(result).Kind().String())
-			}
-		}
-		fmt.Printf("%v", env.builtin.ORS)
 	}
 	return nil, nil
 }

@@ -183,6 +183,13 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{a[\"a\"]=1;print a[\"a\"]}", ok: "1\n"},
 		{script: "BEGIN{a[1]=1;print a[2]}", ok: "\n"},
 		{script: "BEGIN{a[1]=1;print a}", ok: "error:type map does not support print operation\n"},
+		{script: "BEGIN{a[1]=1;delete a[1];print a[1]}", ok: "\n"},
+		{script: "BEGIN{a[1]=1;delete a[1];print a[2]}", ok: "\n"},
+		{script: "BEGIN{a[1]=1;delete a[2];print a[1]}", ok: "1\n"},
+		{script: "BEGIN{a[1]=1;delete a;print a[1]}", ok: "\n"},
+		{script: "BEGIN{a=1;delete a}", ok: "error:type int does not support delete operation\n"},
+		{script: "BEGIN{a[1]=1;delete a;a=2}", ok: "error:can't assign to a; it's an associated array name.\n"},
+		{script: "BEGIN{delete a;a=2}", ok: "error:can't assign to a; it's an associated array name.\n"},
 		//{script: "BEGIN{a[1]=1;a[2]=2;for (i in a) {print i,a[i]}}", ok: "1 1\n2 2\n"},
 		//{script: "BEGIN{a[\"1\"]=1;a[\"2\"]=2;for (i in a) {print i,a[i]}}", ok: "1 1\n2 2\n"},
 

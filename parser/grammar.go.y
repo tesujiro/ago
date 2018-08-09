@@ -35,6 +35,7 @@ var defaultExprs = []ast.Expr{&defaultExpr}
 %token<token> IDENT NUMBER STRING TRUE FALSE NIL
 %token<token> EQEQ NEQ GE LE ANDAND OROR LEN 
 %token<token> PLUSPLUS MINUSMINUS PLUSEQ MINUSEQ MULEQ DIVEQ
+%token<token> DELETE IN
 %token<token> BEGIN END PRINT REGEXP
 %token<token> IF ELSE FOR BREAK CONTINUE
 %token<token> FUNC RETURN
@@ -126,6 +127,10 @@ stmt
 	| expr
 	{
 		$$ = &ast.ExprStmt{Expr: $1}
+	}
+	| DELETE expr
+	{
+		$$ = &ast.DelStmt{Expr: $2}
 	}
 	| PRINT 
 	{
