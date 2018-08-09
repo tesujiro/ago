@@ -119,8 +119,8 @@ func (e *Env) SetFieldFromLine(line string) error {
 		//fmt.Printf("line %v:FS[%v]\n", e.builtin.NR, e.builtin.FS)
 		split(e.builtin.FS, line)
 	}
-	//e.builtin.field[0] = line
-	e.SetFieldZero()
+	e.builtin.field[0] = line
+	//e.SetFieldZero()
 
 	return nil
 }

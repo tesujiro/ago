@@ -197,7 +197,7 @@ func TestGoa(t *testing.T) {
 
 		// built in variables
 		{script: "BEGIN{FS=\":\"}{print $2}", in: "AAA:BBB:CCC\nAAA:BBB:CCC\n", ok: "BBB\nBBB\n"},
-		//{script: "{print}", in: "AAA BBB  CCC\n", ok: "AAA BBB  CCC\n"},  // TODO: NG
+		{script: "{print}", in: "AAA BBB  CCC\n", ok: "AAA BBB  CCC\n"}, // AWK is AWK
 		{script: "BEGIN{OFS=\":\"}{$1=$1;print}", in: "AAA BBB  CCC\n", ok: "AAA:BBB:CCC\n"},
 		//{script: "BEGIN{OFS=\"\n\"}{$1=$1;print}", in: "AAA BBB CCC\nAAA BBB CCC\n", ok: "AAA\nBBB\nCCC\nAAA\nBBB\nCCC\n"}, //TODO
 		{script: "BEGIN{ORS=\":\"}{$1=$1;print}", in: "AAA BBB CCC\nCCC DDD EEE\n", ok: "AAA BBB CCC:CCC DDD EEE:\n"},
