@@ -100,7 +100,7 @@ func (e *Env) DefineDefaultValue(k string) (interface{}, error) {
 
 // TODO: DefineDefaultMapValue should be implemented in vmExpr using Env.GetDefaultValue()
 func (e *Env) DefineDefaultMapValue(k string, idx interface{}) (interface{}, error) {
-	v := make(map[interface{}]interface{}, 1)
+	v := make(map[interface{}]interface{})
 	v[idx] = defaultValue
 	return v, e.Define(k, v)
 }

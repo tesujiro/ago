@@ -196,18 +196,8 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 			}
 			v, ok := m[index]
 			if !ok {
-				//return nil, nil
 				defaultValue := env.GetDefaultValue()
-				newMap := make(map[interface{}]interface{}, len(m)+1)
-				newMap[index] = defaultValue
-				for k, v := range m {
-					newMap[k] = v
-				}
-
-				err := env.Set(id, newMap)
-				if err != nil {
-					return nil, err
-				}
+				m[index] = defaultValue
 				return defaultValue, nil
 			}
 			return v, nil
@@ -552,23 +542,8 @@ func evalAssExpr(lexp ast.Expr, val interface{}, env *Env) (interface{}, error) 
 			if !ok {
 				return nil, errors.New("value cannot convert to map")
 			}
-			_, ok = m[index]
-			if ok {
-				m[index] = val
-				return val, nil
-			} else {
-				newMap := make(map[interface{}]interface{}, len(m)+1)
-				newMap[index] = val
-				for k, v := range m {
-					newMap[k] = v
-				}
-
-				err := env.Set(id, newMap)
-				if err != nil {
-					return nil, err
-				}
-				return newMap, nil
-			}
+			m[index] = val
+			return val, nil
 		default:
 			return nil, errors.New("type " + reflect.TypeOf(value).Kind().String() + " does not support index operation")
 		}

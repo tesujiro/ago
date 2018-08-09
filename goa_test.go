@@ -173,6 +173,10 @@ func TestGoa(t *testing.T) {
 		// map: awk-array (associated array = map)
 		{script: "BEGIN{a[1]=1;print a[1]}", ok: "1\n"},
 		{script: "BEGIN{a[1]=1;print a[2]}", ok: "\n"},
+		{script: "BEGIN{a[1]=1;a[2]=2;print a[1],a[2]}", ok: "1 2\n"},
+		{script: "BEGIN{a[1]=1;a[1]=2;print a[1]}", ok: "2\n"},
+		{script: "BEGIN{a[1]=\"a\";print a[1]}", ok: "a\n"},
+		{script: "BEGIN{a[1]=\"a\";print a[1]+a[2]}", ok: "a\n"},
 		{script: "BEGIN{a[\"a\"]=1;print a[\"a\"]}", ok: "1\n"},
 		{script: "BEGIN{a[1,2]=1;print a[1,2]}", ok: "1\n"},
 		{script: "BEGIN{a[1]=1;a=2}", ok: "error:can't assign to a; it's an associated array name.\n"},
