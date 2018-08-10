@@ -190,8 +190,13 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{a=1;delete a}", ok: "error:type int does not support delete operation\n"},
 		{script: "BEGIN{a[1]=1;delete a;a=2}", ok: "error:can't assign to a; it's an associated array name.\n"},
 		{script: "BEGIN{delete a;a=2}", ok: "error:can't assign to a; it's an associated array name.\n"},
-		//{script: "BEGIN{a[1]=1;a[2]=2;for (i in a) {print i,a[i]}}", ok: "1 1\n2 2\n"},
-		//{script: "BEGIN{a[\"1\"]=1;a[\"2\"]=2;for (i in a) {print i,a[i]}}", ok: "1 1\n2 2\n"},
+		{script: "BEGIN{a[1]=1;a[2]=2;for (i in a) {print i,a[i]}}", ok: "1 1\n2 2\n"},
+		{script: "BEGIN{a[1]=1;a[2]=2;for (i in a) {};print i}", ok: "\n"},
+		{script: "BEGIN{a[1]=1;a[2]=2;i=0;for (i in a) {};print i}", ok: "2\n"},
+		{script: "BEGIN{for (i in a) {print i}}", ok: "error:unknown symbol\n"},
+		{script: "BEGIN{a=1;for (i in a) {print i}}", ok: "error:for key loop not in associated array,int\n"},
+		{script: "BEGIN{a[\"1\"]=1;a[\"2\"]=2;for (i in a) {print i,a[i]}}", ok: "1 1\n2 2\n"},
+		{script: "BEGIN{a[1]=1;a[2]=2;a[3]=3;for (i in a) {print i;if i==\"2\" { break }}}", ok: "1\n2\n"},
 
 		// map
 		//{script: "BEGIN{a[1]=1;print a[1]}", ok: "1\n"},

@@ -37,6 +37,12 @@ type BreakStmt struct {
 type ContinueStmt struct {
 }
 
+type HashLoopStmt struct {
+	Key   string
+	Hash  string
+	Stmts []Stmt
+}
+
 type PrintStmt struct {
 	Exprs []Expr
 }

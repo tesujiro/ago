@@ -160,6 +160,10 @@ stmt
 	{
 		$$ = &ast.ContinueStmt{}
 	}
+	| FOR '(' IDENT IN IDENT ')' '{' stmts '}'
+	{
+		$$ = &ast.HashLoopStmt{Key: $3.Literal, Hash: $5.Literal, Stmts:$8}
+	}
 
 /*
 stmt_term

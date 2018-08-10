@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
+	"sort"
 
 	"github.com/tesujiro/goa/ast"
 )
@@ -261,6 +262,53 @@ func runSingleStmt(stmt ast.Stmt, env *Env) (interface{}, error) {
 				return nil, err
 			}
 		}
+		return nil, nil
+	case *ast.HashLoopStmt:
+		key := stmt.(*ast.HashLoopStmt).Key
+		hash := stmt.(*ast.HashLoopStmt).Hash
+		stmts := stmt.(*ast.HashLoopStmt).Stmts
+		v, err := env.Get(hash)
+		if err != nil {
+			return nil, err
+		}
+		if reflect.TypeOf(v).Kind() != reflect.Map {
+			return nil, fmt.Errorf("for key loop not in associated array,%s", reflect.TypeOf(v).Kind())
+		}
+		m := v.(map[interface{}]interface{})
+		// sort hash keys TODO: REFACT
+		indecies := make([]string, len(m))
+		i := 0
+		for k, _ := range m {
+			indecies[i] = k.(string)
+			i++
+		}
+		sort.Strings(indecies)
+
+		newEnv := env.NewEnv()
+		for _, index := range indecies {
+			if err := newEnv.Set(key, index); err == ErrUnknownSymbol {
+				if err := newEnv.Define(key, index); err != nil {
+					return nil, err
+				}
+			} else if err != nil {
+				return nil, err
+			}
+			ret, err := run(stmts, newEnv)
+
+			if err == ErrReturn {
+				return ret, nil
+			}
+			if err == ErrBreak {
+				break
+			}
+			if err == ErrContinue {
+				continue
+			}
+			if err != nil {
+				return nil, err
+			}
+		}
+
 		return nil, nil
 	}
 	return nil, nil
