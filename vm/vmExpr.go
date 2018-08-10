@@ -14,6 +14,12 @@ func toInt(val interface{}) int {
 	switch reflect.ValueOf(val).Kind() {
 	case reflect.Float64, reflect.Float32:
 		return int(val.(float64))
+	case reflect.String:
+		if i, err := strconv.Atoi(val.(string)); err != nil {
+			return 0
+		} else {
+			return i
+		}
 	}
 	i, _ := val.(int)
 	return i
@@ -408,7 +414,9 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 				return reflect.AppendSlice(reflect.ValueOf(left), reflect.ValueOf(right)).Interface(), nil
 			case l_kind == reflect.Slice || l_kind == reflect.Array:
 				return reflect.Append(reflect.ValueOf(left), reflect.ValueOf(right)).Interface(), nil
-			case l_kind == reflect.Int && r_kind == reflect.Int:
+			case l_kind == reflect.Float64 || r_kind == reflect.Float64:
+				return toFloat64(left) + toFloat64(right), nil
+			case l_kind == reflect.Int || r_kind == reflect.Int:
 				return toInt(left) + toInt(right), nil
 			case l_kind == reflect.String || r_kind == reflect.String:
 				return toString(left) + toString(right), nil

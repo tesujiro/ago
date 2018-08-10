@@ -48,6 +48,7 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{print 15%5}", ok: "0\n"},
 		{script: "BEGIN{print 16%5}", ok: "1\n"},
 		{script: "BEGIN{print 15%4.1}", ok: "3\n"},
+		{script: "BEGIN{print \"a b c\"+1234}", ok: "1234\n"},
 		{script: "BEGIN{print \"a b c\"+\" d e f\"}", ok: "a b c d e f\n"},
 		{script: "BEGIN{print \"a b c\"-\" d e f\"}", ok: "0\n"},
 		{script: "BEGIN{print 15.2%7.1}", ok: "1\n"},
@@ -222,6 +223,26 @@ func TestGoa(t *testing.T) {
 		{script: "{print $1}", in: "Hello World!\n", ok: "Hello\n"},
 		{script: "$1==\"AAA\"{print;COUNT++} END{print COUNT}", in: "AAA BBB CCC\nAAA BBB CCC\n", ok: "AAA BBB CCC\nAAA BBB CCC\n2\n"},
 		{script: "NR==1{$2=$1 ;print $0,NF} NR==2{$5=$1; print $0,NF}", in: "AAA BBB CCC\nAAA BBB CCC\n", ok: "AAA AAA CCC 3\nAAA BBB CCC  AAA 5\n"},
+		// MAP
+		/*
+					{script: `{
+						COUNT[$1]=COUNT[$1]+1
+					}
+					END{
+						for (key in COUNT){
+							print key,COUNT[key]
+						}
+					}`, in: `
+			AAA
+			BBB
+			CCC
+			AAA
+			ZZZ
+			AAA
+			CCC
+			`, ok: `
+			`},
+		*/
 	}
 
 	//fmt.Println("tests:", tests)
