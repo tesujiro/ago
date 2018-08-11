@@ -188,108 +188,13 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 			return !toBool(val), nil
 		}
 	case *ast.CompExpr:
-		/*
-			var left, right interface{}
-			var err error
-			if left, err = evalExpr(expr.(*ast.BinOpExpr).Left, env); err != nil {
-				return nil, err
-			}
-			ltype := reflect.TypeOf(left)
-			rtype := reflect.TypeOf(right)
-			lvalue := reflect.ValueOf(left)
-			rvalue := reflect.ValueOf(right)
-		*/
 		left := expr.(*ast.CompExpr).Left
 		right := expr.(*ast.CompExpr).Right
 		operator := expr.(*ast.CompExpr).Operator
 		switch operator {
-		case "++":
-			/*
-				var ident string
-				switch reflect.TypeOf(left) {
-				case *ast.IdentExpr:
-					ident = left.(*ast.IdentExpr).Literal
-				case *ast.ItemExpr:
-					ident = left.(*ast.ItemExpr).Literal
-				}
-			*/
-			if ident, ok := left.(*ast.IdentExpr); ok {
-				v, err := env.Get(ident.Literal)
-				if err == ErrUnknownSymbol {
-					val, err := env.DefineDefaultValue(ident.Literal)
-					if err != nil {
-						return nil, err
-					}
-					v = val
-				} else if err != nil {
-					return nil, err
-				}
-				switch reflect.TypeOf(v).Kind() {
-				case reflect.Int, reflect.Int32, reflect.Int64:
-					v = toInt(v) + 1
-				case reflect.Float32, reflect.Float64:
-					v = toFloat64(v) + 1.0
-				case reflect.String:
-					v = 1
-				default:
-					return nil, errors.New("Invalid operation")
-				}
-				if err := env.Set(ident.Literal, v); err == ErrUnknownSymbol {
-					if err := env.Define(ident.Literal, v); err != nil {
-						return nil, err
-					}
-				} else if err != nil {
-					return nil, err
-				}
-				return v, nil
-
-			} else if ident, ok := left.(*ast.ItemExpr); ok {
-				fmt.Printf("Kind=%v\n", reflect.TypeOf(left))
-				_ = ident
-
-			} else {
-				return nil, errors.New("Invalid operation")
-			}
-		case "--":
-			if ident, ok := left.(*ast.IdentExpr); ok {
-				v, err := env.Get(ident.Literal)
-				if err == ErrUnknownSymbol {
-					val, err := env.DefineDefaultValue(ident.Literal)
-					if err != nil {
-						return nil, err
-					}
-					v = val
-				} else if err != nil {
-					return nil, err
-				}
-				switch reflect.TypeOf(v).Kind() {
-				case reflect.Int, reflect.Int32, reflect.Int64:
-					v = toInt(v) - 1
-				case reflect.Float32, reflect.Float64:
-					v = toFloat64(v) - 1.0
-				case reflect.String:
-					v = -1
-				default:
-					return nil, errors.New("Invalid operation")
-				}
-				if err := env.Set(ident.Literal, v); err == ErrUnknownSymbol {
-					if err := env.Define(ident.Literal, v); err != nil {
-						return nil, err
-					}
-				} else if err != nil {
-					return nil, err
-				}
-				return v, nil
-
-			} else {
-				return nil, errors.New("Invalid operation")
-			}
+		case "++", "--":
+			right = &ast.NumExpr{Literal: "1"}
 		}
-		/*
-			if right == nil {
-				right = &ast.NumExpr{Literal: "1"}
-			}
-		*/
 		result, err := evalExpr(&ast.BinOpExpr{Left: left, Operator: operator[0:1], Right: right}, env)
 		if err != nil {
 			return nil, err
@@ -499,7 +404,7 @@ func evalAssExpr(lexp ast.Expr, val interface{}, env *Env) (interface{}, error) 
 
 	default:
 		// TODO:?
-		return nil, errors.New("Invalid Operation")
+		return nil, errors.New("Invalid operation")
 	}
 	return val, nil
 }

@@ -52,6 +52,18 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{print \"a b c\"+\" d e f\"}", ok: "a b c d e f\n"},
 		{script: "BEGIN{print \"a b c\"-\" d e f\"}", ok: "0\n"},
 		{script: "BEGIN{print 15.2%7.1}", ok: "1\n"},
+		// composite expression
+		{script: "BEGIN{a=123;a++;print a}", ok: "124\n"},
+		//{script: "BEGIN{a=123;print a++}", ok: "123\n"}, //TODO:AWK
+		//{script: "BEGIN{a=123;print ++a}", ok: "123\n"}, //TODO:AWK
+		{script: "BEGIN{a=123.4;a++;print a}", ok: "124.4\n"},
+		{script: "BEGIN{a=123;a--;print a}", ok: "122\n"},
+		{script: "BEGIN{a=123.4;a--;print a}", ok: "122.4\n"},
+		{script: "BEGIN{a=123;a+=4;print a}", ok: "127\n"},
+		{script: "BEGIN{a=123;a-=4;print a}", ok: "119\n"},
+		{script: "BEGIN{a=123;a*=4;print a}", ok: "492\n"},
+		{script: "BEGIN{a=123;a/=4;print a}", ok: "30\n"},
+		//{script: "BEGIN{a=123;a%=4;print a}", ok: "30\n"}, //TODO
 
 		// variable and scope
 		// builtin
@@ -184,6 +196,8 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{a[\"a\"]=1;print a[\"a\"]}", ok: "1\n"},
 		{script: "BEGIN{a[1]=1;print a[2]}", ok: "\n"},
 		{script: "BEGIN{a[1]=1;print a}", ok: "error:type map does not support print operation\n"},
+		{script: "BEGIN{a[1]=1;a[1]++;print a[1]}", ok: "2\n"},
+		{script: "BEGIN{a[1]=1;a[1]--;print a[1]}", ok: "0\n"},
 		{script: "BEGIN{a[1]=1;delete a[1];print a[1]}", ok: "\n"},
 		{script: "BEGIN{a[1]=1;delete a[1];print a[2]}", ok: "\n"},
 		{script: "BEGIN{a[1]=1;delete a[2];print a[1]}", ok: "1\n"},
