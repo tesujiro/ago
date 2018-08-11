@@ -109,17 +109,10 @@ func runSingleStmt(stmt ast.Stmt, env *Env) (interface{}, error) {
 			id = expr.(*ast.IdentExpr).Literal
 		case *ast.ItemExpr:
 			id = expr.(*ast.ItemExpr).Literal
-			for i, expr := range expr.(*ast.ItemExpr).Index {
-				//fmt.Printf("Index[%v]:%v\n", k, expr)
-				val, err := evalExpr(expr, env)
-				if err != nil {
-					return nil, err
-				}
-				if i == 0 {
-					index = fmt.Sprintf("%v", val)
-				} else {
-					index = fmt.Sprintf("%v%v%v", index, env.builtin.SUBSEP, val)
-				}
+			var err error
+			index, err = getHashIndex(env, expr.(*ast.ItemExpr).Index)
+			if err != nil {
+				return nil, err
 			}
 		default:
 			return nil, fmt.Errorf("type %s does not support delete operation", reflect.TypeOf(expr))

@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"reflect"
 	"strconv"
+
+	"github.com/tesujiro/goa/ast"
 )
 
 func toInt(val interface{}) int {
@@ -58,4 +60,21 @@ func toString(val interface{}) string {
 	}
 	s, _ := val.(string)
 	return s
+}
+
+func getHashIndex(env *Env, exprs []ast.Expr) (string, error) {
+	var index string
+	for i, expr := range exprs {
+		//fmt.Printf("Index[%v]:%v\n", k, expr)
+		val, err := evalExpr(expr, env)
+		if err != nil {
+			return "", err
+		}
+		if i == 0 {
+			index = fmt.Sprintf("%v", val)
+		} else {
+			index = fmt.Sprintf("%v%v%v", index, env.builtin.SUBSEP, val)
+		}
+	}
+	return index, nil
 }
