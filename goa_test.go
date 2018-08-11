@@ -199,6 +199,7 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{a[1]=1;print a}", ok: "error:type map does not support print operation\n"},
 		{script: "BEGIN{a[1]=1;a[1]++;print a[1]}", ok: "2\n"},
 		{script: "BEGIN{a[1]=1;a[1]--;print a[1]}", ok: "0\n"},
+		{script: "BEGIN{a[1]=1;a[2]=2;a[3]=3;b=a;b[1]=10;print a[1]}", ok: "10\n"}, // THIS SPEC OK?
 		{script: "BEGIN{a[1]=1;delete a[1];print a[1]}", ok: "\n"},
 		{script: "BEGIN{a[1]=1;delete a[1];print a[2]}", ok: "\n"},
 		{script: "BEGIN{a[1]=1;delete a[2];print a[1]}", ok: "1\n"},
