@@ -341,7 +341,6 @@ ZZZ 1
 		//fmt.Fprintf(realStdout, "result:[%v]\ttest.ok:[%v]\n", resultOut, test.ok)
 		if resultOut != strings.Replace(test.ok, "\r", "", -1) { //replace for Windows
 			t.Errorf("Stdout - received: %v - expected: %v - runSource: %v", resultOut, test.ok, test.script)
-			t.Errorf("len - received: %v - expected: %v", len(resultOut), len(test.ok))
 		}
 	}
 
