@@ -184,6 +184,7 @@ func TestGoa(t *testing.T) {
 		//{script: "BEGIN{a=0;for{ a=10;return a };print a}", ok: "10\n"},
 
 		// map: awk-array (associated array = map)
+		{script: "BEGIN{print a[1]}", ok: "\n"},
 		{script: "BEGIN{a[1]=1;print a[1]}", ok: "1\n"},
 		{script: "BEGIN{a[1]=1;print a[2]}", ok: "\n"},
 		{script: "BEGIN{a[1]=1;a[2]=2;print a[1],a[2]}", ok: "1 2\n"},
@@ -211,7 +212,10 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{for (i in a) {print i}}", ok: "error:unknown symbol\n"},
 		{script: "BEGIN{a=1;for (i in a) {print i}}", ok: "error:for key loop not in associated array,int\n"},
 		{script: "BEGIN{a[\"1\"]=1;a[\"2\"]=2;for (i in a) {print i,a[i]}}", ok: "1 1\n2 2\n"},
+		{script: "BEGIN{a[1]=1;a[2]=2;for (i in a) {print i,a[i]}}", ok: "1 1\n2 2\n"},
+		{script: "BEGIN{a[1]++;a[2]=2;for (i in a) {print i,a[i]}}", ok: "1 1\n2 2\n"},
 		{script: "BEGIN{a[1]=1;a[2]=2;a[3]=3;for (i in a) {print i;if i==\"2\" { break }}}", ok: "1\n2\n"},
+		{script: "{A[$0]++} END{for(key in A){print key}}", in: "AAA", ok: "AAA\n"},
 
 		// map
 		//{script: "BEGIN{a[1]=1;print a[1]}", ok: "1\n"},
@@ -238,25 +242,25 @@ func TestGoa(t *testing.T) {
 		{script: "$1==\"AAA\"{print;COUNT++} END{print COUNT}", in: "AAA BBB CCC\nAAA BBB CCC\n", ok: "AAA BBB CCC\nAAA BBB CCC\n2\n"},
 		{script: "NR==1{$2=$1 ;print $0,NF} NR==2{$5=$1; print $0,NF}", in: "AAA BBB CCC\nAAA BBB CCC\n", ok: "AAA AAA CCC 3\nAAA BBB CCC  AAA 5\n"},
 		// MAP
-		/*
-					{script: `{
-						COUNT[$1]=COUNT[$1]+1
+		{script: `{
+						COUNT[$1]++
 					}
 					END{
 						for (key in COUNT){
 							print key,COUNT[key]
 						}
-					}`, in: `
-			AAA
-			BBB
-			CCC
-			AAA
-			ZZZ
-			AAA
-			CCC
-			`, ok: `
-			`},
-		*/
+					}`, in: `AAA
+BBB
+CCC
+AAA
+ZZZ
+AAA
+CCC
+`, ok: `AAA 3
+BBB 1
+CCC 2
+ZZZ 1
+`},
 	}
 
 	//fmt.Println("tests:", tests)
@@ -337,6 +341,7 @@ func TestGoa(t *testing.T) {
 		//fmt.Fprintf(realStdout, "result:[%v]\ttest.ok:[%v]\n", resultOut, test.ok)
 		if resultOut != strings.Replace(test.ok, "\r", "", -1) { //replace for Windows
 			t.Errorf("Stdout - received: %v - expected: %v - runSource: %v", resultOut, test.ok, test.script)
+			t.Errorf("len - received: %v - expected: %v", len(resultOut), len(test.ok))
 		}
 	}
 
