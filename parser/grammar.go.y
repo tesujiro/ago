@@ -20,6 +20,7 @@ var defaultExprs = []ast.Expr{&defaultExpr}
 	stmt_if ast.Stmt
 	expr ast.Expr
 	exprs []ast.Expr
+	opt_exprs []ast.Expr
 	ident_args []string
 }
 
@@ -32,6 +33,7 @@ var defaultExprs = []ast.Expr{&defaultExpr}
 %type <stmt_if>	stmt_if
 %type <expr>	expr
 %type <exprs>	exprs
+%type <opt_exprs>	opt_exprs
 %type <ident_args>	ident_args
 
 %token<token> IDENT NUMBER STRING TRUE FALSE NIL
@@ -166,7 +168,7 @@ stmt
 	{
 		$$ = &ast.HashLoopStmt{Key: $3.Literal, Hash: $5.Literal, Stmts:$8}
 	}
-	| RETURN exprs
+	| RETURN opt_exprs
 	{
 		$$ = &ast.ReturnStmt{Exprs:$2}
 	}
@@ -195,6 +197,16 @@ stmt_if
             $$.(*ast.IfStmt).Else = $4
         }
     }
+
+opt_exprs
+	: /* empty */
+	{
+		$$ = []ast.Expr{}
+	}
+	| exprs
+	{
+		$$ = $1
+	}
 
 exprs
 	: expr
@@ -261,11 +273,11 @@ expr
 	{
 		$$ = &ast.FuncExpr{Args: $3, Stmts: $6}
 	}
-	| IDENT '(' exprs ')'
+	| IDENT '(' opt_exprs ')'
 	{
 		$$ = &ast.CallExpr{Name: $1.Literal, SubExprs:$3}
 	}
-	| expr '(' exprs ')'
+	| expr '(' opt_exprs ')'
 	{
 		$$ = &ast.AnonymousCallExpr{Expr: $1, SubExprs:$3}
 	}

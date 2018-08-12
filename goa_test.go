@@ -230,6 +230,11 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{print func(a,b){return a+b}(10,5)}", ok: "15\n"},
 		{script: "BEGIN{a=123;func add(a,b){return a+b}; add(10,5);print a}", ok: "123\n"},
 		{script: "BEGIN{c=100;func add(a,b){return a+b+c}; print add(10,5)}", ok: "115\n"},
+		{script: "BEGIN{func one(){return 1}; print one()}", ok: "1\n"},
+		{script: "BEGIN{func hash(){m[1]=1;m[2]=2;m[3]=3;return m}; m=hash();print m[1]}", ok: "1\n"},
+		//{script: "BEGIN{func hash(){m[1]=1;m[2]=2;m[3]=3;return m}; print hash()[1]}", ok: "1\n"},
+		//{script: "BEGIN{func map(){m[1]=1;m[2]=2;m[3]=3;return m}; print map()[1]}", ok: "1\n"},
+		//{script: "BEGIN{print func(){m[1]=1;m[2]=2;m[3]=3;return m}[1]}", ok: "115\n"},
 
 		// command parameter
 
