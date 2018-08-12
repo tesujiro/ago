@@ -218,17 +218,6 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{a[1]=1;a[2]=2;a[3]=3;for (i in a) {print i;if i==\"2\" { break }}}", ok: "1\n2\n"},
 		{script: "{A[$0]++} END{for(key in A){print key}}", in: "AAA", ok: "AAA\n"},
 
-		// map
-		//{script: "BEGIN{a[1]=1;print a[1]}", ok: "1\n"},
-		//{script: "BEGIN{a[1]=1;print a[2]}", ok: "\n"},
-		//{script: "BEGIN{a[1]=1;print a}", ok: "error\n"},
-		//{script: "BEGIN{a[\"a\"]=1;print a[\"a\"]}", ok: "1\n"},
-		//{script: "BEGIN{a[\"a\"]=1;print a[\"b\"]}", ok: "\n"},
-		//{script: "BEGIN{a[1]=\"a\";print a[1]}", ok: "a\n"},
-		//{script: "BEGIN{a[1]=\"a\";print a[2]}", ok: "\n"},
-		//{script: "BEGIN{a[\"a\"]=\"a\";print a[\"a\"]}", ok: "a\n"},
-		//{script: "BEGIN{a[\"a\"]=\"a\";print a[\"b\"]}", ok: "\n"},
-
 		// command parameter
 
 		// built in variables

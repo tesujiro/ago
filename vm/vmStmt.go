@@ -167,7 +167,6 @@ func runSingleStmt(stmt ast.Stmt, env *Env) (interface{}, error) {
 		fmt.Printf("%v", env.builtin.ORS)
 	case *ast.IfStmt:
 		child := env.NewEnv()
-		//defer child.Destroy() // TODO:
 		result, err := evalExpr(stmt.(*ast.IfStmt).If, child)
 		if err != nil {
 			return nil, err
@@ -225,7 +224,6 @@ func runSingleStmt(stmt ast.Stmt, env *Env) (interface{}, error) {
 		}
 	case *ast.LoopStmt:
 		newEnv := env.NewEnv()
-		//defer newEnv.Destroy() // TODO:
 		for {
 			exp := stmt.(*ast.LoopStmt).Expr
 			if exp != nil {
@@ -238,10 +236,7 @@ func runSingleStmt(stmt ast.Stmt, env *Env) (interface{}, error) {
 				}
 			}
 
-			//fmt.Println("run")
 			ret, err := run(stmt.(*ast.LoopStmt).Stmts, newEnv)
-			//fmt.Println("=> ret:", ret, "\terr:", err)
-
 			if err == ErrReturn {
 				return ret, nil
 			}
@@ -267,8 +262,8 @@ func runSingleStmt(stmt ast.Stmt, env *Env) (interface{}, error) {
 		if reflect.TypeOf(v).Kind() != reflect.Map {
 			return nil, fmt.Errorf("for key loop not in associated array,%s", reflect.TypeOf(v).Kind())
 		}
+		// sort hash keys
 		m := v.(map[interface{}]interface{})
-		// sort hash keys TODO: REFACT
 		indecies := make([]string, len(m))
 		i := 0
 		for k, _ := range m {

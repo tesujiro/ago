@@ -39,7 +39,6 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 		}
 	case *ast.NumExpr:
 		lit := expr.(*ast.NumExpr).Literal
-		//fmt.Println("NumExpr:", lit)
 		if strings.Contains(lit, ".") {
 			if f, err := strconv.ParseFloat(lit, 64); err != nil {
 				return 0.0, err
@@ -51,7 +50,6 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 		if i, err := strconv.ParseInt(lit, 10, 0); err != nil {
 			return 0, err
 		} else {
-			//fmt.Println("==> return :", int(i))
 			return int(i), nil
 		}
 	case *ast.StringExpr:
@@ -105,7 +103,6 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 		if err != nil {
 			return nil, err
 		}
-		//fmt.Printf("ItemExpr\tid:%v\tindex:%v\n", id, index)
 		value, err := env.Get(id)
 		if err == ErrUnknownSymbol {
 			v, err := env.DefineDefaultMapValue(id, index)
@@ -151,7 +148,6 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 	case *ast.MapExpr:
 		exprs := expr.(*ast.MapExpr).MapExpr
 		m := make(map[interface{}]interface{}, len(exprs))
-		//fmt.Println("map len:", len(exprs))
 		var keyResult, valResult interface{}
 		var err error
 		for keyExpr, valExpr := range exprs {
@@ -211,7 +207,6 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 			return nil, err
 		}
 		/*
-			//TODO: checking type  "a==1"
 			if left == nil && right == nil {
 				return 0, nil
 			} else if left == nil {
@@ -252,8 +247,6 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 		case "!=":
 			return left != right, nil
 		case ">":
-			//fmt.Printf("toFloat(left)=%#v\n", toFloat64(left))
-			//fmt.Printf("toFloat(right)=%#v\n", toFloat64(right))
 			return toFloat64(left) > toFloat64(right), nil
 		case ">=":
 			return toFloat64(left) >= toFloat64(right), nil
