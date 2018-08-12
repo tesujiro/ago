@@ -225,8 +225,11 @@ func TestGoa(t *testing.T) {
 
 		// function
 		{script: "BEGIN{func add(a,b){return a+b}; print add(10,5)}", ok: "15\n"},
+		{script: "BEGIN{func add(a,b){return a+b}; print add(1.1,2.1)}", ok: "3.2\n"},
 		{script: "BEGIN{add=func(a,b){return a+b}; print add(10,5)}", ok: "15\n"},
 		{script: "BEGIN{print func(a,b){return a+b}(10,5)}", ok: "15\n"},
+		{script: "BEGIN{a=123;func add(a,b){return a+b}; add(10,5);print a}", ok: "123\n"},
+		{script: "BEGIN{c=100;func add(a,b){return a+b+c}; print add(10,5)}", ok: "115\n"},
 
 		// command parameter
 
