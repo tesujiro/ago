@@ -29,6 +29,8 @@ var tokenTab = map[string]int{
 	"true":     TRUE,
 	"false":    FALSE,
 	"nil":      NIL,
+	"func":     FUNC,
+	"return":   RETURN,
 }
 
 var compSymbols = map[string]int{

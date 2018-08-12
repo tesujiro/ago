@@ -223,6 +223,11 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{a[1]=1;a[2]=2;a[3]=3;for (i in a) {print i;if i==\"2\" { break }}}", ok: "1\n2\n"},
 		{script: "{A[$0]++} END{for(key in A){print key}}", in: "AAA", ok: "AAA\n"},
 
+		// function
+		{script: "BEGIN{func add(a,b){return a+b}; print add(10,5)}", ok: "15\n"},
+		{script: "BEGIN{add=func(a,b){return a+b}; print add(10,5)}", ok: "15\n"},
+		{script: "BEGIN{print func(a,b){return a+b}(10,5)}", ok: "15\n"},
+
 		// command parameter
 
 		// built in variables

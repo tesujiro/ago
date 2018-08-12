@@ -20,6 +20,7 @@ var defaultExprs = []ast.Expr{&defaultExpr}
 	stmt_if ast.Stmt
 	expr ast.Expr
 	exprs []ast.Expr
+	ident_args []string
 }
 
 %type <rules>	program
@@ -31,6 +32,7 @@ var defaultExprs = []ast.Expr{&defaultExpr}
 %type <stmt_if>	stmt_if
 %type <expr>	expr
 %type <exprs>	exprs
+%type <ident_args>	ident_args
 
 %token<token> IDENT NUMBER STRING TRUE FALSE NIL
 %token<token> EQEQ NEQ GE LE ANDAND OROR LEN 
@@ -164,6 +166,10 @@ stmt
 	{
 		$$ = &ast.HashLoopStmt{Key: $3.Literal, Hash: $5.Literal, Stmts:$8}
 	}
+	| RETURN exprs
+	{
+		$$ = &ast.ReturnStmt{Exprs:$2}
+	}
 
 /*
 stmt_term
@@ -246,6 +252,23 @@ expr
 		$$ = &ast.IdentExpr{Literal: $1.Literal}
 	}
 	*/
+	/* FUNCTION */
+	| FUNC IDENT '(' ident_args ')' '{' stmts '}'
+	{
+		$$ = &ast.FuncExpr{Name: $2.Literal, Args: $4, Stmts: $7}
+	}
+	| FUNC '(' ident_args ')' '{' stmts '}'
+	{
+		$$ = &ast.FuncExpr{Args: $3, Stmts: $6}
+	}
+	| IDENT '(' exprs ')'
+	{
+		$$ = &ast.CallExpr{Name: $1.Literal, SubExprs:$3}
+	}
+	| expr '(' exprs ')'
+	{
+		$$ = &ast.AnonymousCallExpr{Expr: $1, SubExprs:$3}
+	}
 	/* COMPOSITE EXPRESSION */
 	| expr PLUSPLUS
 	{
@@ -342,6 +365,20 @@ expr
 	| expr '%' expr
 	{
 		$$ = &ast.BinOpExpr{Left: $1, Operator: "%", Right: $3}
+	}
+
+ident_args
+	: /* empty */
+	{
+		$$ = []string{}
+	}
+	| IDENT
+	{
+		$$ = []string{$1.Literal}
+	}
+	| ident_args ',' opt_nls IDENT
+	{
+		$$ = append($1,$4.Literal)
 	}
 
 nls
