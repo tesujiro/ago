@@ -246,19 +246,6 @@ expr
 		$$ = &ast.IdentExpr{Literal: $1.Literal}
 	}
 	*/
-	/* UNARY EXPRESSION */
-	| '+' expr %prec UNARY
-	{
-		$$ = &ast.UnaryExpr{Operator: "+", Expr:$2}
-	}
-	| '-' expr %prec UNARY
-	{
-		$$ = &ast.UnaryExpr{Operator: "-", Expr:$2}
-	}
-	| '!' expr %prec UNARY
-	{
-		$$ = &ast.UnaryExpr{Operator: "!", Expr:$2}
-	}
 	/* COMPOSITE EXPRESSION */
 	| expr PLUSPLUS
 	{
@@ -318,7 +305,19 @@ expr
 	{
 		$$ = &ast.BinOpExpr{Left: $1, Operator: "&&", Right: $3}
 	}
-	// TODO: 'NOT'
+	/* UNARY EXPRESSION */
+	| '+' expr %prec UNARY
+	{
+		$$ = &ast.UnaryExpr{Operator: "+", Expr:$2}
+	}
+	| '-' expr %prec UNARY
+	{
+		$$ = &ast.UnaryExpr{Operator: "-", Expr:$2}
+	}
+	| '!' expr %prec UNARY
+	{
+		$$ = &ast.UnaryExpr{Operator: "!", Expr:$2}
+	}
 	/* ARITHMETIC EXPRESSION */
 	| '(' expr ')'
 	{
