@@ -65,6 +65,11 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{a=123;a/=4;print a}", ok: "30\n"},
 		//{script: "BEGIN{a=123;a%=4;print a}", ok: "30\n"}, //TODO
 
+		// JAPANESE
+		{script: "BEGIN{print \"あいう\"}", ok: "あいう\n"},
+		{script: "BEGIN{a=\"あいう\";b=\"えお\";print a+b}", ok: "あいうえお\n"},
+		{script: "BEGIN{a[\"あ\"]=1;a[\"い\"]=2;a[\"う\"]=3;for(key in a){print key,a[key]}}", ok: "あ 1\nい 2\nう 3\n"},
+
 		// variable and scope
 		// builtin
 		{script: "BEGIN{NF++;print NF}", ok: "1\n"},
