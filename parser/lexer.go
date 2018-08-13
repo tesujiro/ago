@@ -92,12 +92,16 @@ func (l *Lexer) Lex(lval *yySymType) (token_id int) {
 		if len(lit) > 1 {
 			lit = lit[1 : len(lit)-1]
 		}
+	case token.EOF:
+		token_id = 0
 	default:
 		if symbol, ok := compSymbols[tok.String()]; ok {
 			token_id = symbol
 		} else {
 			if len(tok.String()) == 1 {
 				token_id = int(tok.String()[0])
+			} else {
+				token_id = IDENT
 			}
 		}
 	}

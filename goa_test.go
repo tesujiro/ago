@@ -52,6 +52,8 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{print \"a b c\"+\" d e f\"}", ok: "a b c d e f\n"},
 		{script: "BEGIN{print \"a b c\"-\" d e f\"}", ok: "0\n"},
 		{script: "BEGIN{print 15.2%7.1}", ok: "1\n"},
+		{script: "BEGIN{a=123;print a}", ok: "123\n"},
+		{script: "BEGIN{map=123;print map}", ok: "123\n"},
 		// composite expression
 		{script: "BEGIN{a=123;a++;print a}", ok: "124\n"},
 		//{script: "BEGIN{a=123;print a++}", ok: "123\n"}, //TODO:AWK
@@ -231,7 +233,10 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{a=123;func add(a,b){return a+b}; add(10,5);print a}", ok: "123\n"},
 		{script: "BEGIN{c=100;func add(a,b){return a+b+c}; print add(10,5)}", ok: "115\n"},
 		{script: "BEGIN{func one(){return 1}; print one()}", ok: "1\n"},
+		{script: "BEGIN{a=10;func plusone(){a++};plusone();print a}", ok: "11\n"},
+		//{script: "BEGIN{a=10;func plusone(){a++;return};plusone();print a}", ok: "11\n"}, //TODO: panic
 		{script: "BEGIN{func hash(){m[1]=1;m[2]=2;m[3]=3;return m}; m=hash();print m[1]}", ok: "1\n"},
+		{script: "BEGIN{map=1;print map}", ok: "1\n"},
 		//{script: "BEGIN{func hash(){m[1]=1;m[2]=2;m[3]=3;return m}; print hash()[1]}", ok: "1\n"},
 		//{script: "BEGIN{func map(){m[1]=1;m[2]=2;m[3]=3;return m}; print map()[1]}", ok: "1\n"},
 		//{script: "BEGIN{print func(){m[1]=1;m[2]=2;m[3]=3;return m}[1]}", ok: "115\n"},
