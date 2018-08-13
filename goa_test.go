@@ -214,6 +214,8 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{a=1;delete a}", ok: "error:type int does not support delete operation\n"},
 		{script: "BEGIN{a[1]=1;delete a;a=2}", ok: "error:can't assign to a; it's an associated array name.\n"},
 		{script: "BEGIN{delete a;a=2}", ok: "error:can't assign to a; it's an associated array name.\n"},
+		{script: "BEGIN{func list(){a[1]=1;a[2]=2;a[3]=3;return a};delete list()[1]}", ok: "error:non variable does not support delete operation\n"},
+		{script: "BEGIN{func list(){a[1]=1;a[2]=2;a[3]=3;return a};list()[1]=3}", ok: "error:invalid assignment\n"},
 		{script: "BEGIN{a[1]=1;a[2]=2;for (i in a) {print i,a[i]}}", ok: "1 1\n2 2\n"},
 		{script: "BEGIN{a[1]=1;a[2]=2;for (i in a) {};print i}", ok: "\n"},
 		{script: "BEGIN{a[1]=1;a[2]=2;i=0;for (i in a) {};print i}", ok: "2\n"},
@@ -234,12 +236,11 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{c=100;func add(a,b){return a+b+c}; print add(10,5)}", ok: "115\n"},
 		{script: "BEGIN{func one(){return 1}; print one()}", ok: "1\n"},
 		{script: "BEGIN{a=10;func plusone(){a++};plusone();print a}", ok: "11\n"},
+		{script: "BEGIN{print func(){return 1}()}", ok: "1\n"},
 		//{script: "BEGIN{a=10;func plusone(){a++;return};plusone();print a}", ok: "11\n"}, //TODO: panic
 		{script: "BEGIN{func hash(){m[1]=1;m[2]=2;m[3]=3;return m}; m=hash();print m[1]}", ok: "1\n"},
-		{script: "BEGIN{map=1;print map}", ok: "1\n"},
-		//{script: "BEGIN{func hash(){m[1]=1;m[2]=2;m[3]=3;return m}; print hash()[1]}", ok: "1\n"},
-		//{script: "BEGIN{func map(){m[1]=1;m[2]=2;m[3]=3;return m}; print map()[1]}", ok: "1\n"},
-		//{script: "BEGIN{print func(){m[1]=1;m[2]=2;m[3]=3;return m}[1]}", ok: "115\n"},
+		{script: "BEGIN{func map(){m[1]=1;m[2]=2;m[3]=3;return m}; print map()[1]}", ok: "1\n"},
+		{script: "BEGIN{print func(){m[1]=1;m[2]=2;m[3]=3;return m}()[1]}", ok: "1\n"},
 
 		// command parameter
 

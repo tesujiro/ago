@@ -247,9 +247,9 @@ expr
 	{
 		$$ = &ast.StringExpr{Literal: $1.Literal}
 	}
-	| IDENT '[' exprs ']'
+	| expr '[' exprs ']'
 	{
-		$$ = &ast.ItemExpr{Literal: $1.Literal, Index:$3}
+		$$ = &ast.ItemExpr{Expr: $1, Index:$3}
 	}
 	/*
 	| '/' 

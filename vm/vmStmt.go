@@ -108,7 +108,12 @@ func runSingleStmt(stmt ast.Stmt, env *Env) (interface{}, error) {
 		case *ast.IdentExpr:
 			id = expr.(*ast.IdentExpr).Literal
 		case *ast.ItemExpr:
-			id = expr.(*ast.ItemExpr).Literal
+			e := expr.(*ast.ItemExpr).Expr
+			ie, ok := e.(*ast.IdentExpr)
+			if !ok {
+				return nil, errors.New("non variable does not support delete operation")
+			}
+			id = ie.Literal
 			var err error
 			index, err = getHashIndex(env, expr.(*ast.ItemExpr).Index)
 			if err != nil {

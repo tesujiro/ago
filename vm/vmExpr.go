@@ -98,20 +98,33 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 		}
 		return array, nil
 	case *ast.ItemExpr:
-		id := expr.(*ast.ItemExpr).Literal
-		index, err := getHashIndex(env, expr.(*ast.ItemExpr).Index)
+		var value, index interface{}
+		var err error
+		// index
+		index, err = getHashIndex(env, expr.(*ast.ItemExpr).Index)
 		if err != nil {
 			return nil, err
 		}
-		value, err := env.Get(id)
-		if err == ErrUnknownSymbol {
-			v, err := env.DefineDefaultMapValue(id, index)
+		// value
+		e := expr.(*ast.ItemExpr).Expr
+		ie, ok := e.(*ast.IdentExpr)
+		if ok {
+			id := ie.Literal
+			value, err = env.Get(id)
+			if err == ErrUnknownSymbol {
+				v, err := env.DefineDefaultMapValue(id, index)
+				if err != nil {
+					return nil, err
+				}
+				value = v
+			} else if err != nil {
+				return nil, err
+			}
+		} else {
+			value, err = evalExpr(e, env)
 			if err != nil {
 				return nil, err
 			}
-			value = v
-		} else if err != nil {
-			return nil, err
 		}
 
 		// TODO:Elem()
@@ -348,11 +361,18 @@ func evalAssExpr(lexp ast.Expr, val interface{}, env *Env) (interface{}, error) 
 		}
 		return nil, nil
 	case *ast.ItemExpr:
-		id := lexp.(*ast.ItemExpr).Literal
+		e := lexp.(*ast.ItemExpr).Expr
+		ie, ok := e.(*ast.IdentExpr)
+		if !ok {
+			return nil, errors.New("invalid assignment")
+		}
+		id := ie.Literal
+
 		index, err := getHashIndex(env, lexp.(*ast.ItemExpr).Index)
 		if err != nil {
 			return nil, err
 		}
+
 		value, err := env.Get(id)
 		if err == ErrUnknownSymbol {
 			v, err := env.DefineDefaultMapValue(id, index)
