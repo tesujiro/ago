@@ -183,19 +183,19 @@ func makeResult(ret []reflect.Value, isGoFunction bool) (interface{}, error) {
 
 	debug.Println("User Defined Function")
 	if len(ret) != 2 {
-		return nil, fmt.Errorf("User defined function did not return 2 values but returned %v values", len(ret))
+		return nil, fmt.Errorf("user defined function did not return 2 values but returned %v values", len(ret))
 	}
 	if !ret[0].IsValid() {
-		return nil, fmt.Errorf("User defined function value 1 did not return reflect value type but returned invalid type")
+		return nil, fmt.Errorf("user defined function value 1 did not return reflect value type but returned invalid type")
 	}
 	if !ret[1].IsValid() {
-		return nil, fmt.Errorf("User defined function value 2 did not return reflect value type but returned invalid type")
+		return nil, fmt.Errorf("user defined function value 2 did not return reflect value type but returned invalid type")
 	}
 	if ret[0].Type() != reflect.TypeOf(reflect.Value{}) {
-		return nil, fmt.Errorf("User defined function value 1 did not return reflect value type but returned %v type", ret[0].Type().String())
+		return nil, fmt.Errorf("user defined function value 1 did not return reflect value type but returned %v type", ret[0].Type().String())
 	}
 	if ret[1].Type() != reflect.TypeOf(reflect.Value{}) {
-		return nil, fmt.Errorf("User defined function value 2 did not return reflect value type but returned %v type", ret[1].Type().String())
+		return nil, fmt.Errorf("user defined function value 2 did not return reflect value type but returned %v type", ret[1].Type().String())
 	}
 	// User Defined Funcion
 	result := ret[0].Interface().(reflect.Value).Interface()

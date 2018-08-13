@@ -149,11 +149,11 @@ func TestGoa(t *testing.T) {
 		// composite expression
 		{script: "BEGIN{a=10;print a++}", ok: "11\n"},
 		{script: "BEGIN{a=1.9;print a++}", ok: "2.9\n"},
-		{script: "BEGIN{print 10++}", ok: "error:Invalid operation\n"},
+		{script: "BEGIN{print 10++}", ok: "error:invalid operation\n"},
 		{script: "BEGIN{a=\"a\";print a++}", ok: "1\n"},
 		{script: "BEGIN{a=10;print a--}", ok: "9\n"},
 		{script: "BEGIN{a=2.9;print a--}", ok: "1.9\n"},
-		{script: "BEGIN{print 10--}", ok: "error:Invalid operation\n"},
+		{script: "BEGIN{print 10--}", ok: "error:invalid operation\n"},
 		{script: "BEGIN{a=\"a\";print a--}", ok: "-1\n"},
 		{script: "BEGIN{a=10;a+=2;print a}", ok: "12\n"},
 		{script: "BEGIN{a=10;a+=2.5;print a}", ok: "12.5\n"},
