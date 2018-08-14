@@ -286,6 +286,13 @@ func TestGoa(t *testing.T) {
 		//{script: "BEGIN{OFS=\"\n\"}{$1=$1;print}", in: "AAA BBB CCC\nAAA BBB CCC\n", ok: "AAA\nBBB\nCCC\nAAA\nBBB\nCCC\n"}, //TODO
 		{script: "BEGIN{ORS=\":\"}{$1=$1;print}", in: "AAA BBB CCC\nCCC DDD EEE\n", ok: "AAA BBB CCC:CCC DDD EEE:\n"},
 
+		// lib:len
+		{script: "BEGIN{print length(\"Hello World!\")}", ok: "12\n"},
+		{script: "BEGIN{print len(\"Hello World!\")}", ok: "12\n"},
+		{script: "BEGIN{a[1]=1;a[2]=2;print len(a)}", ok: "2\n"},
+		{script: "BEGIN{f=func(){return 1,2};print len(f())}", ok: "2\n"},
+		//{script: "BEGIN{print len(123)}", ok: "invalid argument 123 (type int) for len\n"},//TODO:
+
 		// field
 		{script: "{print $1}", in: "Hello World!\n", ok: "Hello\n"},
 		{script: "$1==\"AAA\"{print;COUNT++} END{print COUNT}", in: "AAA BBB CCC\nAAA BBB CCC\n", ok: "AAA BBB CCC\nAAA BBB CCC\n2\n"},

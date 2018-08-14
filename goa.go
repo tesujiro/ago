@@ -13,6 +13,7 @@ import (
 
 	"github.com/pkg/profile"
 	"github.com/tesujiro/goa/debug"
+	"github.com/tesujiro/goa/lib"
 	"github.com/tesujiro/goa/parser"
 	"github.com/tesujiro/goa/vm"
 )
@@ -89,6 +90,7 @@ func main() {
 func runScript(script_reader io.Reader, file_reader io.Reader) {
 
 	env := vm.NewEnv()
+	env = lib.Import(env)
 
 	bytes, err := ioutil.ReadAll(script_reader)
 	if err != nil {
