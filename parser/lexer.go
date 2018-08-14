@@ -29,7 +29,7 @@ var tokenTab = map[string]int{
 	"true":     TRUE,
 	"false":    FALSE,
 	"nil":      NIL,
-	"function": FUNCTION,
+	"function": FUNC,
 	"func":     FUNC,
 	"return":   RETURN,
 }
