@@ -163,6 +163,14 @@ func runSingleStmt(stmt ast.Stmt, env *Env) (interface{}, error) {
 			switch reflect.ValueOf(result).Kind() {
 			case reflect.Int, reflect.Float64, reflect.Bool, reflect.String:
 				fmt.Printf("%v", result)
+			case reflect.Slice:
+				len := reflect.ValueOf(result).Len()
+				for i := 0; i < len; i++ {
+					if i > 0 {
+						fmt.Printf("%v", env.builtin.OFS)
+					}
+					fmt.Printf("%v", reflect.ValueOf(result).Index(i))
+				}
 			case reflect.Invalid:
 				fmt.Printf("")
 			default:
