@@ -230,6 +230,7 @@ func TestGoa(t *testing.T) {
 		// function
 		{script: "BEGIN{func add(a,b){return a+b}; print add(10,5)}", ok: "15\n"},
 		{script: "BEGIN{func add(a,b){return a+b}; print add(1.1,2.1)}", ok: "3.2\n"},
+		{script: "BEGIN{func add(a,b){return a+b}; print add(\"あ\",\"いう\")}", ok: "あいう\n"},
 		{script: "BEGIN{add=func(a,b){return a+b}; print add(10,5)}", ok: "15\n"},
 		{script: "BEGIN{print func(a,b){return a+b}(10,5)}", ok: "15\n"},
 		{script: "BEGIN{a=123;func add(a,b){return a+b}; add(10,5);print a}", ok: "123\n"},
@@ -241,6 +242,36 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{func hash(){m[1]=1;m[2]=2;m[3]=3;return m}; m=hash();print m[1]}", ok: "1\n"},
 		{script: "BEGIN{func map(){m[1]=1;m[2]=2;m[3]=3;return m}; print map()[1]}", ok: "1\n"},
 		{script: "BEGIN{print func(){m[1]=1;m[2]=2;m[3]=3;return m}()[1]}", ok: "1\n"},
+		// multi result function
+		{script: "BEGIN{func Cross(a1,a2){return a2,a1;};print Cross(1,5)}", ok: "5 1\n"},
+		{script: "BEGIN{func Cross(a1,a2){return a2,a1;};x,y=Cross(1,5);print x}", ok: "5\n"},
+		{script: "BEGIN{func Cross(a1,a2){return a2,a1;};x,y=Cross(1,5);print y}", ok: "1\n"},
+		{script: "BEGIN{func Cross(a1,a2){return a2,a1;};print Cross(\"a\",\"b\")}", ok: "b a\n"},
+		{script: "BEGIN{a=1;func Fn(){a=100;};Fn();print a}", ok: "100\n"},
+		// anonymous func
+		{script: "BEGIN{print func (x){return x+100;}(10)}", ok: "110\n"},
+		{script: "BEGIN{print func (x){return x+100;}()}", ok: "error:function wants 1 arguments but received 0\n"},
+		{script: "BEGIN{print (1+1)(10)}", ok: "error:cannot call type int\n"},
+		{script: "BEGIN{Fn=func (x){return func(y) {return x*10+y};};Fn2=Fn(10);print Fn2(2)}", ok: "102\n"},
+		// recursive call
+		{script: "BEGIN{func Factorial(x){if x==1 {1} else { x*Factorial(x-1)}};print Factorial(3)}", ok: "6\n"},
+		{script: "BEGIN{func Factorial(x){if x==1 {return 1} else { return x*Factorial(x-1)}};print Factorial(3)}", ok: "6\n"},
+		// higher order function
+		{script: "BEGIN{func (x){return func(y) {return x*10+y};}()(2)}", ok: "error:function wants 1 arguments but received 0\n"},
+		{script: "BEGIN{func (x){return func(y) {return x*10+y};}(10)()}", ok: "error:function wants 1 arguments but received 0\n"},
+		{script: "BEGIN{print func (x){return func(y) {return x*10+y};}(10)(2)}", ok: "102\n"},
+		{script: "BEGIN{func Fibo(){x,y=0,1;return func(){x,y=y,x+y;return y}};f=Fibo();f();f();f();print f();}", ok: "5\n"},
+		// higher order & recursive
+		{script: "BEGIN{func mod(x){return func f(y){ if y<x {return y} else { return f(y-x) }}};mod3=mod(3);print mod3(11);}", ok: "2\n"},
+		{script: "BEGIN{func f(x){if x==1 {return 1} else {return x*f(x-1)}};print f(1)}", ok: "1\n"},
+		{script: "BEGIN{func f(x){if x==1 {return 1} else {return x*f(x-1)}};print f(3)}", ok: "6\n"},
+		{script: "BEGIN{func f(x){if x==1 {return func(){ return 1}} else { return func(){ return x*f(x-1)() }}};print f(1)()}", ok: "1\n"},
+		{script: "BEGIN{func f(x){if x==1 {return func(){ return 1}} else { return func(){ return x*f(x-1)() }}};print f(3)()}", ok: "6\n"}, //ERROR
+		{script: "BEGIN{func f(x){if x==1 {return func(){ return x}} else { return func(){ return x*(x-1) }}};print f(1)()}", ok: "1\n"},
+		{script: "BEGIN{func f(x){return func(){ return x}};print f(1)()}", ok: "1\n"},
+		//PROBLEM
+		{script: "BEGIN{print func(x){return func(){return x}}(1)()}", ok: "1\n"},
+		{script: "BEGIN{print func(x){if true {return func(){return x}}}(1)()}", ok: "1\n"},
 
 		// command parameter
 
