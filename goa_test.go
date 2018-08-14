@@ -269,9 +269,14 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{func f(x){if x==1 {return func(){ return 1}} else { return func(){ return x*f(x-1)() }}};print f(3)()}", ok: "6\n"}, //ERROR
 		{script: "BEGIN{func f(x){if x==1 {return func(){ return x}} else { return func(){ return x*(x-1) }}};print f(1)()}", ok: "1\n"},
 		{script: "BEGIN{func f(x){return func(){ return x}};print f(1)()}", ok: "1\n"},
-		//PROBLEM
+		// PROBLEM
 		{script: "BEGIN{print func(x){return func(){return x}}(1)()}", ok: "1\n"},
 		{script: "BEGIN{print func(x){if true {return func(){return x}}}(1)()}", ok: "1\n"},
+		// func rule
+		{script: "BEGIN{print 1}BEGIN{print 2}", ok: "1\n2\n"},
+		{script: "BEGIN{print 1}END{print 2}", ok: "1\n2\n"},
+		{script: "function one(){return 1}BEGIN{print one()}", ok: "1\n"},
+		//{script: "func one(){return 1}BEGIN{print one()}", ok: "1\n"},
 
 		// command parameter
 

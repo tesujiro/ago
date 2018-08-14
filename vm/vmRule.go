@@ -8,15 +8,30 @@ import (
 	"github.com/tesujiro/goa/debug"
 )
 
-func SeparateRules(rules []ast.Rule) (Begin, Main, End []ast.Rule) {
+func SeparateRules(rules []ast.Rule) (Func, Begin, Main, End []ast.Rule) {
 	for _, rule := range rules {
 		switch rule.Pattern.(type) {
+		case *ast.FuncPattern:
+			Func = append(Func, rule)
 		case *ast.BeginPattern:
 			Begin = append(Begin, rule)
 		case *ast.ExprPattern:
 			Main = append(Main, rule)
 		case *ast.EndPattern:
 			End = append(End, rule)
+		}
+	}
+	return
+}
+
+func RunFuncRules(rules []ast.Rule, env *Env) (result interface{}, err error) {
+	for _, rule := range rules {
+		debug.Println("FUNC")
+
+		funcExpr := &ast.FuncExpr{Name: rule.Pattern.(*ast.FuncPattern).Name, Args: rule.Pattern.(*ast.FuncPattern).Args, Stmts: rule.Action}
+		result, err = evalExpr(funcExpr, env)
+		if err != nil {
+			return
 		}
 	}
 	return

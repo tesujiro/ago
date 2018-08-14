@@ -42,7 +42,7 @@ var defaultExprs = []ast.Expr{&defaultExpr}
 %token<token> DELETE IN
 %token<token> BEGIN END PRINT REGEXP
 %token<token> IF ELSE FOR BREAK CONTINUE
-%token<token> FUNC RETURN
+%token<token> FUNCTION FUNC RETURN
 
 %right '='
 %left OROR
@@ -71,24 +71,20 @@ program
 	}
 
 rule
-	/*
-	: BEGIN action
-	{
-		$$ = &ast.BeginRule{Pattern: $1, Action: $2}
-	}
-	*/
 	: pattern action
 	{
 		$$ = ast.Rule{Pattern: $1, Action: $2}
 	}
-	/*
-	| pattern stmt_term
-	*/
 
 pattern
 	: /* empty */
 	{
 		$$ = &ast.ExprPattern{}
+	}
+	| FUNCTION IDENT '(' ident_args ')'
+	{
+		//fmt.Println("FUNC RULE")
+		$$ = &ast.FuncPattern{Name: $2.Literal, Args: $4}
 	}
 	| BEGIN
 	{

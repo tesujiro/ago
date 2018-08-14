@@ -16,3 +16,8 @@ type EndPattern struct {
 type ExprPattern struct {
 	Expr Expr
 }
+
+type FuncPattern struct {
+	Name string
+	Args []string
+}

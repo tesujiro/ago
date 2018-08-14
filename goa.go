@@ -116,7 +116,20 @@ func runScript(script_reader io.Reader, file_reader io.Reader) {
 
 	var result interface{}
 
-	beginRules, mainRules, endRules := vm.SeparateRules(ast)
+	funcRules, beginRules, mainRules, endRules := vm.SeparateRules(ast)
+
+	// FUNC DEFINITION
+	if len(funcRules) > 0 {
+		result, err = vm.RunFuncRules(funcRules, env)
+		debug.Printf("%#v\n", result)
+		if err != nil {
+			fmt.Printf("error:%v\n", err)
+			return
+		}
+		if *dbg {
+			env.Dump()
+		}
+	}
 
 	// BEGIN
 	result, err = vm.RunBeginRules(beginRules, env)
