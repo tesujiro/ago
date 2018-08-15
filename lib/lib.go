@@ -1,7 +1,9 @@
 package lib
 
 import (
+	"fmt"
 	"reflect"
+	"strconv"
 
 	"github.com/tesujiro/goa/vm"
 )
@@ -26,13 +28,61 @@ func Import(env *vm.Env) *vm.Env {
 			return 0
 		}
 	}
-	//env.Define("length", length)
 	env.Define("length", reflect.ValueOf(length))
-	//env.Define("len", length)
 	env.Define("len", reflect.ValueOf(length))
 
-	//substr := func(str, start, end interface{}) {
-	//}
+	toStr := func(v reflect.Value) string {
+		switch v.Type().Kind() {
+		case reflect.String:
+			return v.Interface().(string)
+		case reflect.Int:
+			return fmt.Sprintf("%v", v.Interface().(int))
+		case reflect.Float64:
+			return fmt.Sprintf("%v", v.Interface().(float64))
+		default:
+			return ""
+		}
+	}
+
+	toInt := func(v reflect.Value) int {
+		switch v.Type().Kind() {
+		case reflect.String:
+			i, err := strconv.Atoi(v.Interface().(string))
+			if err != nil {
+				return 0
+			} else {
+				return i
+			}
+		case reflect.Int:
+			return v.Interface().(int)
+		default:
+			return 0
+		}
+	}
+
+	substr := func(str, begin, end reflect.Value) string {
+		s := toStr(str)
+		b := toInt(begin)
+		e := toInt(end)
+		var from, to int
+		if b > 0 {
+			from = b
+		} else {
+			from = 1
+		}
+		if from+e < len(s)+1 {
+			//fmt.Printf("path1:")
+			to = from + e
+		} else {
+			//fmt.Printf("path2:")
+			to = len(s) + 1
+		}
+		if len(s) == 0 || from >= to {
+			return ""
+		}
+		return s[from-1 : to-1]
+	}
+	env.Define("substr", reflect.ValueOf(substr))
 
 	return env
 }

@@ -292,6 +292,18 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{a[1]=1;a[2]=2;print len(a)}", ok: "2\n"},
 		{script: "BEGIN{f=func(){return 1,2};print len(f())}", ok: "2\n"},
 		//{script: "BEGIN{print len(123)}", ok: "invalid argument 123 (type int) for len\n"},//TODO:
+		// lib:substr
+		{script: "BEGIN{print substr(\"abcde\",1,3)}", ok: "abc\n"},
+		{script: "BEGIN{print substr(\"abcde\",0,3)}", ok: "abc\n"},
+		{script: "BEGIN{print substr(\"abcde\",-1,3)}", ok: "abc\n"},
+		{script: "BEGIN{print substr(\"abcde\",1,5)}", ok: "abcde\n"},
+		{script: "BEGIN{print substr(\"abcde\",1,6)}", ok: "abcde\n"},
+		{script: "BEGIN{print substr(\"abcde\",3,2)}", ok: "cd\n"},
+		{script: "BEGIN{print substr(\"abcde\",2,0)}", ok: "\n"},
+		{script: "BEGIN{print substr(\"abcde\",2,-1)}", ok: "\n"},
+		{script: "BEGIN{print substr(12345,1,3)}", ok: "123\n"},
+		{script: "BEGIN{print substr(12.345,1,4)}", ok: "12.3\n"},
+		{script: "BEGIN{print substr(\"\",1,3)}", ok: "\n"},
 
 		// field
 		{script: "{print $1}", in: "Hello World!\n", ok: "Hello\n"},
