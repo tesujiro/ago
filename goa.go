@@ -91,6 +91,9 @@ func runScript(script_reader io.Reader, file_reader io.Reader) {
 
 	env := vm.NewEnv()
 	env = lib.Import(env)
+	if *dbg {
+		env.Dump()
+	}
 
 	bytes, err := ioutil.ReadAll(script_reader)
 	if err != nil {

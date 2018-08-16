@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"reflect"
 	"strconv"
+	"strings"
 
 	"github.com/tesujiro/goa/vm"
 )
@@ -83,6 +84,22 @@ func Import(env *vm.Env) *vm.Env {
 		return s[from-1 : to-1]
 	}
 	env.Define("substr", reflect.ValueOf(substr))
+
+	index := func(v1, v2 reflect.Value) int {
+		s := toStr(v1)
+		substr := toStr(v2)
+		if len(s) == 0 {
+			return 0
+		}
+		return strings.Index(s, substr) + 1
+	}
+	env.Define("index", reflect.ValueOf(index))
+
+	/*
+		split := func(s, g, fs reflect.Value) int {
+		}
+		env.Define("split", reflect.ValueOf(split))
+	*/
 
 	return env
 }

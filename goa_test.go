@@ -299,11 +299,20 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{print substr(\"abcde\",1,5)}", ok: "abcde\n"},
 		{script: "BEGIN{print substr(\"abcde\",1,6)}", ok: "abcde\n"},
 		{script: "BEGIN{print substr(\"abcde\",3,2)}", ok: "cd\n"},
+		//{script: "BEGIN{print substr(\"abcde\",3)}", ok: "cde\n"}, //TODO: Default parameter
 		{script: "BEGIN{print substr(\"abcde\",2,0)}", ok: "\n"},
 		{script: "BEGIN{print substr(\"abcde\",2,-1)}", ok: "\n"},
 		{script: "BEGIN{print substr(12345,1,3)}", ok: "123\n"},
 		{script: "BEGIN{print substr(12.345,1,4)}", ok: "12.3\n"},
 		{script: "BEGIN{print substr(\"\",1,3)}", ok: "\n"},
+		// lib:split
+		//{script: "BEGIN{split(\"a:b:c\",ar,\":\");print ar[3]}", ok: "c\n"},
+		// lib:index
+		{script: "BEGIN{print index(\"abc\",\"bc\")}", ok: "2\n"},
+		{script: "BEGIN{print index(\"abc\",\"yz\")}", ok: "0\n"},
+		{script: "BEGIN{print index(\"\",\"yz\")}", ok: "0\n"},
+		{script: "BEGIN{print index(\"abc\",\"\")}", ok: "1\n"},
+		{script: "BEGIN{print index(\"\",\"\")}", ok: "0\n"},
 
 		// field
 		{script: "{print $1}", in: "Hello World!\n", ok: "Hello\n"},
