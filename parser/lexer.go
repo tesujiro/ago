@@ -89,7 +89,7 @@ func (l *Lexer) Lex(lval *yySymType) (token_id int) {
 	case token.FLOAT:
 		token_id = NUMBER
 	case token.STRING:
-		if len(lit) > 3 && lit[0:2] == "\"/" && lit[len(lit)-2:len(lit)] == "/\"" {
+		if len(lit) > 3 && lit[:2] == "\"/" && lit[len(lit)-2:] == "/\"" {
 			token_id = REGEXP
 			lit = lit[2 : len(lit)-2]
 		} else {

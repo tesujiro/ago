@@ -18,7 +18,6 @@ var defaultExprs = []ast.Expr{&defaultExpr}
 	stmt		ast.Stmt
 	stmts		[]ast.Stmt
 	stmt_if		ast.Stmt
-	stmt_regexp	ast.Stmt
 	expr		ast.Expr
 	exprs		[]ast.Expr
 	opt_exprs	[]ast.Expr
@@ -32,7 +31,6 @@ var defaultExprs = []ast.Expr{&defaultExpr}
 %type <stmts>		action
 %type <stmts>		stmts
 %type <stmt_if>		stmt_if
-%type <stmt_regexp>	stmt_regexp
 %type <expr>		expr
 %type <exprs>		exprs
 %type <opt_exprs>	opt_exprs
@@ -134,10 +132,6 @@ stmt
 	{
 		$$ = &ast.DelStmt{Expr: $2}
 	}
-	| stmt_regexp
-	{
-		$$ = $1
-	}
 	| PRINT 
 	{
 		$$ = &ast.PrintStmt{Exprs: defaultExprs }
@@ -200,16 +194,6 @@ stmt_if
 		}
 	}
 
-stmt_regexp
-	: expr '~' REGEXP
-	{
-		$$ = &ast.MatchStmt{Expr: $1, RegExp: $3.Literal}
-	}
-	| REGEXP
-	{
-		$$ = &ast.MatchStmt{Expr: defaultExpr, RegExp: $1.Literal}
-	}
-
 opt_exprs
 	: /* empty */
 	{
@@ -263,19 +247,15 @@ expr
 	{
 		$$ = &ast.ItemExpr{Expr: $1, Index:$3}
 	}
-	/*
-	| '/' 
+	/* REGEXP */
+	| expr '~' REGEXP
 	{
-		fmt.Println("path1")
-		IN_REGEXP=true
+		$$ = &ast.MatchExpr{Expr: $1, RegExp: $3.Literal}
 	}
 	| REGEXP
 	{
-		fmt.Println("path2:",$1.Literal)
-		IN_REGEXP=false
-		$$ = &ast.IdentExpr{Literal: $1.Literal}
+		$$ = &ast.MatchExpr{Expr: defaultExpr, RegExp: $1.Literal}
 	}
-	*/
 	/* FUNCTION */
 	| FUNC '(' ident_args ')' '{' stmts '}'
 	{

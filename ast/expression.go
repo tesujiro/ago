@@ -78,3 +78,8 @@ type ItemExpr struct {
 type MapExpr struct {
 	MapExpr map[Expr]Expr
 }
+
+type MatchExpr struct {
+	Expr   Expr
+	RegExp string
+}
