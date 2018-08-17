@@ -22,6 +22,11 @@ type IfStmt struct {
 	ElseIf []Stmt
 }
 
+type MatchStmt struct {
+	Expr   Expr
+	RegExp string
+}
+
 type ReturnStmt struct {
 	Exprs []Expr
 }

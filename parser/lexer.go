@@ -89,12 +89,22 @@ func (l *Lexer) Lex(lval *yySymType) (token_id int) {
 	case token.FLOAT:
 		token_id = NUMBER
 	case token.STRING:
-		token_id = STRING
-		if len(lit) > 1 {
-			lit = lit[1 : len(lit)-1]
+		if len(lit) > 3 && lit[0:2] == "\"/" && lit[len(lit)-2:len(lit)] == "/\"" {
+			token_id = REGEXP
+			lit = lit[2 : len(lit)-2]
+		} else {
+			token_id = STRING
+			if len(lit) > 1 {
+				lit = lit[1 : len(lit)-1]
+			}
 		}
 	case token.EOF:
 		token_id = 0
+	case token.ILLEGAL:
+		switch lit {
+		case "$", "~":
+			token_id = int([]rune(lit)[0])
+		}
 	default:
 		if symbol, ok := compSymbols[tok.String()]; ok {
 			token_id = symbol
@@ -105,9 +115,6 @@ func (l *Lexer) Lex(lval *yySymType) (token_id int) {
 				token_id = IDENT
 			}
 		}
-	}
-	if lit == "$" {
-		token_id = int('$')
 	}
 	lval.token = ast.Token{Token: token_id, Literal: lit}
 	//fmt.Printf("tok=%v\ttoken=%#v\n", tok.String(), lval.token)

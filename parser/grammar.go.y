@@ -11,28 +11,30 @@ var defaultExprs = []ast.Expr{&defaultExpr}
 %}
 
 %union{
-	token ast.Token
-	rule ast.Rule
-	rules []ast.Rule
-	pattern ast.Pattern
-	stmt ast.Stmt
-	stmts []ast.Stmt
-	stmt_if ast.Stmt
-	expr ast.Expr
-	exprs []ast.Expr
-	opt_exprs []ast.Expr
-	ident_args []string
+	token		ast.Token
+	rule		ast.Rule
+	rules		[]ast.Rule
+	pattern		ast.Pattern
+	stmt		ast.Stmt
+	stmts		[]ast.Stmt
+	stmt_if		ast.Stmt
+	stmt_regexp	ast.Stmt
+	expr		ast.Expr
+	exprs		[]ast.Expr
+	opt_exprs	[]ast.Expr
+	ident_args	[]string
 }
 
-%type <rules>	program
-%type <rule>	rule
-%type <pattern> pattern
-%type <stmt>	stmt
-%type <stmts>	action
-%type <stmts>	stmts
-%type <stmt_if>	stmt_if
-%type <expr>	expr
-%type <exprs>	exprs
+%type <rules>		program
+%type <rule>		rule
+%type <pattern> 	pattern
+%type <stmt>		stmt
+%type <stmts>		action
+%type <stmts>		stmts
+%type <stmt_if>		stmt_if
+%type <stmt_regexp>	stmt_regexp
+%type <expr>		expr
+%type <exprs>		exprs
 %type <opt_exprs>	opt_exprs
 %type <ident_args>	ident_args
 
@@ -132,6 +134,10 @@ stmt
 	{
 		$$ = &ast.DelStmt{Expr: $2}
 	}
+	| stmt_regexp
+	{
+		$$ = $1
+	}
 	| PRINT 
 	{
 		$$ = &ast.PrintStmt{Exprs: defaultExprs }
@@ -176,23 +182,33 @@ stmt_term
 */
 
 stmt_if
-    : IF expr '{' stmts '}'
-    {
-        $$ = &ast.IfStmt{If: $2, Then: $4, Else: nil}
-    }
-    | stmt_if ELSE IF expr '{' stmts '}'
-    {
-            $$.(*ast.IfStmt).ElseIf = append($$.(*ast.IfStmt).ElseIf, &ast.IfStmt{If: $4, Then: $6} )
-    }
-    | stmt_if ELSE '{' stmts '}'
-    {
-        if $$.(*ast.IfStmt).Else != nil {
-            yylex.Error("multiple else statement")
-        } else {
-            //$$.(*ast.IfStmt).Else = append($$.(*ast.IfStmt).Else, $4...)
-            $$.(*ast.IfStmt).Else = $4
-        }
-    }
+	: IF expr '{' stmts '}'
+	{
+	    $$ = &ast.IfStmt{If: $2, Then: $4, Else: nil}
+	}
+	| stmt_if ELSE IF expr '{' stmts '}'
+	{
+	        $$.(*ast.IfStmt).ElseIf = append($$.(*ast.IfStmt).ElseIf, &ast.IfStmt{If: $4, Then: $6} )
+	}
+	| stmt_if ELSE '{' stmts '}'
+	{
+		if $$.(*ast.IfStmt).Else != nil {
+			yylex.Error("multiple else statement")
+		} else {
+			//$$.(*ast.IfStmt).Else = append($$.(*ast.IfStmt).Else, $4...)
+			$$.(*ast.IfStmt).Else = $4
+		}
+	}
+
+stmt_regexp
+	: expr '~' REGEXP
+	{
+		$$ = &ast.MatchStmt{Expr: $1, RegExp: $3.Literal}
+	}
+	| REGEXP
+	{
+		$$ = &ast.MatchStmt{Expr: defaultExpr, RegExp: $1.Literal}
+	}
 
 opt_exprs
 	: /* empty */
