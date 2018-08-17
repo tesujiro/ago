@@ -80,6 +80,6 @@ type MapExpr struct {
 }
 
 type MatchExpr struct {
-	Expr   Expr
-	RegExp string
+	Expr    Expr
+	RegExpr string
 }

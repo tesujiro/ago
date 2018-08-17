@@ -910,11 +910,11 @@ yynewstate:
 		}
 	case 40:
 		{
-			yyVAL.expr = &ast.MatchExpr{Expr: yyS[yypt-2].expr, RegExp: yyS[yypt-0].token.Literal}
+			yyVAL.expr = &ast.MatchExpr{Expr: yyS[yypt-2].expr, RegExpr: yyS[yypt-0].token.Literal}
 		}
 	case 41:
 		{
-			yyVAL.expr = &ast.MatchExpr{Expr: defaultExpr, RegExp: yyS[yypt-0].token.Literal}
+			yyVAL.expr = &ast.MatchExpr{Expr: defaultExpr, RegExpr: yyS[yypt-0].token.Literal}
 		}
 	case 42:
 		{

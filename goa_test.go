@@ -134,6 +134,13 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{a=1;b=2;print a==2||b==2}", ok: "true\n"},
 		{script: "BEGIN{print 12&&34}", ok: "error:cannot convert to bool\n"},
 
+		// regular expression
+		{script: "BEGIN{print \"aaa\"~\"/aaa/\"}", ok: "true\n"},
+		{script: "BEGIN{print \"aaa\"~\"/abc/\"}", ok: "false\n"},
+		{script: "BEGIN{print \"aaa\"~\"/a+/\"}", ok: "true\n"},
+		{script: "BEGIN{print \"aaa\"~\"/^a+$/\"}", ok: "true\n"},
+		{script: "BEGIN{print \"abc\"~\"/^a+$/\"}", ok: "false\n"},
+
 		// assignment
 		{script: "BEGIN{a=1;b=2;print a+b}", ok: "3\n"},
 		{script: "BEGIN{a=1;b=2;print a+1==b}", ok: "true\n"},

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -317,6 +318,14 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 		case "%":
 			return toInt(left) % toInt(right), nil
 		}
+	case *ast.MatchExpr:
+		val, err := evalExpr(expr.(*ast.MatchExpr).Expr, env)
+		if err != nil {
+			return nil, err
+		}
+		s := toString(val)
+		re := expr.(*ast.MatchExpr).RegExpr
+		return regexp.MatchString(re, s)
 	}
 	return 0, nil
 }

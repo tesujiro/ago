@@ -250,11 +250,11 @@ expr
 	/* REGEXP */
 	| expr '~' REGEXP
 	{
-		$$ = &ast.MatchExpr{Expr: $1, RegExp: $3.Literal}
+		$$ = &ast.MatchExpr{Expr: $1, RegExpr: $3.Literal}
 	}
 	| REGEXP
 	{
-		$$ = &ast.MatchExpr{Expr: defaultExpr, RegExp: $1.Literal}
+		$$ = &ast.MatchExpr{Expr: defaultExpr, RegExpr: $1.Literal}
 	}
 	/* FUNCTION */
 	| FUNC '(' ident_args ')' '{' stmts '}'
