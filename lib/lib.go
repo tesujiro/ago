@@ -95,6 +95,15 @@ func Import(env *vm.Env) *vm.Env {
 	}
 	env.Define("index", reflect.ValueOf(index))
 
+	tolower := func(v1 reflect.Value) string {
+		return strings.ToLower(toStr(v1))
+	}
+	env.Define("tolower", reflect.ValueOf(tolower))
+
+	toupper := func(v1 reflect.Value) string {
+		return strings.ToUpper(toStr(v1))
+	}
+	env.Define("toupper", reflect.ValueOf(toupper))
 	/*
 		split := func(s, g, fs reflect.Value) int {
 		}

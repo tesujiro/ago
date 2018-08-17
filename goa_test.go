@@ -286,6 +286,13 @@ func TestGoa(t *testing.T) {
 		//{script: "BEGIN{OFS=\"\n\"}{$1=$1;print}", in: "AAA BBB CCC\nAAA BBB CCC\n", ok: "AAA\nBBB\nCCC\nAAA\nBBB\nCCC\n"}, //TODO
 		{script: "BEGIN{ORS=\":\"}{$1=$1;print}", in: "AAA BBB CCC\nCCC DDD EEE\n", ok: "AAA BBB CCC:CCC DDD EEE:\n"},
 
+		// Numeric Built-in Functions
+		// lib: int
+		// lib: sqrt,exp,log
+		// lib: sin,cos,atan2
+		// lib: rand,arand,srand
+
+		// Built-in Functions for String Manipulation
 		// lib:len
 		{script: "BEGIN{print length(\"Hello World!\")}", ok: "12\n"},
 		{script: "BEGIN{print len(\"Hello World!\")}", ok: "12\n"},
@@ -313,6 +320,11 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{print index(\"\",\"yz\")}", ok: "0\n"},
 		{script: "BEGIN{print index(\"abc\",\"\")}", ok: "1\n"},
 		{script: "BEGIN{print index(\"\",\"\")}", ok: "0\n"},
+		// lib: tolower,toupper
+		{script: "BEGIN{print tolower(\"\")}", ok: "\n"},
+		{script: "BEGIN{print tolower(\"Hello, World!\")}", ok: "hello, world!\n"},
+		{script: "BEGIN{print toupper(\"\")}", ok: "\n"},
+		{script: "BEGIN{print toupper(\"Hello, World!\")}", ok: "HELLO, WORLD!\n"},
 
 		// field
 		{script: "{print $1}", in: "Hello World!\n", ok: "Hello\n"},
