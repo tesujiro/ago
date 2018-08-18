@@ -48,6 +48,7 @@ var defaultExprs = []ast.Expr{&defaultExpr}
 %left OROR
 %left ANDAND
 %left IDENT
+%left '~'
 %left EQEQ NEQ
 %left '>' '<' GE LE
 
@@ -254,7 +255,7 @@ expr
 	}
 	| REGEXP
 	{
-		$$ = &ast.MatchExpr{Expr: defaultExpr, RegExpr: $1.Literal}
+		$$ = &ast.MatchExpr{Expr: &defaultExpr, RegExpr: $1.Literal}
 	}
 	/* FUNCTION */
 	| FUNC '(' ident_args ')' '{' stmts '}'

@@ -140,6 +140,9 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{print \"aaa\"~\"/a+/\"}", ok: "true\n"},
 		{script: "BEGIN{print \"aaa\"~\"/^a+$/\"}", ok: "true\n"},
 		{script: "BEGIN{print \"abc\"~\"/^a+$/\"}", ok: "false\n"},
+		{script: "\"AAA\"~\"/AAA/\"{print}", in: "AAA", ok: "AAA\n"},
+		{script: "$0~\"/AAA/\"{print}", in: "AAA", ok: "AAA\n"},
+		{script: "\"/AAA/\"{print}", in: "AAA", ok: "AAA\n"},
 
 		// assignment
 		{script: "BEGIN{a=1;b=2;print a+b}", ok: "3\n"},

@@ -1,7 +1,7 @@
 package vm
 
 import (
-	"errors"
+	"fmt"
 	"reflect"
 
 	"github.com/tesujiro/goa/ast"
@@ -63,7 +63,7 @@ func RunMainRules(rules []ast.Rule, env *Env, line string, line_number int) (res
 				return result, err
 			} else {
 				if reflect.ValueOf(b).Kind() != reflect.Bool {
-					err = errors.New("pattern is not bool")
+					err = fmt.Errorf("pattern is not bool: %v %v", reflect.ValueOf(b).Kind(), b)
 					return result, err
 				}
 
