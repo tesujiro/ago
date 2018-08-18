@@ -370,6 +370,7 @@ ZZZ 1
 
 	for _, test := range tests {
 		//t.Logf("script:%v\n", test.script)
+		//fmt.Fprintf(realStdout, "script:%v\n", test.script)
 
 		// IN PIPE
 		readFromIn, writeToIn, err := os.Pipe()
