@@ -1,7 +1,10 @@
 # goa
 go on awk (just like Unagi on Katsudon)
 
-# still not implemented
+# version
+under development
+
+# Still not implemented
 * /start/,/stop/
 * printf, sprintf
 * do while, while
@@ -12,8 +15,10 @@ go on awk (just like Unagi on Katsudon)
 * func: rand, srand, int, split, system
 * var: FNR, OFMT, RS, ENVIRON, CONVFMT, RSTART, RLENGTH
 
-# difference from AWK
+# Difference from AWK
 * variables name beginning with uppercase are global, others are local
+* can define func in action (ex. { swap=func(a,b){return b,a}; print swap("a","b"); } // b a )
+* nonymous func (ex. { print func(a,b){return b,a}("a","b"); } // b a )
 * function call is call by value.
 * sub,gsub returns replaced string
 
