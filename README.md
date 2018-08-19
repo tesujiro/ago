@@ -17,12 +17,13 @@ under development
 
 # Difference from AWK
 * variables name beginning with uppercase are global, others are local
-* can define func in action (ex. { swap=func(a,b){return b,a}; print swap("a","b"); } // b a )
-* nonymous func (ex. { print func(a,b){return b,a}("a","b"); } // b a )
+* define func in action (ex. { swap=func(a,b){return b,a}; print swap("a","b"); } // b a )
+* anonymous func (ex. { print func(a,b){return b,a}("a","b"); } // b a )
 * function call is call by value.
 * sub,gsub returns replaced string
 
 # To be fixed
+* cannot omit {} . (ex.'NF>10' : error)
 * REGEXP "/.../" -> /.../
 * function args cannot be omitted (like sub(r, t[, s]))
 * function match() does not set RSTART, RLENGTH
