@@ -310,7 +310,7 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{print len(\"Hello World!\")}", ok: "12\n"},
 		{script: "BEGIN{a[1]=1;a[2]=2;print len(a)}", ok: "2\n"},
 		{script: "BEGIN{f=func(){return 1,2};print len(f())}", ok: "2\n"},
-		//{script: "BEGIN{print len(123)}", ok: "invalid argument 123 (type int) for len\n"},//TODO:
+		{script: "BEGIN{print length(123)}", ok: "3\n"},
 		// lib:substr
 		{script: "BEGIN{print substr(\"abcde\",1,3)}", ok: "abc\n"},
 		{script: "BEGIN{print substr(\"abcde\",0,3)}", ok: "abc\n"},
