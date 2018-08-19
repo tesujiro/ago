@@ -27,9 +27,8 @@ func defineFunc(funcExpr *ast.FuncExpr, env *Env) (interface{}, error) {
 		//defer newEnv.Destroy()  // Do not delete this line because higer order function
 
 		for i, arg := range funcExpr.Args {
-			//val := reflect.ValueOf(in[i]).Interface()
-			//val := reflect.ValueOf(in[i]).Interface().(reflect.Value).Interface()
-			val := reflect.ValueOf(in[i]).Interface().(reflect.Value).Interface().(reflect.Value).Interface()
+			//val := reflect.ValueOf(in[i]).Interface().(reflect.Value).Interface().(reflect.Value).Interface()
+			val := in[i].Interface().(reflect.Value).Interface()
 			debug.Printf("arg[%v]: %#v\tType:%v\tValue:%v\n", i, in[i], reflect.TypeOf(val), reflect.ValueOf(val))
 			//if err := newEnv.Set(arg, val); err != nil {
 			if err := newEnv.Define(arg, val); err != nil {
@@ -59,6 +58,7 @@ func defineFunc(funcExpr *ast.FuncExpr, env *Env) (interface{}, error) {
 		}
 	}
 
+	debug.Printf("MakeFunc: funcType %v\n", funcType)
 	fn := reflect.MakeFunc(funcType, runVmFunction)
 
 	if funcExpr.Name != "" {
@@ -151,6 +151,7 @@ func callArgs(f reflect.Value, callExpr *ast.CallExpr, env *Env) ([]reflect.Valu
 			return nil, err
 		} else {
 			// User Defined Funcion
+			debug.Printf("callArg[%v]:%v %v\n", k, arg, reflect.TypeOf(arg))
 			args[k] = reflect.ValueOf(reflect.ValueOf(arg))
 			// TODO: Golang Pacakage Funcion
 			//
