@@ -13,7 +13,7 @@ type builtin struct {
 	ORS     string
 	SUBSEP  string
 	//OFMT,FNR,
-	//RLENGTH,RSTART //for MATCH
+	RLENGTH, RSTART int
 	//RS
 	//ENVIRON
 	//CONVFMT

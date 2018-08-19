@@ -104,6 +104,12 @@ func Import(env *vm.Env) *vm.Env {
 	}
 	env.Define("toupper", reflect.ValueOf(toupper))
 
+	/*
+		sub := func(s, g, fs reflect.Value) int {
+		}
+		env.Define("sub", reflect.ValueOf(sub))
+	*/
+
 	// TODO: NOT SAME SPEC AS AWK gsub
 	// AWK : function call args by reference
 	gsub := func(v1, v2, v3 reflect.Value) string {
@@ -112,6 +118,18 @@ func Import(env *vm.Env) *vm.Env {
 		return result
 	}
 	env.Define("gsub", reflect.ValueOf(gsub))
+
+	//TODO: how can i set RSTART,RLENGTH -> builtin function
+	match := func(s, r reflect.Value) int {
+		re := regexp.MustCompile(toStr(r))
+		loc := re.FindStringIndex(toStr(s))
+		if len(loc) > 0 {
+			return loc[0] + 1
+		} else {
+			return 0
+		}
+	}
+	env.Define("match", reflect.ValueOf(match))
 
 	/*
 		split := func(s, g, fs reflect.Value) int {
