@@ -3,6 +3,7 @@ package lib
 import (
 	"fmt"
 	"reflect"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -104,6 +105,16 @@ func Import(env *vm.Env) *vm.Env {
 		return strings.ToUpper(toStr(v1))
 	}
 	env.Define("toupper", reflect.ValueOf(toupper))
+
+	// TODO: NOT SAME SPEC AS AWK gsub
+	// AWK : function call args by reference
+	gsub := func(v1, v2, v3 reflect.Value) string {
+		re := regexp.MustCompile(toStr(v1))
+		result := re.ReplaceAllString(toStr(v3), toStr(v2))
+		return result
+	}
+	env.Define("gsub", reflect.ValueOf(gsub))
+
 	/*
 		split := func(s, g, fs reflect.Value) int {
 		}

@@ -143,6 +143,8 @@ func TestGoa(t *testing.T) {
 		{script: "\"AAA\"~\"/AAA/\"{print}", in: "AAA", ok: "AAA\n"},
 		{script: "$0~\"/AAA/\"{print}", in: "AAA", ok: "AAA\n"},
 		{script: "\"/AAA/\"{print}", in: "AAA", ok: "AAA\n"},
+		//{script: "BEGIN{s=\"abcaaa\";gsub(\"/a+/\",\"A\",s);print s}", ok: "AbcA\n"},  // TODO: AWK: call by reference
+		{script: "BEGIN{s=\"abcaaa\";print gsub(\"/a+/\",\"A\",s)}", ok: "AbcA\n"},
 
 		// assignment
 		{script: "BEGIN{a=1;b=2;print a+b}", ok: "3\n"},

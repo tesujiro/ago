@@ -147,15 +147,23 @@ func callArgs(f reflect.Value, callExpr *ast.CallExpr, env *Env) ([]reflect.Valu
 	}
 	args := make([]reflect.Value, f.Type().NumIn(), f.Type().NumIn())
 	for k, subExpr := range callExpr.SubExprs {
-		if arg, err := evalExpr(subExpr, env); err != nil {
-			return nil, err
-		} else {
-			// User Defined Funcion
+		// User Defined Funcion
+		var arg interface{}
+		switch subExpr.(type) {
+		case *ast.MatchExpr:
+			arg = subExpr.(*ast.MatchExpr).RegExpr
+			debug.Println("call parameter contains REGEXP:", arg)
+		default:
+			var err error
+			arg, err = evalExpr(subExpr, env)
+			if err != nil {
+				return nil, err
+			}
 			debug.Printf("callArg[%v]:%v %v\n", k, arg, reflect.TypeOf(arg))
-			args[k] = reflect.ValueOf(reflect.ValueOf(arg))
-			// TODO: Golang Pacakage Funcion
-			//
 		}
+		args[k] = reflect.ValueOf(reflect.ValueOf(arg))
+		// TODO: Golang Pacakage Funcion
+		//
 	}
 	return args, nil
 }
