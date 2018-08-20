@@ -15,7 +15,7 @@ func SeparateRules(rules []ast.Rule) (Func, Begin, Main, End []ast.Rule) {
 			Func = append(Func, rule)
 		case *ast.BeginPattern:
 			Begin = append(Begin, rule)
-		case *ast.ExprPattern:
+		case *ast.ExprPattern, *ast.StartStopPattern:
 			Main = append(Main, rule)
 		case *ast.EndPattern:
 			End = append(End, rule)
@@ -57,26 +57,67 @@ func RunMainRules(rules []ast.Rule, env *Env, line string, line_number int) (res
 	for _, rule := range rules {
 		debug.Println(env.builtin.NR, ":MAIN")
 		childEnv := env.NewEnv()
-		expr := rule.Pattern.(*ast.ExprPattern).Expr
-		if expr != nil {
-			if b, err := evalExpr(expr, childEnv); err != nil {
-				return result, err
-			} else {
-				if reflect.ValueOf(b).Kind() != reflect.Bool {
-					err = fmt.Errorf("pattern is not bool: %v %v", reflect.ValueOf(b).Kind(), b)
+		switch rule.Pattern.(type) {
+		case *ast.ExprPattern:
+			expr := rule.Pattern.(*ast.ExprPattern).Expr
+			if expr != nil {
+				if b, err := evalExpr(expr, childEnv); err != nil {
 					return result, err
-				}
-
-				if reflect.ValueOf(b).Interface() != true {
-					debug.Printf("Line: %v skipped\n", childEnv.builtin.NR)
-					continue
+				} else {
+					if reflect.ValueOf(b).Kind() != reflect.Bool {
+						err = fmt.Errorf("pattern is not bool: %v %v", reflect.ValueOf(b).Kind(), b)
+						return result, err
+					}
+					if reflect.ValueOf(b).Interface() != true {
+						debug.Printf("Line: %v skipped\n", childEnv.builtin.NR)
+						continue
+					}
 				}
 			}
-		}
 
-		result, err = runStmts(rule.Action, childEnv)
-		if err != nil {
-			return
+			result, err = runStmts(rule.Action, childEnv)
+			if err != nil {
+				return
+			}
+		case *ast.StartStopPattern:
+			pattern := rule.Pattern.(*ast.StartStopPattern)
+			var b interface{}
+			isMatch := func() (bool, error) {
+				if !env.GetLoop() {
+					b, err = evalExpr(pattern.Start, childEnv)
+				} else {
+					b, err = evalExpr(pattern.Stop, childEnv)
+				}
+				if err != nil {
+					return false, err
+				}
+				if reflect.ValueOf(b).Kind() != reflect.Bool {
+					err = fmt.Errorf("pattern is not bool: %v %v", reflect.ValueOf(b).Kind(), b)
+					return false, err
+				}
+				return reflect.ValueOf(b).Interface().(bool), nil
+			}
+			match, err := isMatch()
+			if err != nil {
+				return nil, err
+			}
+			if match {
+				env.SetLoop(!env.GetLoop())
+				match, err := isMatch()
+				if err != nil {
+					return nil, err
+				}
+				if match {
+					env.SetLoop(!env.GetLoop())
+				}
+			} else if !env.GetLoop() && !reflect.ValueOf(b).Interface().(bool) {
+				debug.Printf("Line: %v skipped\n", childEnv.builtin.NR)
+				continue
+			}
+			result, err = runStmts(rule.Action, childEnv)
+			if err != nil {
+				return nil, err
+			}
 		}
 	}
 	return

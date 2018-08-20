@@ -99,6 +99,15 @@ pattern
 	{
 		$$ = &ast.ExprPattern{Expr:$1}
 	}
+	| REGEXP ',' REGEXP
+	{
+		//$$ = &ast.StartStopPattern{Start:$1.Literal, Stop:$3.Literal}
+		$$ = &ast.StartStopPattern{
+			Start: &ast.MatchExpr{Expr: &defaultExpr, RegExpr: $1.Literal},
+			Stop:  &ast.MatchExpr{Expr: &defaultExpr, RegExpr: $3.Literal},
+		}
+		//$$ = &ast.MatchExpr{Expr: &defaultExpr, RegExpr: $1.Literal}
+	}
 
 action
 	: '{' stmts '}' opt_semi opt_nls

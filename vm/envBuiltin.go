@@ -17,7 +17,8 @@ type builtin struct {
 	//RS
 	//ENVIRON
 	//CONVFMT
-	field []string
+	field           []string
+	inStartStopLoop bool
 }
 
 func NewBuiltIn() *builtin {
@@ -123,4 +124,13 @@ func (e *Env) SetFieldFromLine(line string) error {
 	//e.SetFieldZero()
 
 	return nil
+}
+
+func (e *Env) GetLoop() bool {
+	return e.builtin.inStartStopLoop
+}
+
+func (e *Env) SetLoop(b bool) {
+	e.builtin.inStartStopLoop = b
+	return
 }

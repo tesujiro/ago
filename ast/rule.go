@@ -21,3 +21,8 @@ type FuncPattern struct {
 	Name string
 	Args []string
 }
+
+type StartStopPattern struct {
+	Start Expr
+	Stop  Expr
+}

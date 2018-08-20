@@ -347,6 +347,15 @@ func TestGoa(t *testing.T) {
 		{script: "{print $1}", in: "Hello World!\n", ok: "Hello\n"},
 		{script: "$1==\"AAA\"{print;COUNT++} END{print COUNT}", in: "AAA BBB CCC\nAAA BBB CCC\n", ok: "AAA BBB CCC\nAAA BBB CCC\n2\n"},
 		{script: "NR==1{$2=$1 ;print $0,NF} NR==2{$5=$1; print $0,NF}", in: "AAA BBB CCC\nAAA BBB CCC\n", ok: "AAA AAA CCC 3\nAAA BBB CCC  AAA 5\n"},
+		// /start/./stop/
+		{script: "\"/AAA/\",\"/CCC/\"{print}", in: "AAA\nBBB\nCCC\nDDD\n", ok: "AAA\nBBB\nCCC\n"},
+		{script: "\"/BBB/\",\"/CCC/\"{print}", in: "AAA\nBBB\nCCC\nDDD\n", ok: "BBB\nCCC\n"},
+		{script: "\"/BBB/\",\"/BBB/\"{print}", in: "AAA\nBBB\nCCC\nDDD\n", ok: "BBB\n"},
+		{script: "\"/ZZZ/\",\"/BBB/\"{print}", in: "AAA\nBBB\nCCC\nDDD\n", ok: ""},
+		{script: "\"/A+/\",\"/A+/\"{print}", in: "AAX\nBBB\nAAZ\nDDD\n", ok: "AAX\nAAZ\n"},
+		{script: "\"//\",\"/A+/\"{print}", in: "AAA\nBBB\nAAA\nDDD\n", ok: "AAA\nBBB\nAAA\nDDD\n"},
+		{script: "\"/A+/\",\"//\"{print}", in: "AAA\nBBB\nAAA\nDDD\n", ok: "AAA\nAAA\n"},
+
 		// MAP
 		{script: `{
 						COUNT[$1]++

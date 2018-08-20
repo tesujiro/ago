@@ -5,7 +5,6 @@ go on awk (just like Unagi on Katsudon)
 under development
 
 # Still not implemented
-* /start/,/stop/
 * printf, sprintf
 * do while, while
 * for(;;)
