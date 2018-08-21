@@ -209,9 +209,10 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{a=0;for a<=10 { a= a+1 };print a}", ok: "11\n"},
 		{script: "BEGIN{a=0;for a { a= a+1 };print a}", ok: "0\n"},
 		{script: "BEGIN{a=1;for a { a= a-1 };print a}", ok: "0\n"},
+		{script: "BEGIN{s[1]=1;for s { a= a-1 };print a}", ok: "error:convert to bool failed in while condition\n"},
 		{script: "BEGIN{s=\"\";for s { s= s+1 };print s}", ok: "\n"},
 		{script: "BEGIN{s=\"str\";for s { s= \"\" };print s}", ok: "\n"},
-		// for statement == while statement
+		// while statement == for statement
 		{script: "BEGIN{a=0;while{ if a==10 { break }; a= a+1 };print a}", ok: "10\n"},
 		{script: "BEGIN{a=0;b=0;while{ a=a+1;if a==10 { break }; if b==5 {continue};b= b+1 };print b}", ok: "5\n"},
 		{script: "BEGIN{a=0;while a<=10 { a= a+1 };print a}", ok: "11\n"},
@@ -219,6 +220,11 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{a=1;while a { a= a-1 };print a}", ok: "0\n"},
 		{script: "BEGIN{s=\"\";while s { s= s+1 };print s}", ok: "\n"},
 		{script: "BEGIN{s=\"str\";while s { s= \"\" };print s}", ok: "\n"},
+		// do while statement
+		{script: "BEGIN{a=0;do{a=a+1} while(a<10);print a}", ok: "10\n"},
+		{script: "BEGIN{a=0;do{a=a+1;if a==5{break}} while(a<10);print a}", ok: "5\n"},
+		{script: "BEGIN{a=-10;do{a=a+1} while(a);print a}", ok: "0\n"},
+		{script: "BEGIN{a[1]=1;do{a[1]=a[1]+1} while(a);print a[1]}", ok: "error:convert to bool failed in do loop condition\n"},
 
 		// map: awk-array (associated array = map)
 		{script: "BEGIN{print a[1]}", ok: "\n"},

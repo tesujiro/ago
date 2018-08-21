@@ -6,7 +6,6 @@ under development
 
 # Still not implemented
 * printf, sprintf
-* do while
 * for(;;)
 * next, nextfile
 * getline

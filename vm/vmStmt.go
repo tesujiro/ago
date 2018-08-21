@@ -252,7 +252,7 @@ func runSingleStmt(stmt ast.Stmt, env *Env) (interface{}, error) {
 				if err != nil {
 					return nil, err
 				}
-				b, err := strictToBool(result, "if condition")
+				b, err := strictToBool(result, "while condition")
 				if err != nil {
 					return nil, err
 				}
@@ -273,6 +273,38 @@ func runSingleStmt(stmt ast.Stmt, env *Env) (interface{}, error) {
 			}
 			if err != nil {
 				return nil, err
+			}
+		}
+		return nil, nil
+	case *ast.DoLoopStmt:
+		newEnv := env.NewEnv()
+		for {
+			ret, err := run(stmt.(*ast.DoLoopStmt).Stmts, newEnv)
+			if err == ErrReturn {
+				return ret, nil
+			}
+			if err == ErrBreak {
+				break
+			}
+			if err == ErrContinue {
+				continue
+			}
+			if err != nil {
+				return nil, err
+			}
+			exp := stmt.(*ast.DoLoopStmt).Expr
+			if exp != nil {
+				result, err := evalExpr(exp, newEnv)
+				if err != nil {
+					return nil, err
+				}
+				b, err := strictToBool(result, "do loop condition")
+				if err != nil {
+					return nil, err
+				}
+				if !b {
+					break
+				}
 			}
 		}
 		return nil, nil
