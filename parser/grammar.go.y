@@ -76,13 +76,17 @@ rule
 	{
 		$$ = ast.Rule{Pattern: $1, Action: $2}
 	}
+	| pattern opt_semi opt_nls
+	{
+		$$ = ast.Rule{Pattern: $1, Action: []ast.Stmt{ &ast.PrintStmt{Exprs: defaultExprs }}}
+	}
+	| action
+	{
+		$$ = ast.Rule{Pattern: &ast.ExprPattern{}, Action: $1}
+	}
 
 pattern
-	: /* empty */
-	{
-		$$ = &ast.ExprPattern{}
-	}
-	| FUNC IDENT '(' ident_args ')'
+	: FUNC IDENT '(' ident_args ')'
 	{
 		//fmt.Println("FUNC RULE")
 		$$ = &ast.FuncPattern{Name: $2.Literal, Args: $4}
@@ -108,13 +112,6 @@ pattern
 	}
 
 action
-	/* yacc panic
-	: opt_semi opt_nls
-	{
-		$$ = []ast.Stmt{}
-		//$$ = []ast.Stmt{ &ast.PrintStmt{Exprs: defaultExprs }}
-	}
-	*/
 	: '{' stmts '}' opt_semi opt_nls
 	{
 		$$ = $2
