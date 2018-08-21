@@ -19,7 +19,7 @@ under development
 * anonymous func (ex. { print func(a,b){return b,a}("a","b"); } // b a )
 * function call is call by value.
 * sub,gsub returns replaced string
-* "while (expression){statements}" can be "for expression {statements}"
+* if, for, while conditions do not need parentheses, statements need curly braces. (ex. for a<10 {a=a+1}) 
 
 # To be fixed
 * 1==true, 0==false
