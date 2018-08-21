@@ -47,6 +47,21 @@ func toBool(val interface{}) bool {
 	}
 }
 
+func strictToBool(val interface{}, operation string) (bool, error) {
+	switch reflect.ValueOf(val).Kind() {
+	case reflect.Bool:
+		return val.(bool), nil
+	case reflect.Int64, reflect.Int32, reflect.Int16, reflect.Int8, reflect.Int:
+		return val.(int) != 0, nil
+	case reflect.Float32, reflect.Float64:
+		return val.(float64) != 0, nil
+	case reflect.String:
+		return val.(string) != "", nil
+	default:
+		return false, fmt.Errorf("convert to bool failed in %v", operation)
+	}
+}
+
 func toString(val interface{}) string {
 	switch reflect.ValueOf(val).Kind() {
 	case reflect.String:

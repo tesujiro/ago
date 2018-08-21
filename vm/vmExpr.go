@@ -220,42 +220,39 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 		if right, err = evalExpr(expr.(*ast.BinOpExpr).Right, env); err != nil {
 			return nil, err
 		}
-		/*
-			if left == nil && right == nil {
-				return 0, nil
-			} else if left == nil {
-				return right, nil
-			} else if right == nil {
-				return left, nil
-			}
-		*/
 		switch expr.(*ast.BinOpExpr).Operator {
 		case "||":
-			if l, ok := left.(bool); !ok {
-				return nil, errors.New("cannot convert to bool")
-			} else {
-				if l {
-					return true, nil
-				}
-				if r, ok := right.(bool); !ok {
-					return nil, errors.New("cannot convert to bool")
-				} else {
-					return r, nil
-				}
+			left_b, err := strictToBool(left, "left expression of OR operator")
+			if err != nil {
+				return nil, err
 			}
+			if left_b {
+				return true, nil
+			}
+			right_b, err := strictToBool(right, "right expression of OR operator")
+			if err != nil {
+				return nil, err
+			}
+			if right_b {
+				return true, nil
+			}
+			return false, nil
 		case "&&":
-			if l, ok := left.(bool); !ok {
-				return nil, errors.New("cannot convert to bool")
-			} else {
-				if !l {
-					return false, nil
-				}
-				if r, ok := right.(bool); !ok {
-					return nil, errors.New("cannot convert to bool")
-				} else {
-					return r, nil
-				}
+			left_b, err := strictToBool(left, "left expression of AND operator")
+			if err != nil {
+				return nil, err
 			}
+			if !left_b {
+				return false, nil
+			}
+			right_b, err := strictToBool(right, "right expression of AND operator")
+			if err != nil {
+				return nil, err
+			}
+			if right_b {
+				return true, nil
+			}
+			return false, nil
 		case "==":
 			return left == right, nil
 		case "!=":

@@ -184,7 +184,11 @@ func runSingleStmt(stmt ast.Stmt, env *Env) (interface{}, error) {
 		if err != nil {
 			return nil, err
 		}
-		if result.(bool) {
+		b, err := strictToBool(result, "if condition")
+		if err != nil {
+			return nil, err
+		}
+		if b {
 			//fmt.Println("If then -> env.Dump()")
 			//child.Dump()
 			result, err = run(stmt.(*ast.IfStmt).Then, child)
@@ -198,7 +202,11 @@ func runSingleStmt(stmt ast.Stmt, env *Env) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-			if result.(bool) {
+			b, err := strictToBool(result, "else if condition")
+			if err != nil {
+				return nil, err
+			}
+			if b {
 				result, err = run(stmt.(*ast.IfStmt).Then, child)
 				if err != nil {
 					return result, err
@@ -240,11 +248,15 @@ func runSingleStmt(stmt ast.Stmt, env *Env) (interface{}, error) {
 		for {
 			exp := stmt.(*ast.LoopStmt).Expr
 			if exp != nil {
-				if result, err := evalExpr(exp, newEnv); err != nil {
+				result, err := evalExpr(exp, newEnv)
+				if err != nil {
 					return nil, err
-				} else if b, ok := result.(bool); !ok {
-					return nil, fmt.Errorf("for condition type %s cannot convert to bool", reflect.TypeOf(result).Kind())
-				} else if !b {
+				}
+				b, err := strictToBool(result, "if condition")
+				if err != nil {
+					return nil, err
+				}
+				if !b {
 					break
 				}
 			}
