@@ -23,6 +23,8 @@ under development
 * "while (expression){statements}" can be "for expression {statements}"
 
 # To be fixed
+* 1==true, 0==false
+* NR,$n is not set in END{} 
 * REGEXP "/.../" -> /.../
 * function args cannot be omitted (like sub(r, t[, s]))
 * function match() does not set RSTART, RLENGTH
