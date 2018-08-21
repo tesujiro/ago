@@ -172,6 +172,10 @@ stmt
 	{
 		$$ = &ast.LoopStmt{Stmts: $4, Expr: $2}
 	}
+	| DO '{' stmts '}' WHILE '(' expr ')'
+	{
+		$$ = &ast.DoLoopStmt{Stmts: $3, Expr: $7}
+	}
 	| BREAK
 	{
 		$$ = &ast.BreakStmt{}

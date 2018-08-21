@@ -33,6 +33,7 @@ var tokenTab = map[string]int{
 	"func":     FUNC,
 	"return":   RETURN,
 	"while":    WHILE,
+	"do":       DO,
 }
 
 var compSymbols = map[string]int{
