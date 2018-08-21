@@ -201,6 +201,12 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{a=0;for a { a= a+1 };print a}", ok: "error:for condition type int cannot convert to bool\n"},
 		//{script: "BEGIN{a=0;for{ a=a+1;if a==10 { return a; };};print a}", ok: "10\n"},
 		//{script: "BEGIN{a=0;for{ a=10;return a };print a}", ok: "10\n"},
+		// for statement == while statement
+		{script: "BEGIN{a=0;while{ if a==10 { break }; a= a+1 };print a}", ok: "10\n"},
+		{script: "BEGIN{a=0;b=0;while{ a=a+1;if a==10 { break }; if b==5 {continue};b= b+1 };print b}", ok: "5\n"},
+		{script: "BEGIN{a=0;while a<=10 { a= a+1 };print a}", ok: "11\n"},
+		{script: "BEGIN{a=0;while b { a= a+1 };print a}", ok: "error:for condition type string cannot convert to bool\n"},
+		{script: "BEGIN{a=0;while a { a= a+1 };print a}", ok: "error:for condition type int cannot convert to bool\n"},
 
 		// map: awk-array (associated array = map)
 		{script: "BEGIN{print a[1]}", ok: "\n"},

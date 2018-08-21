@@ -6,7 +6,7 @@ under development
 
 # Still not implemented
 * printf, sprintf
-* do while, while
+* do while
 * for(;;)
 * next, nextfile
 * getline
@@ -15,11 +15,12 @@ under development
 * var: FNR, OFMT, RS, ENVIRON, CONVFMT, RSTART, RLENGTH
 
 # Difference from AWK
-* variables name beginning with uppercase are global, others are local
+* {} block has localscope. variables name beginning with uppercase are global, others are local
 * define func in action (ex. { swap=func(a,b){return b,a}; print swap("a","b"); } // b a )
 * anonymous func (ex. { print func(a,b){return b,a}("a","b"); } // b a )
 * function call is call by value.
 * sub,gsub returns replaced string
+* "while (expression){statements}" can be "for expression {statements}"
 
 # To be fixed
 * cannot omit {} . (ex.'NF>10' : error)

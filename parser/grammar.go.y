@@ -41,7 +41,7 @@ var defaultExprs = []ast.Expr{&defaultExpr}
 %token<token> PLUSPLUS MINUSMINUS PLUSEQ MINUSEQ MULEQ DIVEQ
 %token<token> DELETE IN
 %token<token> BEGIN END PRINT REGEXP
-%token<token> IF ELSE FOR BREAK CONTINUE
+%token<token> IF ELSE FOR WHILE DO BREAK CONTINUE
 %token<token> FUNC RETURN
 
 %right '='
@@ -164,6 +164,14 @@ stmt
 		$$ = &ast.LoopStmt{Stmts: $3}
 	}
 	| FOR expr '{' stmts '}'
+	{
+		$$ = &ast.LoopStmt{Stmts: $4, Expr: $2}
+	}
+	| WHILE '{' stmts '}'
+	{
+		$$ = &ast.LoopStmt{Stmts: $3}
+	}
+	| WHILE expr '{' stmts '}'
 	{
 		$$ = &ast.LoopStmt{Stmts: $4, Expr: $2}
 	}
