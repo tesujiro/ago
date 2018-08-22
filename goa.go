@@ -147,14 +147,19 @@ func runScript(script_reader io.Reader, file_reader io.Reader) {
 		env.Dump()
 	}
 
-	if len(mainRules) > 0 {
-		// MAIN
-		file_scanner := bufio.NewScanner(file_reader)
-		var number int
-		for file_scanner.Scan() {
-			number++
-			file_line := file_scanner.Text()
-			result, err := vm.RunMainRules(mainRules, env, file_line, number)
+	// MAIN
+	file_scanner := bufio.NewScanner(file_reader)
+	var number int
+	for file_scanner.Scan() {
+		number++
+		file_line := file_scanner.Text()
+		env.SetNR(number)
+		if err := env.SetFieldFromLine(file_line); err != nil {
+			fmt.Printf("error:%v\n", err)
+			return
+		}
+		if len(mainRules) > 0 {
+			result, err := vm.RunMainRules(mainRules, env)
 			if err != nil {
 				fmt.Printf("error:%v\n", err)
 				return
@@ -165,11 +170,6 @@ func runScript(script_reader io.Reader, file_reader io.Reader) {
 				env.Dump()
 			}
 			debug.Printf("%#v\n", result)
-			/*
-				for k, v := range env.GetField() {
-					debug.Println("Field[", k, "]=\t", v)
-				}
-			*/
 		}
 	}
 

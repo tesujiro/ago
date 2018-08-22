@@ -49,11 +49,7 @@ func RunBeginRules(rules []ast.Rule, env *Env) (result interface{}, err error) {
 	return
 }
 
-func RunMainRules(rules []ast.Rule, env *Env, line string, line_number int) (result interface{}, err error) {
-	env.setNR(line_number)
-	if err := env.SetFieldFromLine(line); err != nil {
-		return nil, err
-	}
+func RunMainRules(rules []ast.Rule, env *Env) (result interface{}, err error) {
 	for _, rule := range rules {
 		debug.Println(env.builtin.NR, ":MAIN")
 		childEnv := env.NewEnv()

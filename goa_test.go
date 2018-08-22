@@ -384,10 +384,10 @@ func TestGoa(t *testing.T) {
 		// One Liner
 		{script: "1", in: "AAA\n", ok: "AAA\n"},
 		{script: "BEGIN{A[1]=1}A", in: "AAA\n", ok: "error:convert to bool failed in rule expression\n"},
-		//{script: "END{print NR}", in: "AAA\nBBB\nAAA\nDDD\n", ok: "4\n"}, //TODO: fix
-		//{script: "END{print}", in: "AAA\nBBB\nAAA\nDDD\n", ok: "4\n"}, //TODO: fix
-		//{script: "NF", in: "\n\nAAA\nBBB\n\n\nAAA\nDDD\n", ok: "4\n"}, //TODO: fix
-		//{script: "NR%2", in: "AAA\nBBB\nAAA\nDDD\n", ok: "BBB\nDDD\n"}, //TODO
+		{script: "END{print NR}", in: "AAA\nBBB\nAAA\nDDD\n", ok: "4\n"},
+		{script: "END{print}", in: "AAA\nBBB\nAAA\nDDD\n", ok: "DDD\n"},
+		//{script: "NF", in: "\n\nAAA\nBBB\n\n\nAAA\nDDD\n", ok: "AAA\nBBB\nAAA\nDDD\n"}, //TODO
+		{script: "NR%2", in: "AAA\nBBB\nAAA\nDDD\n", ok: "AAA\nAAA\n"},
 		{script: "NR%2==0", in: "AAA\nBBB\nAAA\nDDD\n", ok: "BBB\nDDD\n"},
 
 		// MAP

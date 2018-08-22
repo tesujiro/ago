@@ -29,7 +29,7 @@ func NewBuiltIn() *builtin {
 	}
 }
 
-func (e *Env) setNR(i int) {
+func (e *Env) SetNR(i int) {
 	e.builtin.NR = i
 }
 
@@ -122,6 +122,7 @@ func (e *Env) SetFieldFromLine(line string) error {
 	}
 	e.builtin.field[0] = line
 	//e.SetFieldZero()
+	e.SetNF()
 
 	return nil
 }
