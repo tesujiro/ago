@@ -61,14 +61,14 @@ func RunMainRules(rules []ast.Rule, env *Env, line string, line_number int) (res
 		case *ast.ExprPattern:
 			expr := rule.Pattern.(*ast.ExprPattern).Expr
 			if expr != nil {
-				if b, err := evalExpr(expr, childEnv); err != nil {
+				if result, err := evalExpr(expr, childEnv); err != nil {
 					return result, err
 				} else {
-					if reflect.ValueOf(b).Kind() != reflect.Bool {
-						err = fmt.Errorf("pattern is not bool: %v %v", reflect.ValueOf(b).Kind(), b)
-						return result, err
+					b, err := strictToBool(result, "rule expression")
+					if err != nil {
+						return nil, err
 					}
-					if reflect.ValueOf(b).Interface() != true {
+					if !b {
 						debug.Printf("Line: %v skipped\n", childEnv.builtin.NR)
 						continue
 					}
