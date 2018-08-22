@@ -150,7 +150,7 @@ func runScript(script_reader io.Reader, file_reader io.Reader) {
 	// MAIN
 	file_scanner := bufio.NewScanner(file_reader)
 	var number int
-	for file_scanner.Scan() {
+	for len(mainRules) > 0 && file_scanner.Scan() {
 		number++
 		file_line := file_scanner.Text()
 		env.SetNR(number)
