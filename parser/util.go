@@ -39,9 +39,10 @@ func Dump(obj interface{}) {
 			}
 		case reflect.Struct:
 			debug.Println(indent, "struct")
+			pf(indent, t.String(), v.Interface())
 			//v = v.Elem()
 			for i := 0; i < v.NumField(); i++ {
-				pf(indent, t.Field(i).Name, v.Field(i).Interface())
+				pf(indent+"\t", t.Field(i).Name, v.Field(i).Interface())
 				//if !v.Elem().IsNil() {
 				if v.Field(i).Kind() != reflect.String && !v.Field(i).IsNil() {
 					dump_helper(next_indent, v.Field(i).Interface())
