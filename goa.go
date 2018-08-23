@@ -147,10 +147,14 @@ func runScript(script_reader io.Reader, file_reader io.Reader) {
 		env.Dump()
 	}
 
+	if len(mainRules) == 0 && len(endRules) == 0 {
+		return
+	}
+
 	// MAIN
 	file_scanner := bufio.NewScanner(file_reader)
 	var number int
-	for len(mainRules) > 0 && file_scanner.Scan() {
+	for file_scanner.Scan() {
 		number++
 		file_line := file_scanner.Text()
 		env.SetNR(number)
