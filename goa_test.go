@@ -292,6 +292,7 @@ func TestGoa(t *testing.T) {
 		{script: "{A[$0]++} END{for(key in A){print key}}", in: "AAA", ok: "AAA\n"},
 
 		// function
+		{script: "BEGIN{add=func(a,b){return a+b}; x=add(10,5);print x}", ok: "15\n"},
 		{script: "BEGIN{add=func(a,b){return a+b}; print add(10,5)}", ok: "15\n"},
 		{script: "BEGIN{add=func(a,b){return a+b}; print add(1.1,2.1)}", ok: "3.2\n"},
 		{script: "BEGIN{add=func(a,b){return a+b}; print add(\"あ\",\"いう\")}", ok: "あいう\n"},
@@ -414,7 +415,6 @@ func TestGoa(t *testing.T) {
 		// One Liner
 		{script: "1", in: "AAA\n", ok: "AAA\n"},
 		{script: "BEGIN{A[1]=1}A", in: "AAA\n", ok: "error:convert to bool failed in rule expression\n"},
-		{script: "END{print NR}", in: "AAA\nBBB\nAAA\nDDD\n", ok: "4\n"},
 		{script: "END{print}", in: "AAA\nBBB\nAAA\nDDD\n", ok: "DDD\n"},
 		//{script: "NF", in: "\n\nAAA\nBBB\n\n\nAAA\nDDD\n", ok: "AAA\nBBB\nAAA\nDDD\n"}, //TODO
 		//{script: "$0", in: "\n\nAAA\nBBB\n\n\nAAA\nDDD\n", ok: "AAA\nBBB\nAAA\nDDD\n"}, //TODO
@@ -423,8 +423,11 @@ func TestGoa(t *testing.T) {
 		{script: "NR%2", in: "AAA\nBBB\nAAA\nDDD\n", ok: "AAA\nAAA\n"},
 		{script: "NR%2==0", in: "AAA\nBBB\nAAA\nDDD\n", ok: "BBB\nDDD\n"},
 		{script: "{N+=length($0) } END{print N}", in: "AAA\nBBB\n", ok: "6\n"},
-		//{script: "{N-=length($0) } END{print N}", in: "AAA\nBBB\n", ok: "6\n"}, //TOFIX
 		{script: "{N+=NF} END{print N}", in: "AAA\nBBB\n", ok: "2\n"},
+		{script: "END{print NR}", in: "AAA\nBBB\nAAA\nDDD\n", ok: "4\n"},
+		//{script: "{$0=gsub(\"/[ \\t]+$/\", \"\",$0)}1", in: "AAA \tBBB\n", ok: "AAABBB\n"},  //TODO
+		//{script: "{sub(\"/[ \t]+$/\", \"\")}1", in: "AAA \tBBB\n", ok: "AAABBB\n"}, //TODO
+		//{script: "!a[$0]++", in: "AAA\nAAA\nAAA\nDDD\n", ok: "AAA\nDDD\n"}, //TODO
 
 		// MAP
 		{script: `{
