@@ -8,8 +8,6 @@ import (
 	"testing"
 )
 
-const scriptPath = "./goa_test.json"
-
 type test struct {
 	script string
 	in     string
@@ -220,6 +218,14 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{a=1;while a { a= a-1 };print a}", ok: "0\n"},
 		{script: "BEGIN{s=\"\";while s { s= s+1 };print s}", ok: "\n"},
 		{script: "BEGIN{s=\"str\";while s { s= \"\" };print s}", ok: "\n"},
+		// for;;{}
+		{script: "BEGIN{for i=1;i<=3;i++{print i}}", ok: "1\n2\n3\n"},
+		{script: "BEGIN{for 1;i<=3;i++{print i}}", ok: "\n1\n2\n3\n"},
+		{script: "BEGIN{for 1;1;i++{print i;if i==3{break}}}", ok: "\n1\n2\n3\n"},
+		{script: "BEGIN{for ;1;i++{print i;if i==3{break}}}", ok: "\n1\n2\n3\n"},
+		{script: "BEGIN{for 1;;i++{print i;if i==3{break}}}", ok: "\n1\n2\n3\n"},
+		{script: "BEGIN{for ;;i++{print i;if i==3{break}}}", ok: "\n1\n2\n3\n"},
+		{script: "BEGIN{for ;;{print i;if i==3{break};i++}}", ok: "\n1\n2\n3\n"},
 		// do while statement
 		{script: "BEGIN{a=0;do{a=a+1} while(a<10);print a}", ok: "10\n"},
 		{script: "BEGIN{a=0;do{a=a+1;if a==5{break}} while(a<10);print a}", ok: "5\n"},
@@ -312,6 +318,7 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{print 1}END{print 2}", ok: "1\n2\n"},
 		{script: "function one(){return 1}BEGIN{print one()}", ok: "1\n"},
 		{script: "func one(){return 1}BEGIN{print one()}", ok: "1\n"},
+		//{script: "func printOne(){print 1}BEGIN{printOne()}", ok: "1\n"}, //TOFIX
 
 		// command parameter
 
@@ -411,8 +418,6 @@ CCC 2
 ZZZ 1
 `},
 	}
-
-	//fmt.Println("tests:", tests)
 
 	realStdin := os.Stdin
 	realStdout := os.Stdout

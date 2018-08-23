@@ -1,6 +1,7 @@
 package vm
 
 import (
+	"fmt"
 	"testing"
 )
 
@@ -18,6 +19,7 @@ func TestSetGet(t *testing.T) {
 		{checkSet: true, checkDefine: false, key: "KEY", value: 123},
 		{checkSet: false, checkDefine: true, key: "KEY", value: 123},
 	}
+	fmt.Printf("TESTSetGet\n")
 	for _, c := range cases {
 		e := NewEnv()
 		if c.checkSet {

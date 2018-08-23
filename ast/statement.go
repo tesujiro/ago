@@ -31,6 +31,13 @@ type LoopStmt struct {
 	Stmts []Stmt
 }
 
+type CForLoopStmt struct {
+	Stmt1 Stmt
+	Expr2 Expr
+	Expr3 Expr
+	Stmts []Stmt
+}
+
 type DoLoopStmt struct {
 	Expr  Expr
 	Stmts []Stmt

@@ -276,6 +276,53 @@ func runSingleStmt(stmt ast.Stmt, env *Env) (interface{}, error) {
 			}
 		}
 		return nil, nil
+	case *ast.CForLoopStmt:
+		stmt1 := stmt.(*ast.CForLoopStmt).Stmt1
+		expr2 := stmt.(*ast.CForLoopStmt).Expr2
+		expr3 := stmt.(*ast.CForLoopStmt).Expr3
+		stmts := stmt.(*ast.CForLoopStmt).Stmts
+		newEnv := env.NewEnv()
+		if stmt1 != nil {
+			_, err := run([]ast.Stmt{stmt1}, newEnv)
+			if err != nil {
+				return nil, err
+			}
+		}
+		for {
+			if expr2 != nil {
+				result, err := evalExpr(expr2, newEnv)
+				if err != nil {
+					return nil, err
+				}
+				b, err := strictToBool(result, "for loop condition")
+				if err != nil {
+					return nil, err
+				}
+				if !b {
+					break
+				}
+			}
+			ret, err := run(stmts, newEnv)
+			if err == ErrReturn {
+				return ret, nil
+			}
+			if err == ErrBreak {
+				break
+			}
+			if err == ErrContinue {
+				continue
+			}
+			if err != nil {
+				return nil, err
+			}
+			if expr3 != nil {
+				_, err := evalExpr(expr3, newEnv)
+				if err != nil {
+					return nil, err
+				}
+			}
+		}
+		return nil, nil
 	case *ast.DoLoopStmt:
 		newEnv := env.NewEnv()
 		for {

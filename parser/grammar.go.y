@@ -16,9 +16,11 @@ var defaultExprs = []ast.Expr{&defaultExpr}
 	rules		[]ast.Rule
 	pattern		ast.Pattern
 	stmt		ast.Stmt
+	opt_stmt	ast.Stmt
 	stmts		[]ast.Stmt
 	stmt_if		ast.Stmt
 	expr		ast.Expr
+	opt_expr	ast.Expr
 	exprs		[]ast.Expr
 	opt_exprs	[]ast.Expr
 	ident_args	[]string
@@ -28,10 +30,12 @@ var defaultExprs = []ast.Expr{&defaultExpr}
 %type <rule>		rule
 %type <pattern> 	pattern
 %type <stmt>		stmt
+%type <opt_stmt>	opt_stmt
 %type <stmts>		action
 %type <stmts>		stmts
 %type <stmt_if>		stmt_if
 %type <expr>		expr
+%type <opt_expr>	opt_expr
 %type <exprs>		exprs
 %type <opt_exprs>	opt_exprs
 %type <ident_args>	ident_args
@@ -163,6 +167,10 @@ stmt
 	| FOR expr '{' stmts '}'
 	{
 		$$ = &ast.LoopStmt{Stmts: $4, Expr: $2}
+	}
+	| FOR opt_stmt ';' opt_expr ';' opt_expr '{' stmts '}'
+	{
+		$$ = &ast.CForLoopStmt{Stmt1: $2, Expr2: $4, Expr3: $6, Stmts: $8}
 	}
 	| WHILE '{' stmts '}'
 	{
@@ -408,6 +416,26 @@ ident_args
 nls
 	: '\n'
 	| nls '\n'
+
+opt_stmt
+	: /* empty */
+	{
+		$$ = nil
+	}
+	| stmt
+	{
+		$$ = $1
+	}
+
+opt_expr
+	: /* empty */
+	{
+		$$ = nil
+	}
+	| expr
+	{
+		$$ = $1
+	}
 
 opt_nls
 	: /* empty */

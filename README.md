@@ -6,12 +6,14 @@ under development
 
 # Still not implemented
 * printf, sprintf
-* for(;;)
 * next, nextfile
 * getline
 * exit
 * func: rand, srand, int, split, system
 * var: FNR, OFMT, RS, ENVIRON, CONVFMT, RSTART, RLENGTH
+* print error with line number
+* datetime funcs
+* asort(),asorti()
 
 # Difference from AWK
 * {} block has localscope. variables name beginning with uppercase are global, others are local
@@ -22,6 +24,7 @@ under development
 * if, for, while conditions do not need parentheses, statements need curly braces. (ex. for a<10 {a=a+1}) 
 
 # To be fixed
+* panic func without return
 * set NF=1 when empty line
 * REGEXP "/.../" -> /.../
 * function args cannot be omitted (like sub(r, t[, s]))
@@ -29,5 +32,3 @@ under development
 * FS=="\n" : error
 * ++A : invalid operation
 * A++ : incremented before evaluation
-* datetime funcs
-* asort(),asorti()
