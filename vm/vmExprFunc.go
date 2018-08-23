@@ -170,14 +170,17 @@ func callArgs(f reflect.Value, callExpr *ast.CallExpr, env *Env) ([]reflect.Valu
 
 func makeResult(ret []reflect.Value, isGoFunction bool) (interface{}, error) {
 	debug.Println("ret length:", len(ret))
+	// FOR DEBUB
 	for i, _ := range ret {
 		a := ret[i]
 		debug.Printf("ret[%d]           : \tType:%v\tValue:%v\tKind():%v\n", i, reflect.TypeOf(a), reflect.ValueOf(a), reflect.ValueOf(a).Kind())
 		b := a.Interface()
 		debug.Printf("->Interface()    : \tType:%v\tValue:%v\tKind():%v\n", reflect.TypeOf(b), reflect.ValueOf(b), reflect.ValueOf(b).Kind())
 		if c, ok := b.(reflect.Value); ok {
-			d := c.Interface()
-			debug.Printf("->(reflect.Value)    : \tType:%v\tValue:%v\tKind():%v\n", reflect.TypeOf(d), reflect.ValueOf(d), reflect.ValueOf(d).Kind())
+			if c.IsValid() {
+				d := c.Interface()
+				debug.Printf("->(reflect.Value)    : \tType:%v\tValue:%v\tKind():%v\n", reflect.TypeOf(d), reflect.ValueOf(d), reflect.ValueOf(d).Kind())
+			}
 		}
 	}
 	if isGoFunction {
@@ -199,6 +202,12 @@ func makeResult(ret []reflect.Value, isGoFunction bool) (interface{}, error) {
 	}
 	if !ret[1].IsValid() {
 		return nil, fmt.Errorf("user defined function value 2 did not return reflect value type but returned invalid type")
+	}
+	if !ret[0].Interface().(reflect.Value).IsValid() {
+		ret[0] = reflect.ValueOf(reflect.ValueOf(""))
+	}
+	if !ret[1].Interface().(reflect.Value).IsValid() {
+		ret[1] = reflect.ValueOf(reflect.ValueOf(errors.New("")))
 	}
 	if ret[0].Type() != reflect.TypeOf(reflect.Value{}) {
 		return nil, fmt.Errorf("user defined function value 1 did not return reflect value type but returned %v type", ret[0].Type().String())

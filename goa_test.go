@@ -318,7 +318,7 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{print 1}END{print 2}", ok: "1\n2\n"},
 		{script: "function one(){return 1}BEGIN{print one()}", ok: "1\n"},
 		{script: "func one(){return 1}BEGIN{print one()}", ok: "1\n"},
-		//{script: "func printOne(){print 1}BEGIN{printOne()}", ok: "1\n"}, //TOFIX
+		{script: "func printOne(){print 1}BEGIN{printOne()}", ok: "1\n"},
 
 		// command parameter
 
