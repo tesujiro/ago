@@ -44,7 +44,7 @@ func Dump(obj interface{}) {
 			for i := 0; i < v.NumField(); i++ {
 				pf(indent+"\t", t.Field(i).Name, v.Field(i).Interface())
 				//if !v.Elem().IsNil() {
-				if v.Field(i).Kind() != reflect.String && !v.Field(i).IsNil() {
+				if v.Field(i).Kind() != reflect.String && v.Field(i).Kind() != reflect.Struct && !v.Field(i).IsNil() {
 					dump_helper(next_indent, v.Field(i).Interface())
 				}
 			}
