@@ -60,6 +60,7 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{a=123;a--;print a}", ok: "122\n"},
 		{script: "BEGIN{a=123.4;a--;print a}", ok: "122.4\n"},
 		{script: "BEGIN{a=123;a+=4;print a}", ok: "127\n"},
+		{script: "BEGIN{a+=4;print a}", ok: "4\n"},
 		{script: "BEGIN{a=123;a-=4;print a}", ok: "119\n"},
 		{script: "BEGIN{a=123;a*=4;print a}", ok: "492\n"},
 		{script: "BEGIN{a=123;a/=4;print a}", ok: "30\n"},
@@ -376,6 +377,7 @@ func TestGoa(t *testing.T) {
 
 		// field
 		{script: "{print $1}", in: "Hello World!\n", ok: "Hello\n"},
+		{script: "{print length($1)}", in: "Hello World!\n", ok: "5\n"},
 		{script: "$1==\"AAA\"{print;COUNT++} END{print COUNT}", in: "AAA BBB CCC\nAAA BBB CCC\n", ok: "AAA BBB CCC\nAAA BBB CCC\n2\n"},
 		{script: "NR==1{$2=$1 ;print $0,NF} NR==2{$5=$1; print $0,NF}", in: "AAA BBB CCC\nAAA BBB CCC\n", ok: "AAA AAA CCC 3\nAAA BBB CCC  AAA 5\n"},
 		// /start/./stop/
@@ -394,8 +396,13 @@ func TestGoa(t *testing.T) {
 		{script: "END{print NR}", in: "AAA\nBBB\nAAA\nDDD\n", ok: "4\n"},
 		{script: "END{print}", in: "AAA\nBBB\nAAA\nDDD\n", ok: "DDD\n"},
 		//{script: "NF", in: "\n\nAAA\nBBB\n\n\nAAA\nDDD\n", ok: "AAA\nBBB\nAAA\nDDD\n"}, //TODO
+		//{script: "$0", in: "\n\nAAA\nBBB\n\n\nAAA\nDDD\n", ok: "AAA\nBBB\nAAA\nDDD\n"}, //TODO
+		//{script: "\"/./\"", in: "\n\nAAA\nBBB\n\n\nAAA\nDDD\n", ok: "AAA\nBBB\nAAA\nDDD\n"}, //TODO
+		{script: "NR==1", in: "AAA\nBBB\nAAA\nDDD\n", ok: "AAA\n"},
 		{script: "NR%2", in: "AAA\nBBB\nAAA\nDDD\n", ok: "AAA\nAAA\n"},
 		{script: "NR%2==0", in: "AAA\nBBB\nAAA\nDDD\n", ok: "BBB\nDDD\n"},
+		//{script: "{N+=length($0)} END{print N}", in: "AAA\nBBB\n", ok: "6\n"}, //TOFIX
+		{script: "{N+=NF} END{print N}", in: "AAA\nBBB\n", ok: "2\n"},
 
 		// MAP
 		{script: `{
