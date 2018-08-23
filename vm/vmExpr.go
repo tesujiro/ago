@@ -209,6 +209,7 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 		if err != nil {
 			return nil, err
 		}
+		//fmt.Printf("ast.CompExpr: result:%v\n", result)
 		return evalAssExpr(left, result, env)
 
 	case *ast.BinOpExpr:
@@ -273,6 +274,9 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 				return reflect.AppendSlice(reflect.ValueOf(left), reflect.ValueOf(right)).Interface(), nil
 			case l_kind == reflect.Slice || l_kind == reflect.Array:
 				return reflect.Append(reflect.ValueOf(left), reflect.ValueOf(right)).Interface(), nil
+			case r_kind == reflect.Slice || r_kind == reflect.Array:
+				right = reflect.ValueOf(right).Index(0).Interface()
+				fallthrough
 			case l_kind == reflect.Float64 || r_kind == reflect.Float64:
 				return toFloat64(left) + toFloat64(right), nil
 			case l_kind == reflect.Int || r_kind == reflect.Int:
@@ -283,9 +287,17 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 				return toFloat64(left) + toFloat64(right), nil
 			}
 		case "-":
+			//TODO difference from "+"
 			l_kind := reflect.ValueOf(left).Kind()
 			r_kind := reflect.ValueOf(right).Kind()
 			switch {
+			case l_kind == reflect.Slice || l_kind == reflect.Array:
+				return 0, nil
+			case r_kind == reflect.Slice || r_kind == reflect.Array:
+				right = reflect.ValueOf(right).Index(0).Interface()
+				fallthrough
+			case l_kind == reflect.Float64 || r_kind == reflect.Float64:
+				return toFloat64(left) - toFloat64(right), nil
 			case l_kind == reflect.Int && r_kind == reflect.Int:
 				return toInt(left) - toInt(right), nil
 			default:
@@ -295,6 +307,11 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 			l_kind := reflect.ValueOf(left).Kind()
 			r_kind := reflect.ValueOf(right).Kind()
 			switch {
+			case l_kind == reflect.Slice || l_kind == reflect.Array:
+				return 0, nil
+			case r_kind == reflect.Slice || r_kind == reflect.Array:
+				right = reflect.ValueOf(right).Index(0).Interface()
+				fallthrough
 			case l_kind == reflect.Int && r_kind == reflect.Int:
 				return toInt(left) * toInt(right), nil
 			default:
@@ -307,6 +324,11 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 				return nil, fmt.Errorf("devision by zero")
 			}
 			switch {
+			case l_kind == reflect.Slice || l_kind == reflect.Array:
+				return 0, nil
+			case r_kind == reflect.Slice || r_kind == reflect.Array:
+				right = reflect.ValueOf(right).Index(0).Interface()
+				fallthrough
 			case l_kind == reflect.Int && r_kind == reflect.Int:
 				return toInt(left) / toInt(right), nil
 			default:

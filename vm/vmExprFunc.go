@@ -188,8 +188,10 @@ func makeResult(ret []reflect.Value, isGoFunction bool) (interface{}, error) {
 		// Golang Pacakage Funcion
 		result := make([]interface{}, len(ret))
 		for k, v := range ret {
+			debug.Printf("ret[%d]           : \tType:%v\tValue:%v\tKind():%v\n", k, reflect.TypeOf(v), reflect.ValueOf(v), reflect.ValueOf(v).Kind())
 			result[k] = v.Interface()
 		}
+		debug.Printf("ret : %v\n", result)
 		return result, nil
 	}
 

@@ -52,6 +52,22 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{print 15.2%7.1}", ok: "1\n"},
 		{script: "BEGIN{a=123;print a}", ok: "123\n"},
 		{script: "BEGIN{map=123;print map}", ok: "123\n"},
+		{script: "BEGIN{a[1]=1;a[2]=10;print a[1]+a[2]}", ok: "11\n"},
+		{script: "BEGIN{a[1]=1;a[2]=10;print a[1]-a[2]}", ok: "-9\n"},
+		{script: "BEGIN{a[1]=10;a[2]=5;print a[1]*a[2]}", ok: "50\n"},
+		{script: "BEGIN{a[1]=10;a[2]=5;print a[1]/a[2]}", ok: "2\n"},
+		{script: "BEGIN{a[1]=1;a[2]=10;print a+a[2]}", ok: "10\n"},
+		{script: "BEGIN{a[1]=1;a[2]=10;print a-a[2]}", ok: "-10\n"},
+		{script: "BEGIN{a[1]=10;a[2]=5;print a*a[2]}", ok: "0\n"},
+		{script: "BEGIN{a[1]=10;a[2]=5;print a/a[2]}", ok: "0\n"},
+		{script: "BEGIN{a[1]=1;a[2]=10;print a[1]+a}", ok: "1\n"},
+		{script: "BEGIN{a[1]=1;a[2]=10;print a[1]-a}", ok: "1\n"},
+		{script: "BEGIN{a[1]=10;a[2]=5;print a[1]*a}", ok: "0\n"},
+		{script: "BEGIN{a[1]=10;a[2]=5;print a[1]/a}", ok: "+Inf\n"}, //TODO: error
+		{script: "BEGIN{a[1]=1;a[2]=10;print 1+length(a)}", ok: "3\n"},
+		{script: "BEGIN{a[1]=1;a[2]=10;print 1-length(a)}", ok: "-1\n"},
+		{script: "BEGIN{a[1]=1;a[2]=10;print 1*length(a)}", ok: "2\n"},
+		{script: "BEGIN{a[1]=1;a[2]=10;print 1/length(a)}", ok: "0\n"},
 		// composite expression
 		{script: "BEGIN{a=123;a++;print a}", ok: "124\n"},
 		//{script: "BEGIN{a=123;print a++}", ok: "123\n"}, //TODO:AWK
@@ -175,6 +191,11 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{a=10;a-=2;print a}", ok: "8\n"},
 		{script: "BEGIN{a=10;a*=2;print a}", ok: "20\n"},
 		{script: "BEGIN{a=10;a/=2;print a}", ok: "5\n"},
+		{script: "BEGIN{a=\"abc\";a+=\"xyz\";print a}", ok: "abcxyz\n"},
+		// TODO & TOFIX
+		//{script: "BEGIN{a=\"abc\";a-=\"xyz\";print a}", ok: "abcxyz\n"},
+		//{script: "BEGIN{a=\"1\";a+=\"2\";print a}", ok: "3\n"}, //TOFIX
+		//{script: "BEGIN{a=\"abc\";a-=\"xyz\";print a}", ok: "abcxyz\n"},
 
 		// multi expressions
 		{script: "BEGIN{a,b=1,2;print a}", ok: "1\n"},
@@ -401,7 +422,8 @@ func TestGoa(t *testing.T) {
 		{script: "NR==1", in: "AAA\nBBB\nAAA\nDDD\n", ok: "AAA\n"},
 		{script: "NR%2", in: "AAA\nBBB\nAAA\nDDD\n", ok: "AAA\nAAA\n"},
 		{script: "NR%2==0", in: "AAA\nBBB\nAAA\nDDD\n", ok: "BBB\nDDD\n"},
-		//{script: "{N+=length($0)} END{print N}", in: "AAA\nBBB\n", ok: "6\n"}, //TOFIX
+		{script: "{N+=length($0) } END{print N}", in: "AAA\nBBB\n", ok: "6\n"},
+		//{script: "{N-=length($0) } END{print N}", in: "AAA\nBBB\n", ok: "6\n"}, //TOFIX
 		{script: "{N+=NF} END{print N}", in: "AAA\nBBB\n", ok: "2\n"},
 
 		// MAP
