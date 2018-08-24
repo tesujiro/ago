@@ -115,6 +115,7 @@ func Import(env *vm.Env) *vm.Env {
 	gsub := func(v1, v2, v3 reflect.Value) string {
 		re := regexp.MustCompile(toStr(v1))
 		result := re.ReplaceAllString(toStr(v3), toStr(v2))
+		//fmt.Printf("lib:gsub v1:%v v2:%v v3:%v\tresult:%#v\n", v1, v2, v3, result)
 		return result
 	}
 	env.Define("gsub", reflect.ValueOf(gsub))

@@ -68,6 +68,7 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 	case *ast.FuncExpr:
 		return (defineFunc(expr.(*ast.FuncExpr), env))
 	case *ast.CallExpr:
+		//fmt.Printf("CallExpr env:%v builtin.field:%#v\n", env, env.builtin.field)
 		return (callFunc(expr.(*ast.CallExpr), env))
 	case *ast.LenExpr:
 		sub := expr.(*ast.LenExpr).Expr
@@ -378,6 +379,11 @@ func evalAssExpr(lexp ast.Expr, val interface{}, env *Env) (interface{}, error) 
 		if !ok {
 			return nil, fmt.Errorf("field index not int :%v", reflect.TypeOf(i_val))
 		}
+		switch val.(type) {
+		case []interface{}:
+			val = reflect.ValueOf(val).Index(0).Interface()
+		}
+		//fmt.Printf("evalAssExpr FieldExpr: index:%v \tval:%v\n", index, val) //TODO
 		val_string, ok := val.(string)
 		if !ok {
 			return nil, fmt.Errorf("field value is not string :%v", reflect.TypeOf(val))

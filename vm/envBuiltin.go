@@ -81,18 +81,46 @@ func (e *Env) SetFieldZero() error {
 }
 
 func (e *Env) SetField(index int, str string) error {
-	if index <= 0 {
+	//fmt.Printf("SetField(%v,%v)\n", index, str)
+	/*
+			fmt.Printf("SetField(%v,%v)\n", index, str)
+			fmt.Printf("e.builtin.field:%#v\n", e.builtin.field)
+			fmt.Printf("e.builtin.field type:%v\n", reflect.TypeOf(e.builtin.field))
+			fmt.Printf("e.builtin.field kind:%v\n", reflect.TypeOf(e.builtin.field).Kind())
+			fmt.Printf("e.builtin.field len:%v\n", len(e.builtin.field))
+			//fmt.Printf("e.builtin.field[0]:%v\n", e.builtin.field[0])
+			//return e.builtin.field[i], nil
+			//fmt.Printf("e.builtin.field[1]:%v\n", e.builtin.field[1])
+			fmt.Printf("e.builtin.field[0:]:%v\n", e.builtin.field[0:])
+			//fmt.Printf("e.builtin.field[1:]:%v\n", e.builtin.field[1:])
+			fmt.Printf("e.builtin.field[:0]:%v\n", e.builtin.field[:0])
+			//fmt.Printf("e.builtin.field[:1]:%v\n", e.builtin.field[:1])
+		zero, _ := e.GetField(0)
+		fmt.Printf("e.builtin.field[0]:%v\n", zero)
+	*/
+	/*
+		getField := func(i int) string {
+			return e.builtin.field[i]
+		}
+	*/
+	//if index <= 0 {
+	if index < 0 {
 		return fmt.Errorf("Field Index Out of Range:%v", index)
 	}
-	if index > len(e.builtin.field) {
+	if index >= len(e.builtin.field) {
 		newField := make([]string, index+1)
 		for i := 1; i < len(e.builtin.field); i++ {
+			//newField[i] = getField(i)
+			//f, _ := e.GetField(i)
+			//newField[i] = f
 			newField[i] = e.builtin.field[i]
 		}
 		e.builtin.field = newField
 	}
 	e.builtin.field[index] = str
-	e.SetFieldZero()
+	if index > 0 {
+		e.SetFieldZero()
+	}
 	return nil
 }
 
