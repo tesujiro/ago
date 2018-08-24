@@ -425,7 +425,6 @@ func TestGoa(t *testing.T) {
 		{script: "{N+=length($0) } END{print N}", in: "AAA\nBBB\n", ok: "6\n"},
 		{script: "{N+=NF} END{print N}", in: "AAA\nBBB\n", ok: "2\n"},
 		{script: "END{print NR}", in: "AAA\nBBB\nAAA\nDDD\n", ok: "4\n"},
-		//{script: "{gsub(\"/[ \\t]+$/\", \"\",$0)}1", in: "AAA \tBBB\n", ok: "AAABBB\n"}, //TODO
 		{script: "{$0=gsub(\"/[ \t]+/\", \"\",$0)}1", in: "AAA \tBBB\n", ok: "AAABBB\n"},
 		//{script: "{sub(\"/[ \t]+$/\", \"\")}1", in: "AAA \tBBB\n", ok: "AAABBB\n"}, //TODO
 		//{script: "!a[$0]++", in: "AAA\nAAA\nAAA\nDDD\n", ok: "AAA\nDDD\n"}, //TODO

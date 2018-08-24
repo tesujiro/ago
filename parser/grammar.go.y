@@ -56,9 +56,10 @@ var defaultExprs = []ast.Expr{&defaultExpr}
 %left EQEQ NEQ
 %left '>' '<' GE LE
 
-%left '+' '-' PLUSPLUS MINUSMINUS
+%left '+' '-'
 %left '*' '/' '%'
-%right UNARY
+%right '!' UNARY
+%left PLUSPLUS MINUSMINUS
 %left '$'
 %left '(' ')'
 
