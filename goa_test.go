@@ -421,6 +421,7 @@ func TestGoa(t *testing.T) {
 
 		// One Liner
 		{script: "1", in: "AAA\n", ok: "AAA\n"},
+		{script: "1;{print \"\"}", in: "AAA\nBBB\n", ok: "AAA\n\nBBB\n\n"},
 		{script: "BEGIN{A[1]=1}A", in: "AAA\n", ok: "error:convert to bool failed in rule expression\n"},
 		{script: "END{print}", in: "AAA\nBBB\nAAA\nDDD\n", ok: "DDD\n"},
 		//{script: "NF", in: "\n\nAAA\nBBB\n\n\nAAA\nDDD\n", ok: "AAA\nBBB\nAAA\nDDD\n"}, //TODO
@@ -435,6 +436,11 @@ func TestGoa(t *testing.T) {
 		{script: "{$0=gsub(\"/[ \t]+/\", \"\",$0)}1", in: "AAA \tBBB\n", ok: "AAABBB\n"},
 		{script: "{$0=sub(\"/[ \t]+/\", \"\",$0)}1", in: "AAA \tBBB\n", ok: "AAABBB\n"}, //TODO
 		//{script: "!a[$0]++{print a[$0]}", in: "AAA\nAAA\nAAA\nDDD\n", ok: "AAA\nDDD\n"},
+		{script: "{A[C++]=$0}END{for i=C;i>0;i--{print A[i]}}", in: "AAA\nBBB\nAAA\nDDD\n", ok: "DDD\nAAA\nBBB\nAAA\n"},
+		{script: "\"/A+/\"{N++};END{print N+0}", in: "AAA\nBBB\nAAA\nDDD\n", ok: "2\n"},
+		//{script: "NF{$0=++a \" :\" $0};1", in: "AAA\n\nBBB\n", ok: "1 AAA\n\n2 BBB\n"},
+		//{script: "{print (NF? ++a \" :\" :\"\") $0}", in: "AAA\n\nBBB\n", ok: "1 AAA\n\n2 BBB\n"},
+		//{script: "$1+0 > Max {Max=$1; Maxline=$0}; END{ print Max, Maxline}", in: "10 AAA\n30 BBB\n20 CCC\n10 DDD\n", ok: "30 30 BBB\n"},
 
 		// MAP
 		{script: `{

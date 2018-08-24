@@ -15,6 +15,7 @@ under development
 * print error with line number
 * datetime funcs
 * asort(),asorti()
+* ternary operator (V?A:B)
 
 # Difference from AWK
 * {} block has localscope. variables name beginning with uppercase are global, others are local
