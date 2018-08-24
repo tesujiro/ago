@@ -396,6 +396,13 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{print tolower(\"Hello, World!\")}", ok: "hello, world!\n"},
 		{script: "BEGIN{print toupper(\"\")}", ok: "\n"},
 		{script: "BEGIN{print toupper(\"Hello, World!\")}", ok: "HELLO, WORLD!\n"},
+		// lib: sub,gsub
+		{script: "BEGIN{print sub(\"/a/\",\"A\",\"aabbaacc\")}", ok: "Aabbaacc\n"},
+		{script: "BEGIN{print gsub(\"/a/\",\"A\",\"aabbaacc\")}", ok: "AAbbAAcc\n"},
+		{script: "BEGIN{print sub(\"/a+/\",\"A\",\"aabbaacc\")}", ok: "Abbaacc\n"},
+		{script: "BEGIN{print gsub(\"/^a+/\",\"A\",\"aabbaacc\")}", ok: "Abbaacc\n"},
+		{script: "BEGIN{print sub(\"/^a+/\",\"\",\"aabbaacc\")}", ok: "bbaacc\n"},
+		{script: "BEGIN{print sub(\"/c+$/\",\"\",\"aabbaacc\")}", ok: "aabbaa\n"},
 
 		// field
 		{script: "{print $1}", in: "Hello World!\n", ok: "Hello\n"},
@@ -426,8 +433,8 @@ func TestGoa(t *testing.T) {
 		{script: "{N+=NF} END{print N}", in: "AAA\nBBB\n", ok: "2\n"},
 		{script: "END{print NR}", in: "AAA\nBBB\nAAA\nDDD\n", ok: "4\n"},
 		{script: "{$0=gsub(\"/[ \t]+/\", \"\",$0)}1", in: "AAA \tBBB\n", ok: "AAABBB\n"},
-		//{script: "{sub(\"/[ \t]+$/\", \"\")}1", in: "AAA \tBBB\n", ok: "AAABBB\n"}, //TODO
-		//{script: "!a[$0]++", in: "AAA\nAAA\nAAA\nDDD\n", ok: "AAA\nDDD\n"}, //TODO
+		{script: "{$0=sub(\"/[ \t]+/\", \"\",$0)}1", in: "AAA \tBBB\n", ok: "AAABBB\n"}, //TODO
+		//{script: "!a[$0]++{print a[$0]}", in: "AAA\nAAA\nAAA\nDDD\n", ok: "AAA\nDDD\n"},
 
 		// MAP
 		{script: `{

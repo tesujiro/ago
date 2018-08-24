@@ -5,7 +5,7 @@ go on awk (just like Unagi on Katsudon)
 under development
 
 # Still not implemented
-* sub
+* string concatenate
 * printf, sprintf
 * next, nextfile
 * getline

@@ -64,6 +64,7 @@ func RunMainRules(rules []ast.Rule, env *Env) (result interface{}, err error) {
 					if err != nil {
 						return nil, err
 					}
+					//fmt.Printf("vmRule ExprPattern result:%#v bool:%v\n", result, b)
 					if !b {
 						debug.Printf("Line: %v skipped\n", childEnv.builtin.NR)
 						continue
