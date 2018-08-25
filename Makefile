@@ -11,6 +11,10 @@ goa : goa.go ./parser/*.y ./parser/*.go ./ast/*.go ./vm/*.go ./lib/*.go
 test: ./*_test.go ./vm/*_test.go ./parser/grammar.go
 	go test -v -count=1 . ./vm
 
+.PHONY: testcase
+testcase: ./*_test.go ./vm/*_test.go ./parser/grammar.go
+	TESTCASE=1 go test -v -count=1 .
+
 .PHONY: prof
 prof:
 	# make prof ARG=[PPROF PATH]

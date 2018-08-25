@@ -69,9 +69,10 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{a[1]=1;a[2]=10;print 1*length(a)}", ok: "2\n"},
 		{script: "BEGIN{a[1]=1;a[2]=10;print 1/length(a)}", ok: "0\n"},
 		// composite expression
-		{script: "BEGIN{a=123;a++;print a}", ok: "124\n"},
-		//{script: "BEGIN{a=123;print a++}", ok: "123\n"}, //TODO:AWK
-		//{script: "BEGIN{a=123;print ++a}", ok: "123\n"}, //TODO:AWK
+		{script: "BEGIN{a=123;print ++a;print a}", ok: "124\n124\n"}, //TODO:AWK
+		{script: "BEGIN{a=123;print a++;print a}", ok: "123\n124\n"}, //TODO:AWK
+		{script: "BEGIN{a=123;print --a;print a}", ok: "122\n122\n"}, //TODO:AWK
+		{script: "BEGIN{a=123;print a--;print a}", ok: "123\n122\n"}, //TODO:AWK
 		{script: "BEGIN{a=123.4;a++;print a}", ok: "124.4\n"},
 		{script: "BEGIN{a=123;a--;print a}", ok: "122\n"},
 		{script: "BEGIN{a=123.4;a--;print a}", ok: "122.4\n"},
@@ -472,7 +473,9 @@ ZZZ 1
 
 	for _, test := range tests {
 		//t.Logf("script:%v\n", test.script)
-		//fmt.Fprintf(realStdout, "script:%v\n", test.script)
+		if os.Getenv("TESTCASE") == "1" {
+			fmt.Fprintf(realStdout, "script:%v\n", test.script)
+		}
 
 		// IN PIPE
 		readFromIn, writeToIn, err := os.Pipe()
