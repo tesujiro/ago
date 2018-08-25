@@ -406,6 +406,8 @@ func TestGoa(t *testing.T) {
 
 		// field
 		{script: "{print $1}", in: "Hello World!\n", ok: "Hello\n"},
+		{script: "{print NF}", in: "\n \n\t\naaa\n", ok: "0\n0\n0\n1\n"},
+		{script: "{FS=\":\"}{print NF}", in: "\n:\naaa:bbb\n", ok: "0\n2\n2\n"},
 		{script: "{print length($1)}", in: "Hello World!\n", ok: "5\n"},
 		{script: "$1==\"AAA\"{print;COUNT++} END{print COUNT}", in: "AAA BBB CCC\nAAA BBB CCC\n", ok: "AAA BBB CCC\nAAA BBB CCC\n2\n"},
 		{script: "NR==1{$2=$1 ;print $0,NF} NR==2{$5=$1; print $0,NF}", in: "AAA BBB CCC\nAAA BBB CCC\n", ok: "AAA AAA CCC 3\nAAA BBB CCC  AAA 5\n"},
@@ -424,9 +426,9 @@ func TestGoa(t *testing.T) {
 		{script: "1;{print \"\"}", in: "AAA\nBBB\n", ok: "AAA\n\nBBB\n\n"},
 		{script: "BEGIN{A[1]=1}A", in: "AAA\n", ok: "error:convert to bool failed in rule expression\n"},
 		{script: "END{print}", in: "AAA\nBBB\nAAA\nDDD\n", ok: "DDD\n"},
-		//{script: "NF", in: "\n\nAAA\nBBB\n\n\nAAA\nDDD\n", ok: "AAA\nBBB\nAAA\nDDD\n"}, //TODO
-		//{script: "$0", in: "\n\nAAA\nBBB\n\n\nAAA\nDDD\n", ok: "AAA\nBBB\nAAA\nDDD\n"}, //TODO
-		//{script: "\"/./\"", in: "\n\nAAA\nBBB\n\n\nAAA\nDDD\n", ok: "AAA\nBBB\nAAA\nDDD\n"}, //TODO
+		{script: "NF", in: "\n\nAAA\nBBB\n\n\nAAA\nDDD\n", ok: "AAA\nBBB\nAAA\nDDD\n"},
+		{script: "$0", in: "\n\nAAA\nBBB\n\n\nAAA\nDDD\n", ok: "AAA\nBBB\nAAA\nDDD\n"},
+		{script: "\"/./\"", in: "\n\nAAA\nBBB\n\n\nAAA\nDDD\n", ok: "AAA\nBBB\nAAA\nDDD\n"},
 		{script: "NR==1", in: "AAA\nBBB\nAAA\nDDD\n", ok: "AAA\n"},
 		{script: "NR%2", in: "AAA\nBBB\nAAA\nDDD\n", ok: "AAA\nAAA\n"},
 		{script: "NR%2==0", in: "AAA\nBBB\nAAA\nDDD\n", ok: "BBB\nDDD\n"},
@@ -434,7 +436,7 @@ func TestGoa(t *testing.T) {
 		{script: "{N+=NF} END{print N}", in: "AAA\nBBB\n", ok: "2\n"},
 		{script: "END{print NR}", in: "AAA\nBBB\nAAA\nDDD\n", ok: "4\n"},
 		{script: "{$0=gsub(\"/[ \t]+/\", \"\",$0)}1", in: "AAA \tBBB\n", ok: "AAABBB\n"},
-		{script: "{$0=sub(\"/[ \t]+/\", \"\",$0)}1", in: "AAA \tBBB\n", ok: "AAABBB\n"}, //TODO
+		{script: "{$0=sub(\"/[ \t]+/\", \"\",$0)}1", in: "AAA \tBBB\n", ok: "AAABBB\n"},
 		//{script: "!a[$0]++{print a[$0]}", in: "AAA\nAAA\nAAA\nDDD\n", ok: "AAA\nDDD\n"},
 		{script: "{A[C++]=$0}END{for i=C;i>0;i--{print A[i]}}", in: "AAA\nBBB\nAAA\nDDD\n", ok: "DDD\nAAA\nBBB\nAAA\n"},
 		{script: "\"/A+/\"{N++};END{print N+0}", in: "AAA\nBBB\nAAA\nDDD\n", ok: "2\n"},

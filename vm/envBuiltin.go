@@ -130,6 +130,13 @@ func (e *Env) SetFieldFromLine(line string) error {
 	split := func(regex, line string) {
 		re := regexp.MustCompile(regex) //TODO: STORE PRE COMPILED VALUE TO ENV FOR PERFORMANCE
 		result := re.Split(line, -1)
+		//fmt.Printf("SetFieldFromLine split result:%#v\n", result)
+		if len(result) == 1 && result[0] == "" {
+			result = result[:0]
+		}
+		if e.builtin.FS == " " && len(result) == 2 && result[0] == "" && result[1] == "" {
+			result = result[:0]
+		}
 		e.builtin.field = make([]string, len(result)+1)
 		for i, f := range result {
 			e.builtin.field[i+1] = f

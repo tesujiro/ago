@@ -27,7 +27,6 @@ under development
 
 # To be fixed
 * assighn a value returned from func() to variable
-* set NF=1 when empty line
 * REGEXP "/.../" -> /.../
 * function args cannot be omitted (like sub(r, t[, s]))
 * function match() does not set RSTART, RLENGTH
