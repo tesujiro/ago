@@ -6,6 +6,8 @@ under development
 
 # Still not implemented
 * string concatenate
+* array key predicate (ex: (key in map){}, if !(key in map){}
+* ternary operator (V?A:B)
 * printf, sprintf
 * next, nextfile
 * getline
@@ -15,7 +17,6 @@ under development
 * print error with line number
 * datetime funcs
 * asort(),asorti()
-* ternary operator (V?A:B)
 
 # Difference from AWK
 * {} block has localscope. variables name beginning with uppercase are global, others are local
