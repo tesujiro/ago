@@ -303,13 +303,21 @@ expr
 		$$ = &ast.AnonymousCallExpr{Expr: $1, SubExprs:$3}
 	}
 	/* COMPOSITE EXPRESSION */
+	| PLUSPLUS expr
+	{
+		$$ = &ast.CompExpr{Left: $2, Operator: "++"}
+	}
 	| expr PLUSPLUS
 	{
-		$$ = &ast.CompExpr{Left: $1, Operator: "++"}
+		$$ = &ast.CompExpr{Left: $1, Operator: "++", After:true}
+	}
+	| MINUSMINUS expr
+	{
+		$$ = &ast.CompExpr{Left: $2, Operator: "--"}
 	}
 	| expr MINUSMINUS
 	{
-		$$ = &ast.CompExpr{Left: $1, Operator: "--"}
+		$$ = &ast.CompExpr{Left: $1, Operator: "--", After:true}
 	}
 	| expr PLUSEQ expr
 	{

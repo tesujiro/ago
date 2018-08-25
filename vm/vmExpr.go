@@ -202,6 +202,11 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 		left := expr.(*ast.CompExpr).Left
 		right := expr.(*ast.CompExpr).Right
 		operator := expr.(*ast.CompExpr).Operator
+		if expr.(*ast.CompExpr).After {
+			afterCompExpr := &ast.CompExpr{Left: left, Right: right, Operator: operator, After: false} //After: false!
+			afterStmts = append(afterStmts, &ast.ExprStmt{Expr: afterCompExpr})
+			return evalExpr(left, env)
+		}
 		switch operator {
 		case "++", "--":
 			right = &ast.NumExpr{Literal: "1"}
@@ -444,6 +449,7 @@ func evalAssExpr(lexp ast.Expr, val interface{}, env *Env) (interface{}, error) 
 				return nil, errors.New("value cannot convert to map")
 			}
 			m[index] = val
+			//fmt.Printf("vmExpr evalAssExpr ItemExpr reflect.Map index:%#v val:%#v\n", index, val)
 			return val, nil
 		default:
 			return nil, errors.New("type " + reflect.TypeOf(value).Kind().String() + " does not support index operation")

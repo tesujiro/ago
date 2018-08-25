@@ -24,6 +24,8 @@ func runStmts(stmts []ast.Stmt, env *Env) (interface{}, error) {
 	}
 }
 
+var afterStmts []ast.Stmt
+
 func run(stmts []ast.Stmt, env *Env) (interface{}, error) {
 	//fmt.Println("run -> env.Dump()")
 	//env.Dump()
@@ -46,6 +48,18 @@ func run(stmts []ast.Stmt, env *Env) (interface{}, error) {
 			if err != nil && err != ErrReturn {
 				return nil, err
 			}
+		}
+		for {
+			if len(afterStmts) == 0 {
+				break
+			}
+			stmt := afterStmts[0]
+			afterStmts = afterStmts[1:]
+			result, err = run([]ast.Stmt{stmt}, env)
+			if err != nil {
+				return result, err
+			}
+			//fmt.Println("afterStmt result:", result)
 		}
 	}
 	return result, err

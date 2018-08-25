@@ -26,10 +26,8 @@ under development
 * if, for, while conditions do not need parentheses, statements need curly braces. (ex. for a<10 {a=a+1}) 
 
 # To be fixed
-* assighn a value returned from func() to variable
+* assign a value returned from func() to variable
 * REGEXP "/.../" -> /.../
 * function args cannot be omitted (like sub(r, t[, s]))
 * function match() does not set RSTART, RLENGTH
 * FS=="\n" : error
-* ++A : invalid operation
-* A++ : incremented before evaluation
