@@ -8,6 +8,7 @@ under development
 * string concatenate
 * array key predicate (ex: (key in map){}, if !(key in map){}
 * ternary operator (V?A:B)
+* regular expressin not match "!~"
 * printf, sprintf
 * next, nextfile
 * getline

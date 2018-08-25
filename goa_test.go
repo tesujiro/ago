@@ -442,7 +442,7 @@ func TestGoa(t *testing.T) {
 		{script: "END{print NR}", in: "AAA\nBBB\nAAA\nDDD\n", ok: "4\n"},
 		{script: "{$0=gsub(\"/[ \t]+/\", \"\",$0)}1", in: "AAA \tBBB\n", ok: "AAABBB\n"},
 		{script: "{$0=sub(\"/[ \t]+/\", \"\",$0)}1", in: "AAA \tBBB\n", ok: "AAABBB\n"},
-		//{script: "A !~ $0; {A=$0}", in: "AAA\nAAA\nAAA\nDDD\n\AAA\n", ok: "AAA\nDDD\nAAA\n"},
+		{script: "A !~ $0; {A=$0}", in: "AAA\nAAA\nAAA\nDDD\n\nAAA\n", ok: "AAA\nDDD\nAAA\n"},
 		{script: "!A[$0]++", in: "AAA\nAAA\nAAA\nDDD\nAAA\n", ok: "AAA\nDDD\n"},
 		//{script: "!($0 in A){A[$0];print}", in: "AAA\nAAA\nAAA\nDDD\nAAA\n", ok: "AAA\nDDD\n"},
 		{script: "{A[++C]=$0}END{for i=C;i>0;--i{print A[i]}}", in: "AAA\nBBB\nAAA\nDDD\n", ok: "DDD\nAAA\nBBB\nAAA\n"},
