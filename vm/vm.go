@@ -27,6 +27,12 @@ func toFloat64(val interface{}) float64 {
 	switch reflect.ValueOf(val).Kind() {
 	case reflect.Int64, reflect.Int32, reflect.Int16, reflect.Int8, reflect.Int:
 		return float64(val.(int))
+	case reflect.String:
+		if f, err := strconv.ParseFloat(val.(string), 64); err != nil {
+			return 0
+		} else {
+			return f
+		}
 	}
 	f, _ := val.(float64)
 	return f

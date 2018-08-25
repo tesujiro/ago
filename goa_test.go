@@ -440,7 +440,7 @@ func TestGoa(t *testing.T) {
 		{script: "\"/A+/\"{N++};END{print N+0}", in: "AAA\nBBB\nAAA\nDDD\n", ok: "2\n"},
 		//{script: "NF{$0=++a \" :\" $0};1", in: "AAA\n\nBBB\n", ok: "1 AAA\n\n2 BBB\n"},
 		//{script: "{print (NF? ++a \" :\" :\"\") $0}", in: "AAA\n\nBBB\n", ok: "1 AAA\n\n2 BBB\n"},
-		//{script: "$1+0 > Max {Max=$1; Maxline=$0}; END{ print Max, Maxline}", in: "10 AAA\n30 BBB\n20 CCC\n10 DDD\n", ok: "30 30 BBB\n"},
+		{script: "$1+0 > Max {Max=$1; Maxline=$0}; END{ print Max, Maxline}", in: "10 AAA\n30 BBB\n20 CCC\n10 DDD\n", ok: "30 30 BBB\n"},
 
 		// MAP
 		{script: `{
