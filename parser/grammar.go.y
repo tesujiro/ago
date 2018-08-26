@@ -132,7 +132,7 @@ stmts
 	}
 
 stmt
-	: expr '=' expr
+	: variable '=' expr
 	{
 		$$ = &ast.AssStmt{Left: []ast.Expr{$1}, Right: []ast.Expr{$3}}
 	}
@@ -263,19 +263,19 @@ expr
 		$$ = &ast.FuncExpr{Args: $3, Stmts: $6}
 	}
 	/* COMPOSITE EXPRESSION */
-	| expr PLUSEQ expr
+	| variable PLUSEQ expr
 	{
 		$$ = &ast.CompExpr{Left: $1, Operator: "+=", Right: $3}
 	}
-	| expr MINUSEQ expr
+	| variable MINUSEQ expr
 	{
 		$$ = &ast.CompExpr{Left: $1, Operator: "-=", Right: $3}
 	}
-	| expr MULEQ expr
+	| variable MULEQ expr
 	{
 		$$ = &ast.CompExpr{Left: $1, Operator: "*=", Right: $3}
 	}
-	| expr DIVEQ expr
+	| variable DIVEQ expr
 	{
 		$$ = &ast.CompExpr{Left: $1, Operator: "/=", Right: $3}
 	}
@@ -341,7 +341,7 @@ simp_expr
 		$$ = &ast.StringExpr{Literal: $1.Literal}
 	}
 	/* REGEXP */
-	| expr '~' REGEXP
+	| simp_expr '~' REGEXP
 	{
 		$$ = &ast.MatchExpr{Expr: $1, RegExpr: $3.Literal}
 	}
