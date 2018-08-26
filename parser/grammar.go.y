@@ -38,13 +38,13 @@ var defaultExprs = []ast.Expr{&defaultExpr}
 %type <exprs>		opt_exprs
 %type <ident_args>	ident_args
 
-%token<token> IDENT NUMBER STRING TRUE FALSE NIL
-%token<token> EQEQ NEQ GE LE ANDAND OROR LEN 
-%token<token> PLUSPLUS MINUSMINUS PLUSEQ MINUSEQ MULEQ DIVEQ
-%token<token> DELETE IN
-%token<token> BEGIN END PRINT REGEXP
-%token<token> IF ELSE FOR WHILE DO BREAK CONTINUE
-%token<token> FUNC RETURN
+%token <token> IDENT NUMBER STRING TRUE FALSE NIL
+%token <token> EQEQ NEQ GE LE ANDAND OROR LEN 
+%token <token> PLUSPLUS MINUSMINUS PLUSEQ MINUSEQ MULEQ DIVEQ
+%token <token> DELETE IN
+%token <token> BEGIN END PRINT REGEXP
+%token <token> IF ELSE FOR WHILE DO BREAK CONTINUE
+%token <token> FUNC RETURN
 
 %right '=' PLUSEQ MINUSEQ MULEQ DIVEQ  
 %left OROR
