@@ -16,13 +16,9 @@ var defaultExprs = []ast.Expr{&defaultExpr}
 	rules		[]ast.Rule
 	pattern		ast.Pattern
 	stmt		ast.Stmt
-	opt_stmt	ast.Stmt
 	stmts		[]ast.Stmt
-	stmt_if		ast.Stmt
 	expr		ast.Expr
-	opt_expr	ast.Expr
 	exprs		[]ast.Expr
-	opt_exprs	[]ast.Expr
 	ident_args	[]string
 }
 
@@ -30,14 +26,16 @@ var defaultExprs = []ast.Expr{&defaultExpr}
 %type <rule>		rule
 %type <pattern> 	pattern
 %type <stmt>		stmt
-%type <opt_stmt>	opt_stmt
+%type <stmt>		opt_stmt
 %type <stmts>		action
 %type <stmts>		stmts
-%type <stmt_if>		stmt_if
+%type <stmt>		stmt_if
 %type <expr>		expr
-%type <opt_expr>	opt_expr
+%type <expr>		simp_expr
+%type <expr>		variable
+%type <expr>		opt_expr
 %type <exprs>		exprs
-%type <opt_exprs>	opt_exprs
+%type <exprs>		opt_exprs
 %type <ident_args>	ident_args
 
 %token<token> IDENT NUMBER STRING TRUE FALSE NIL
@@ -56,6 +54,7 @@ var defaultExprs = []ast.Expr{&defaultExpr}
 %left EQEQ NEQ
 %left '>' '<' GE LE
 
+%left CONCAT_OP
 %left '+' '-'
 %left '*' '/' '%'
 %right '!' UNARY
@@ -248,77 +247,22 @@ exprs
 	}
 
 expr
-	: IDENT
+	: simp_expr
 	{
-		$$ = &ast.IdentExpr{Literal: $1.Literal}
+		$$ = $1
 	}
-	| NUMBER
+	/*
+	| expr simp_expr %prec CONCAT_OP
 	{
-		$$ = &ast.NumExpr{Literal: $1.Literal}
+		$$ = &ast.ConcatExpr{Left: $1, Right: $2}
 	}
-	| TRUE
-	{
-		$$ = &ast.ConstExpr{Literal: $1.Literal}
-	}
-	| FALSE
-	{
-		$$ = &ast.ConstExpr{Literal: $1.Literal}
-	}
-	| NIL
-	{
-		$$ = &ast.ConstExpr{Literal: $1.Literal}
-	}
-	| '$' expr
-	{
-		$$ = &ast.FieldExpr{Expr: $2}
-	}
-	| STRING
-	{
-		$$ = &ast.StringExpr{Literal: $1.Literal}
-	}
-	| expr '[' exprs ']'
-	{
-		$$ = &ast.ItemExpr{Expr: $1, Index:$3}
-	}
-	/* REGEXP */
-	| expr '~' REGEXP
-	{
-		$$ = &ast.MatchExpr{Expr: $1, RegExpr: $3.Literal}
-	}
-	| REGEXP
-	{
-		$$ = &ast.MatchExpr{Expr: &defaultExpr, RegExpr: $1.Literal}
-	}
-	/* FUNCTION */
+	*/
+	/* FUNCTION DEFINITION */
 	| FUNC '(' ident_args ')' '{' stmts '}'
 	{
 		$$ = &ast.FuncExpr{Args: $3, Stmts: $6}
 	}
-	| IDENT '(' opt_exprs ')'
-	{
-		$$ = &ast.CallExpr{Name: $1.Literal, SubExprs:$3}
-	}
-	| expr '(' opt_exprs ')'
-	{
-		$$ = &ast.AnonymousCallExpr{Expr: $1, SubExprs:$3}
-	}
 	/* COMPOSITE EXPRESSION */
-	| PLUSPLUS expr
-	{
-		$$ = &ast.CompExpr{Left: $2, Operator: "++"}
-	}
-	| expr PLUSPLUS
-	{
-		$$ = &ast.CompExpr{Left: $1, Operator: "++", After:true}
-	}
-	| MINUSMINUS expr
-	{
-		$$ = &ast.CompExpr{Left: $2, Operator: "--"}
-	}
-	| expr MINUSMINUS
-	{
-		$$ = &ast.CompExpr{Left: $1, Operator: "--", After:true}
-	}
 	| expr PLUSEQ expr
 	{
 		$$ = &ast.CompExpr{Left: $1, Operator: "+=", Right: $3}
@@ -369,6 +313,68 @@ expr
 	{
 		$$ = &ast.BinOpExpr{Left: $1, Operator: "&&", Right: $3}
 	}
+
+
+simp_expr
+	: variable
+	{
+		$$ = $1
+	}
+	| NUMBER
+	{
+		$$ = &ast.NumExpr{Literal: $1.Literal}
+	}
+	| TRUE
+	{
+		$$ = &ast.ConstExpr{Literal: $1.Literal}
+	}
+	| FALSE
+	{
+		$$ = &ast.ConstExpr{Literal: $1.Literal}
+	}
+	| NIL
+	{
+		$$ = &ast.ConstExpr{Literal: $1.Literal}
+	}
+	| STRING
+	{
+		$$ = &ast.StringExpr{Literal: $1.Literal}
+	}
+	/* REGEXP */
+	| expr '~' REGEXP
+	{
+		$$ = &ast.MatchExpr{Expr: $1, RegExpr: $3.Literal}
+	}
+	| REGEXP
+	{
+		$$ = &ast.MatchExpr{Expr: &defaultExpr, RegExpr: $1.Literal}
+	}
+	/* FUNCTION CALL */
+	| IDENT '(' opt_exprs ')'
+	{
+		$$ = &ast.CallExpr{Name: $1.Literal, SubExprs:$3}
+	}
+	| expr '(' opt_exprs ')'
+	{
+		$$ = &ast.AnonymousCallExpr{Expr: $1, SubExprs:$3}
+	}
+	/* COMPOSITE EXPRESSION */
+	| PLUSPLUS expr
+	{
+		$$ = &ast.CompExpr{Left: $2, Operator: "++"}
+	}
+	| expr PLUSPLUS
+	{
+		$$ = &ast.CompExpr{Left: $1, Operator: "++", After:true}
+	}
+	| MINUSMINUS expr
+	{
+		$$ = &ast.CompExpr{Left: $2, Operator: "--"}
+	}
+	| expr MINUSMINUS
+	{
+		$$ = &ast.CompExpr{Left: $1, Operator: "--", After:true}
+	}
 	/* UNARY EXPRESSION */
 	| '+' expr %prec UNARY
 	{
@@ -406,6 +412,20 @@ expr
 	| expr '%' expr
 	{
 		$$ = &ast.BinOpExpr{Left: $1, Operator: "%", Right: $3}
+	}
+
+variable
+	: IDENT
+	{
+		$$ = &ast.IdentExpr{Literal: $1.Literal}
+	}
+	| '$' expr
+	{
+		$$ = &ast.FieldExpr{Expr: $2}
+	}
+	| expr '[' exprs ']'
+	{
+		$$ = &ast.ItemExpr{Expr: $1, Index:$3}
 	}
 
 ident_args
