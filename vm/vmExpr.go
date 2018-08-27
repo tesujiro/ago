@@ -218,6 +218,24 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 		//fmt.Printf("ast.CompExpr: result:%v\n", result)
 		return evalAssExpr(left, result, env)
 
+	case *ast.TriOpExpr:
+		condExpr := expr.(*ast.TriOpExpr).Cond
+		thenExpr := expr.(*ast.TriOpExpr).Then
+		elseExpr := expr.(*ast.TriOpExpr).Else
+		cond, err := evalExpr(condExpr, env)
+		if err != nil {
+			return nil, err
+		}
+		cond_b, err := strictToBool(cond, "ternary operator")
+		if err != nil {
+			return nil, err
+		}
+		if cond_b {
+			return evalExpr(thenExpr, env)
+		} else {
+			return evalExpr(elseExpr, env)
+		}
+
 	case *ast.BinOpExpr:
 		var left, right interface{}
 		var err error
