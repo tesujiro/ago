@@ -77,21 +77,27 @@ program
 	}
 
 rule
-	: pattern action
+	: pattern action opt_term
 	{
 		$$ = ast.Rule{Pattern: $1, Action: $2}
 	}
-	| pattern opt_term
+	| pattern term
 	{
 		$$ = ast.Rule{Pattern: $1, Action: []ast.Stmt{ &ast.PrintStmt{Exprs: defaultExprs }}}
 	}
+	/*
 	| action
 	{
 		$$ = ast.Rule{Pattern: &ast.ExprPattern{}, Action: $1}
 	}
+	*/
 
 pattern
-	: FUNC IDENT '(' ident_args ')'
+	: /* empty */
+	{
+		$$ = &ast.ExprPattern{}
+	}
+	| FUNC IDENT '(' ident_args ')'
 	{
 		//fmt.Println("FUNC RULE")
 		$$ = &ast.FuncPattern{Name: $2.Literal, Args: $4}
@@ -117,7 +123,7 @@ pattern
 	}
 
 action
-	: '{' opt_stmts '}' opt_term
+	: '{' opt_stmts '}'
 	{
 		$$ = $2
 	}
