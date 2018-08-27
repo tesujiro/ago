@@ -47,7 +47,7 @@ var defaultExprs = []ast.Expr{&defaultExpr}
 %token <token> IF ELSE FOR WHILE DO BREAK CONTINUE
 %token <token> FUNC RETURN
 
-%right '=' PLUSEQ MINUSEQ MULEQ DIVEQ  
+%right '=' PLUSEQ MINUSEQ MULEQ DIVEQ
 %left OROR
 %left ANDAND
 %left IDENT
