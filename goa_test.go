@@ -68,6 +68,10 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{a[1]=1;a[2]=10;print 1-length(a)}", ok: "-1\n"},
 		{script: "BEGIN{a[1]=1;a[2]=10;print 1*length(a)}", ok: "2\n"},
 		{script: "BEGIN{a[1]=1;a[2]=10;print 1/length(a)}", ok: "0\n"},
+		// ternary operator
+		{script: "BEGIN{a=1;print a==1?a+1:a+2}", ok: "2\n"},
+		{script: "BEGIN{a=0;print a==1?a+1:a+2}", ok: "3\n"},
+		//{script: "{print (NF? ++a \" :\" :\"\") $0}", in: "AAA\n\nBBB\n", ok: "1 AAA\n\n2 BBB\n"},
 		// composite expression
 		{script: "BEGIN{a=123;print ++a;print a}", ok: "124\n124\n"},
 		{script: "BEGIN{a=123;print a++;print a}", ok: "123\n124\n"},

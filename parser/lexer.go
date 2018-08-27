@@ -104,7 +104,7 @@ func (l *Lexer) Lex(lval *yySymType) (token_id int) {
 		token_id = 0
 	case token.ILLEGAL:
 		switch lit {
-		case "$", "~":
+		case "$", "~", "?":
 			token_id = int([]rune(lit)[0])
 		}
 	default:

@@ -39,6 +39,12 @@ type BinOpExpr struct {
 	Right    Expr
 }
 
+type TriOpExpr struct {
+	Cond Expr
+	Then Expr
+	Else Expr
+}
+
 type CompExpr struct {
 	Left     Expr
 	Operator string

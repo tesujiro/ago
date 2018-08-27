@@ -48,6 +48,7 @@ var defaultExprs = []ast.Expr{&defaultExpr}
 %token <token> FUNC RETURN
 
 %right '=' PLUSEQ MINUSEQ MULEQ DIVEQ
+%right '?' ':'
 %left OROR
 %left ANDAND
 %left IDENT
@@ -359,6 +360,11 @@ simp_expr
 	| REGEXP
 	{
 		$$ = &ast.MatchExpr{Expr: &defaultExpr, RegExpr: $1.Literal}
+	}
+	/* TERNARY OPERATOR */
+	| expr '?' expr ':' expr
+	{
+		$$ = &ast.TriOpExpr{Cond: $1, Then: $3, Else: $5}
 	}
 	/* FUNCTION CALL */
 	| IDENT '(' opt_exprs ')'
