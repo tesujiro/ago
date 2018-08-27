@@ -29,6 +29,7 @@ var defaultExprs = []ast.Expr{&defaultExpr}
 %type <stmt>		opt_stmt
 %type <stmts>		action
 %type <stmts>		stmts
+%type <stmts>		opt_stmts
 %type <stmt>		stmt_if
 %type <expr>		expr
 %type <expr>		simp_expr
@@ -116,19 +117,29 @@ pattern
 	}
 
 action
-	: '{' stmts '}' opt_semi opt_nls
+	: '{' opt_stmts '}' opt_semi opt_nls
 	{
 		$$ = $2
 	}
 
-stmts
+opt_stmts
 	: /* empty */
 	{
 		$$ = []ast.Stmt{}
 	}
-	| stmts stmt opt_semi opt_nls
+	| stmts opt_semi
 	{
-		$$ = append($1,$2)
+		$$ = $1
+	}
+	
+stmts
+	: opt_semi opt_nls stmt
+	{
+		$$ = []ast.Stmt{$3}
+	}
+	| stmts semi opt_nls stmt
+	{
+		$$ = append($1,$4)
 	}
 
 stmt
@@ -160,27 +171,27 @@ stmt
 	{
 		$$ = $1
 	}
-	| FOR '{' stmts '}'
+	| FOR '{' opt_stmts '}'
 	{
 		$$ = &ast.LoopStmt{Stmts: $3}
 	}
-	| FOR expr '{' stmts '}'
+	| FOR expr '{' opt_stmts '}'
 	{
 		$$ = &ast.LoopStmt{Stmts: $4, Expr: $2}
 	}
-	| FOR opt_stmt ';' opt_expr ';' opt_expr '{' stmts '}'
+	| FOR opt_stmt ';' opt_expr ';' opt_expr '{' opt_stmts '}'
 	{
 		$$ = &ast.CForLoopStmt{Stmt1: $2, Expr2: $4, Expr3: $6, Stmts: $8}
 	}
-	| WHILE '{' stmts '}'
+	| WHILE '{' opt_stmts '}'
 	{
 		$$ = &ast.LoopStmt{Stmts: $3}
 	}
-	| WHILE expr '{' stmts '}'
+	| WHILE expr '{' opt_stmts '}'
 	{
 		$$ = &ast.LoopStmt{Stmts: $4, Expr: $2}
 	}
-	| DO '{' stmts '}' WHILE '(' expr ')'
+	| DO '{' opt_stmts '}' WHILE '(' expr ')'
 	{
 		$$ = &ast.DoLoopStmt{Stmts: $3, Expr: $7}
 	}
@@ -192,7 +203,7 @@ stmt
 	{
 		$$ = &ast.ContinueStmt{}
 	}
-	| FOR '(' IDENT IN IDENT ')' '{' stmts '}'
+	| FOR '(' IDENT IN IDENT ')' '{' opt_stmts '}'
 	{
 		$$ = &ast.HashLoopStmt{Key: $3.Literal, Hash: $5.Literal, Stmts:$8}
 	}
@@ -208,15 +219,15 @@ stmt_term
 */
 
 stmt_if
-	: IF expr '{' stmts '}'
+	: IF expr '{' opt_stmts '}'
 	{
 	    $$ = &ast.IfStmt{If: $2, Then: $4, Else: nil}
 	}
-	| stmt_if ELSE IF expr '{' stmts '}'
+	| stmt_if ELSE IF expr '{' opt_stmts '}'
 	{
 	        $$.(*ast.IfStmt).ElseIf = append($$.(*ast.IfStmt).ElseIf, &ast.IfStmt{If: $4, Then: $6} )
 	}
-	| stmt_if ELSE '{' stmts '}'
+	| stmt_if ELSE '{' opt_stmts '}'
 	{
 		if $$.(*ast.IfStmt).Else != nil {
 			yylex.Error("multiple else statement")
@@ -258,7 +269,7 @@ expr
 	}
 	*/
 	/* FUNCTION DEFINITION */
-	| FUNC '(' ident_args ')' '{' stmts '}'
+	| FUNC '(' ident_args ')' '{' opt_stmts '}'
 	{
 		$$ = &ast.FuncExpr{Args: $3, Stmts: $6}
 	}
