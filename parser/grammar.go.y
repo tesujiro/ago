@@ -81,7 +81,7 @@ rule
 	{
 		$$ = ast.Rule{Pattern: $1, Action: $2}
 	}
-	| pattern opt_semi opt_nls
+	| pattern opt_term
 	{
 		$$ = ast.Rule{Pattern: $1, Action: []ast.Stmt{ &ast.PrintStmt{Exprs: defaultExprs }}}
 	}
@@ -117,7 +117,7 @@ pattern
 	}
 
 action
-	: '{' opt_stmts '}' opt_semi opt_nls
+	: '{' opt_stmts '}' opt_term
 	{
 		$$ = $2
 	}
@@ -127,15 +127,15 @@ opt_stmts
 	{
 		$$ = []ast.Stmt{}
 	}
-	| stmts opt_semi
+	| stmts opt_term
 	{
 		$$ = $1
 	}
 	
 stmts
-	: opt_semi opt_nls stmt
+	: opt_term stmt
 	{
-		$$ = []ast.Stmt{$3}
+		$$ = []ast.Stmt{$2}
 	}
 	| stmts semi opt_nls stmt
 	{
@@ -211,12 +211,6 @@ stmt
 	{
 		$$ = &ast.ReturnStmt{Exprs:$2}
 	}
-
-/*
-stmt_term
-	: nls
-	| semi opt_nls
-*/
 
 stmt_if
 	: IF expr '{' opt_stmts '}'
@@ -453,10 +447,6 @@ ident_args
 		$$ = append($1,$4.Literal)
 	}
 
-nls
-	: '\n'
-	| nls '\n'
-
 opt_stmt
 	: /* empty */
 	{
@@ -477,15 +467,24 @@ opt_expr
 		$$ = $1
 	}
 
-opt_nls
+opt_term
 	: /* empty */
+	| term
+
+term
+	: semi nls
 	| nls
+	| semi
 
 semi
 	: ';'
 
-opt_semi
+opt_nls
 	: /* empty */
-	| semi
+	| nls
+
+nls
+	: '\n'
+	| nls '\n'
 
 %%
