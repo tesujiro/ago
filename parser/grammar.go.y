@@ -434,7 +434,7 @@ variable
 	{
 		$$ = &ast.FieldExpr{Expr: $2}
 	}
-	| expr '[' exprs ']'
+	| simp_expr '[' exprs ']'
 	{
 		$$ = &ast.ItemExpr{Expr: $1, Index:$3}
 	}
