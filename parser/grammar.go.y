@@ -492,12 +492,11 @@ opt_term
 	| term
 
 term
-	: semi nls
-	| nls
-	| semi
+	: semi
+	| term semi
 
 semi
-	: ';'
+	: ';'  /* go/scanner return semi when EOL */
 
 opt_nls
 	: /* empty */
