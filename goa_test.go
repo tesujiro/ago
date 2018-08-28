@@ -432,6 +432,14 @@ func TestGoa(t *testing.T) {
 		{script: "\"//\",\"/A+/\"{print}", in: "AAA\nBBB\nAAA\nDDD\n", ok: "AAA\nBBB\nAAA\nDDD\n"},
 		{script: "\"/A+/\",\"//\"{print}", in: "AAA\nBBB\nAAA\nDDD\n", ok: "AAA\nAAA\n"},
 
+		// next
+		{script: "\"/BBB/\",\"/CCC/\"{next}1", in: "AAA\nBBB\nCCC\nDDD\n", ok: "AAA\nDDD\n"},
+		{script: "{if NR%2==0{next}}1", in: "AAA\nBBB\nCCC\nDDD\n", ok: "AAA\nCCC\n"},
+		{script: "{for{if NR%2==0 {next};break;}}1", in: "AAA\nBBB\nCCC\nDDD\n", ok: "AAA\nCCC\n"},
+		{script: "function skipper(){if NR%2==0 {next};return}{skipper()}1", in: "AAA\nBBB\nCCC\nDDD\n", ok: "AAA\nCCC\n"},
+
+		// exit (no check return code)
+
 		// One Liner
 		{script: "1", in: "AAA\n", ok: "AAA\n"},
 		{script: "1;{print \"\"}", in: "AAA\nBBB\n", ok: "AAA\n\nBBB\n\n"},

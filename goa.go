@@ -169,6 +169,9 @@ func runScript(script_reader io.Reader, file_reader io.Reader) int {
 		}
 		if len(mainRules) > 0 {
 			result, err := vm.RunMainRules(mainRules, env)
+			if err == vm.ErrNext {
+				continue
+			}
 			if err == vm.ErrExit {
 				return result.(int)
 			}

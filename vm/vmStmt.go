@@ -12,6 +12,7 @@ import (
 var (
 	ErrBreak    = errors.New("unexpected break")
 	ErrContinue = errors.New("unexpected continue")
+	ErrNext     = errors.New("unexpected next")
 	ErrReturn   = errors.New("unexpected return")
 	ErrExit     = errors.New("unexpected exit")
 )
@@ -38,6 +39,8 @@ func run(stmts []ast.Stmt, env *Env) (interface{}, error) {
 			return nil, ErrBreak
 		case *ast.ContinueStmt:
 			return nil, ErrContinue
+		case *ast.NextStmt:
+			return result, ErrNext
 		case *ast.ReturnStmt:
 			result, err = runSingleStmt(stmt, env)
 			if err != nil && err != ErrReturn {

@@ -9,7 +9,7 @@ under development
 * array key predicate (ex: (key in map){}, if !(key in map){}
 * regular expressin not match "!~"
 * printf, sprintf
-* next, nextfile
+* nextfile
 * getline
 * func: rand, srand, int, split, system
 * var: FNR, OFMT, RS, ENVIRON, CONVFMT, RSTART, RLENGTH

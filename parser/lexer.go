@@ -25,6 +25,7 @@ var tokenTab = map[string]int{
 	"for":      FOR,
 	"break":    BREAK,
 	"continue": CONTINUE,
+	"next":     NEXT,
 	"in":       IN,
 	"true":     TRUE,
 	"false":    FALSE,
