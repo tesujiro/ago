@@ -439,6 +439,9 @@ func TestGoa(t *testing.T) {
 		{script: "function skipper(){if NR%2==0 {next};return}{skipper()}1", in: "AAA\nBBB\nCCC\nDDD\n", ok: "AAA\nCCC\n"},
 
 		// exit (no check return code)
+		{script: "NR==3{exit 0}1", in: "AAA\nBBB\nCCC\nDDD\n", ok: "AAA\nBBB\n"},
+		{script: "NR==3{exit 1}1", in: "AAA\nBBB\nCCC\nDDD\n", ok: "AAA\nBBB\n"},
+		{script: "{if $0==\"BBB\" {exit 1}}1", in: "AAA\nBBB\nCCC\nDDD\n", ok: "AAA\n"},
 
 		// One Liner
 		{script: "1", in: "AAA\n", ok: "AAA\n"},

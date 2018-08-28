@@ -142,7 +142,12 @@ func runScript(script_reader io.Reader, file_reader io.Reader) int {
 	result, err = vm.RunBeginRules(beginRules, env)
 	debug.Printf("%#v\n", result)
 	if err == vm.ErrExit {
-		return result.(int)
+		v, ok := result.(int)
+		if ok {
+			return v
+		} else {
+			return 1
+		}
 	}
 	if err != nil {
 		fmt.Printf("error:%v\n", err)

@@ -49,13 +49,19 @@ func run(stmts []ast.Stmt, env *Env) (interface{}, error) {
 			return result, ErrReturn
 		case *ast.ExitStmt:
 			result, err = runSingleStmt(stmt, env)
+			//fmt.Printf("vmStmt ExitStmt result:%#v err:%v\n", result, err)
 			if err != nil && err != ErrExit {
 				return nil, err
 			}
 			return result, ErrExit
 		default:
 			result, err = runSingleStmt(stmt, env)
-			if err != nil && err != ErrReturn {
+			//fmt.Printf("vmStmt default result:%#v err:%v\n", result, err)
+			switch err {
+			case nil, ErrReturn:
+			case ErrExit:
+				return result, err
+			default:
 				return nil, err
 			}
 		}
