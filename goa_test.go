@@ -523,6 +523,12 @@ ZZZ 1
 		go func() {
 			script_reader := strings.NewReader(test.script)
 			runScript(script_reader, os.Stdin)
+			/*
+				rc := runScript(script_reader, os.Stdin)
+				if rc != 0 {
+					t.Fatal("runscript return code:", rc)
+				}
+			*/
 			//close(chanDone) //NG
 			writeToOut.Close()
 		}()

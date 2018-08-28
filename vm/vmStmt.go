@@ -13,6 +13,7 @@ var (
 	ErrBreak    = errors.New("unexpected break")
 	ErrContinue = errors.New("unexpected continue")
 	ErrReturn   = errors.New("unexpected return")
+	ErrExit     = errors.New("unexpected exit")
 )
 
 func runStmts(stmts []ast.Stmt, env *Env) (interface{}, error) {
@@ -43,6 +44,12 @@ func run(stmts []ast.Stmt, env *Env) (interface{}, error) {
 				return nil, err
 			}
 			return result, ErrReturn
+		case *ast.ExitStmt:
+			result, err = runSingleStmt(stmt, env)
+			if err != nil && err != ErrExit {
+				return nil, err
+			}
+			return result, ErrExit
 		default:
 			result, err = runSingleStmt(stmt, env)
 			if err != nil && err != ErrReturn {
@@ -257,6 +264,13 @@ func runSingleStmt(stmt ast.Stmt, env *Env) (interface{}, error) {
 		default:
 			return resultExpr, nil
 		}
+	case *ast.ExitStmt:
+		exitStmt := stmt.(*ast.ExitStmt)
+		result, err := evalExpr(exitStmt.Expr, env)
+		if err != nil {
+			return nil, err
+		}
+		return result, nil
 	case *ast.LoopStmt:
 		newEnv := env.NewEnv()
 		for {

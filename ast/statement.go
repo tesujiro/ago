@@ -26,6 +26,10 @@ type ReturnStmt struct {
 	Exprs []Expr
 }
 
+type ExitStmt struct {
+	Expr Expr
+}
+
 type LoopStmt struct {
 	Expr  Expr
 	Stmts []Stmt

@@ -11,7 +11,6 @@ under development
 * printf, sprintf
 * next, nextfile
 * getline
-* exit
 * func: rand, srand, int, split, system
 * var: FNR, OFMT, RS, ENVIRON, CONVFMT, RSTART, RLENGTH
 * print error with line number

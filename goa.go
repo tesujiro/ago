@@ -84,10 +84,10 @@ func main() {
 		file_reader = os.Stdin
 	}
 
-	runScript(script_reader, file_reader)
+	os.Exit(runScript(script_reader, file_reader))
 }
 
-func runScript(script_reader io.Reader, file_reader io.Reader) {
+func runScript(script_reader io.Reader, file_reader io.Reader) int {
 
 	env := vm.NewEnv()
 	env = lib.Import(env)
@@ -97,7 +97,9 @@ func runScript(script_reader io.Reader, file_reader io.Reader) {
 
 	bytes, err := ioutil.ReadAll(script_reader)
 	if err != nil {
-		os.Exit(1)
+		fmt.Printf("Read error: %v \n", err)
+		//os.Exit(1)
+		return 1
 	}
 	source := string(bytes)
 	debug.Println("script:", source)
@@ -110,7 +112,7 @@ func runScript(script_reader io.Reader, file_reader io.Reader) {
 	ast, parseError := parser.Parse(l)
 	if parseError != nil {
 		fmt.Printf("Syntax error: %v \n", parseError)
-		return
+		return 1
 	}
 	if *ast_dump {
 		parser.Dump(ast)
@@ -129,7 +131,7 @@ func runScript(script_reader io.Reader, file_reader io.Reader) {
 		debug.Printf("%#v\n", result)
 		if err != nil {
 			fmt.Printf("error:%v\n", err)
-			return
+			return 1
 		}
 		if *dbg {
 			env.Dump()
@@ -139,16 +141,19 @@ func runScript(script_reader io.Reader, file_reader io.Reader) {
 	// BEGIN
 	result, err = vm.RunBeginRules(beginRules, env)
 	debug.Printf("%#v\n", result)
+	if err == vm.ErrExit {
+		return result.(int)
+	}
 	if err != nil {
 		fmt.Printf("error:%v\n", err)
-		return
+		return 1
 	}
 	if *dbg {
 		env.Dump()
 	}
 
 	if len(mainRules) == 0 && len(endRules) == 0 {
-		return
+		return 0
 	}
 
 	// MAIN
@@ -160,13 +165,16 @@ func runScript(script_reader io.Reader, file_reader io.Reader) {
 		env.SetNR(number)
 		if err := env.SetFieldFromLine(file_line); err != nil {
 			fmt.Printf("error:%v\n", err)
-			return
+			return 1
 		}
 		if len(mainRules) > 0 {
 			result, err := vm.RunMainRules(mainRules, env)
+			if err == vm.ErrExit {
+				return result.(int)
+			}
 			if err != nil {
 				fmt.Printf("error:%v\n", err)
-				return
+				return 1
 			}
 			//debug.Printf("ENV=%#v\n", env)
 			//debug.Printf("%#v\n", res)
@@ -180,9 +188,13 @@ func runScript(script_reader io.Reader, file_reader io.Reader) {
 	// END
 	result, err = vm.RunEndRules(endRules, env)
 	debug.Printf("%#v\n", result)
+	if err == vm.ErrExit {
+		return result.(int)
+	}
 	if err != nil {
 		fmt.Printf("error:%v\n", err)
+		return 1
 	}
 
-	return
+	return 0
 }

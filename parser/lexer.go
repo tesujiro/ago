@@ -32,6 +32,7 @@ var tokenTab = map[string]int{
 	"function": FUNC,
 	"func":     FUNC,
 	"return":   RETURN,
+	"exit":     EXIT,
 	"while":    WHILE,
 	"do":       DO,
 }

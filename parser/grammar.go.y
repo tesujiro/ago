@@ -45,7 +45,7 @@ var defaultExprs = []ast.Expr{&defaultExpr}
 %token <token> DELETE IN
 %token <token> BEGIN END PRINT REGEXP
 %token <token> IF ELSE FOR WHILE DO BREAK CONTINUE
-%token <token> FUNC RETURN
+%token <token> FUNC RETURN EXIT
 
 %right '=' PLUSEQ MINUSEQ MULEQ DIVEQ
 %right '?' ':'
@@ -217,6 +217,10 @@ stmt
 	| RETURN opt_exprs
 	{
 		$$ = &ast.ReturnStmt{Exprs:$2}
+	}
+	| EXIT opt_expr
+	{
+		$$ = &ast.ExitStmt{Expr:$2}
 	}
 
 stmt_if
