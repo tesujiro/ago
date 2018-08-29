@@ -27,6 +27,7 @@ under development
 
 # To be fixed
 * assign a value returned from func() to variable
+* error a=b=1
 * REGEXP "/.../" -> /.../
 * function args cannot be omitted (like sub(r, t[, s]))
 * function match() does not set RSTART, RLENGTH
