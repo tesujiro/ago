@@ -51,6 +51,7 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{print \"a b c\"-\" d e f\"}", ok: "0\n"},
 		{script: "BEGIN{print 15.2%7.1}", ok: "1\n"},
 		{script: "BEGIN{a=123;print a}", ok: "123\n"},
+		{script: "BEGIN{a=b=123;print a,b}", ok: "123 123\n"},
 		{script: "BEGIN{map=123;print map}", ok: "123\n"},
 		{script: "BEGIN{a[1]=1;a[2]=10;print a[1]+a[2]}", ok: "11\n"},
 		{script: "BEGIN{a[1]=1;a[2]=10;print a[1]-a[2]}", ok: "-9\n"},

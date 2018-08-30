@@ -32,10 +32,13 @@ var defaultExprs = []ast.Expr{&defaultExpr}
 %type <stmts>		opt_stmts
 %type <stmt>		stmt_if
 %type <expr>		expr
+%type <expr>		multi_val_expr
 %type <expr>		simp_expr
+%type <expr>		non_post_simp_expr
 %type <expr>		variable
 %type <expr>		opt_expr
 %type <exprs>		exprs
+%type <exprs>		variables
 %type <exprs>		opt_exprs
 %type <ident_args>	ident_args
 
@@ -46,12 +49,14 @@ var defaultExprs = []ast.Expr{&defaultExpr}
 %token <token> BEGIN END PRINT REGEXP
 %token <token> IF ELSE FOR WHILE DO BREAK CONTINUE
 %token <token> FUNC RETURN EXIT NEXT
+%token <token> CONCAT_OP
 
 %right '=' PLUSEQ MINUSEQ MULEQ DIVEQ
 %right '?' ':'
 %left OROR
 %left ANDAND
 %left IDENT
+%nonassoc ',' vars
 %left '~'
 %left EQEQ NEQ
 %left '>' '<' GE LE
@@ -62,6 +67,7 @@ var defaultExprs = []ast.Expr{&defaultExpr}
 %right '!' UNARY
 %left PLUSPLUS MINUSMINUS
 %left '$'
+%nonassoc '['
 %left '(' ')'
 
 %%
@@ -86,19 +92,21 @@ rule
 	{
 		$$ = ast.Rule{Pattern: $1, Action: []ast.Stmt{ &ast.PrintStmt{Exprs: defaultExprs }}}
 	}
-	/*
-	| action
+	| action opt_term
 	{
 		$$ = ast.Rule{Pattern: &ast.ExprPattern{}, Action: $1}
 	}
+	/*
 	*/
 
 pattern
-	: /* empty */
+	/*
+	:
 	{
 		$$ = &ast.ExprPattern{}
 	}
-	| FUNC IDENT '(' ident_args ')'
+	*/
+	: FUNC IDENT '(' ident_args ')'
 	{
 		//fmt.Println("FUNC RULE")
 		$$ = &ast.FuncPattern{Name: $2.Literal, Args: $4}
@@ -144,21 +152,17 @@ stmts
 	{
 		$$ = []ast.Stmt{$2}
 	}
-	| stmts semi opt_nls stmt
+	| stmts semi opt_term stmt
 	{
 		$$ = append($1,$4)
 	}
 
 stmt
-	: variable '=' expr
+	: expr
 	{
-		$$ = &ast.AssStmt{Left: []ast.Expr{$1}, Right: []ast.Expr{$3}}
+		$$ = &ast.ExprStmt{Expr: $1}
 	}
-	| exprs '=' exprs
-	{
-		$$ = &ast.AssStmt{Left: $1, Right: $3}
-	}
-	| expr
+	| multi_val_expr
 	{
 		$$ = &ast.ExprStmt{Expr: $1}
 	}
@@ -257,13 +261,29 @@ opt_exprs
 	}
 
 exprs
+	/*
+	: expr
+	: simp_expr
+	: non_post_simp_expr
+	*/
 	: expr
 	{
 		$$ = []ast.Expr{$1}
 	}
-	| exprs ',' opt_nls expr
+	/*
+	| exprs ',' opt_term expr
+	| exprs ',' opt_term simp_expr
+	| exprs ',' opt_term non_post_simp_expr
+	*/
+	| exprs ',' opt_term expr
 	{
 		$$ = append($1,$4)
+	}
+
+multi_val_expr
+	: variables '=' exprs
+	{
+		$$ = &ast.AssExpr{Left: $1, Right: $3}
 	}
 
 expr
@@ -271,17 +291,25 @@ expr
 	{
 		$$ = $1
 	}
+	| variable '=' expr
+	{
+		$$ = &ast.AssExpr{Left: []ast.Expr{$1}, Right: []ast.Expr{$3}}
+	}
+	/*
+	| variables '=' variables
+	*/
+	/*
+	| variables '=' exprs
+	{
+		$$ = &ast.AssExpr{Left: $1, Right: $3}
+	}
+	*/
 	/*
 	| expr simp_expr %prec CONCAT_OP
 	{
 		$$ = &ast.ConcatExpr{Left: $1, Right: $2}
 	}
 	*/
-	/* FUNCTION DEFINITION */
-	| FUNC '(' ident_args ')' '{' opt_stmts '}'
-	{
-		$$ = &ast.FuncExpr{Args: $3, Stmts: $6}
-	}
 	/* COMPOSITE EXPRESSION */
 	| variable PLUSEQ expr
 	{
@@ -299,30 +327,10 @@ expr
 	{
 		$$ = &ast.CompExpr{Left: $1, Operator: "/=", Right: $3}
 	}
-	/* RELATION EXPRESSION */
-	| expr EQEQ expr
+	/* TERNARY OPERATOR */
+	| expr '?' expr ':' expr
 	{
-		$$ = &ast.BinOpExpr{Left: $1, Operator: "==", Right: $3}
-	}
-	| expr NEQ expr
-	{
-		$$ = &ast.BinOpExpr{Left: $1, Operator: "!=", Right: $3}
-	}
-	| expr '>' expr
-	{
-		$$ = &ast.BinOpExpr{Left: $1, Operator: ">", Right: $3}
-	}
-	| expr GE expr
-	{
-		$$ = &ast.BinOpExpr{Left: $1, Operator: ">=", Right: $3}
-	}
-	| expr '<' expr
-	{
-		$$ = &ast.BinOpExpr{Left: $1, Operator: "<", Right: $3}
-	}
-	| expr LE expr
-	{
-		$$ = &ast.BinOpExpr{Left: $1, Operator: "<=", Right: $3}
+		$$ = &ast.TriOpExpr{Cond: $1, Then: $3, Else: $5}
 	}
 	/* BOOL EXPRESSION */
 	| expr OROR expr
@@ -336,10 +344,112 @@ expr
 
 
 simp_expr
-	: variable
+	: non_post_simp_expr
 	{
 		$$ = $1
 	}
+	/* ARITHMETIC EXPRESSION */
+	| simp_expr '+' simp_expr
+	{
+		$$ = &ast.BinOpExpr{Left: $1, Operator: "+", Right: $3}
+	}
+	| simp_expr '-' simp_expr
+	{
+		$$ = &ast.BinOpExpr{Left: $1, Operator: "-", Right: $3}
+	}
+	| simp_expr '*' simp_expr
+	{
+		$$ = &ast.BinOpExpr{Left: $1, Operator: "*", Right: $3}
+	}
+	| simp_expr '/' simp_expr
+	{
+		$$ = &ast.BinOpExpr{Left: $1, Operator: "/", Right: $3}
+	}
+	| simp_expr '%' simp_expr
+	{
+		$$ = &ast.BinOpExpr{Left: $1, Operator: "%", Right: $3}
+	}
+	/* RELATION EXPRESSION */
+	| simp_expr EQEQ simp_expr
+	{
+		$$ = &ast.BinOpExpr{Left: $1, Operator: "==", Right: $3}
+	}
+	| simp_expr NEQ simp_expr
+	{
+		$$ = &ast.BinOpExpr{Left: $1, Operator: "!=", Right: $3}
+	}
+	| simp_expr '>' simp_expr
+	{
+		$$ = &ast.BinOpExpr{Left: $1, Operator: ">", Right: $3}
+	}
+	| simp_expr GE simp_expr
+	{
+		$$ = &ast.BinOpExpr{Left: $1, Operator: ">=", Right: $3}
+	}
+	| simp_expr '<' simp_expr
+	{
+		$$ = &ast.BinOpExpr{Left: $1, Operator: "<", Right: $3}
+	}
+	| simp_expr LE simp_expr
+	{
+		$$ = &ast.BinOpExpr{Left: $1, Operator: "<=", Right: $3}
+	}
+	/* REGEXP */
+	| simp_expr '~' REGEXP
+	{
+		$$ = &ast.MatchExpr{Expr: $1, RegExpr: $3.Literal}
+	}
+	| REGEXP
+	{
+		$$ = &ast.MatchExpr{Expr: &defaultExpr, RegExpr: $1.Literal}
+	}
+	/* COMPOSITE EXPRESSION */
+	| simp_expr PLUSPLUS
+	{
+		$$ = &ast.CompExpr{Left: $1, Operator: "++", After:true}
+	}
+	| simp_expr MINUSMINUS
+	{
+		$$ = &ast.CompExpr{Left: $1, Operator: "--", After:true}
+	}
+
+non_post_simp_expr
+	: '!' simp_expr %prec UNARY
+	{
+		$$ = &ast.UnaryExpr{Operator: "!", Expr:$2}
+	}
+	/* FUNCTION CALL */
+	| IDENT '(' opt_exprs ')'
+	{
+		$$ = &ast.CallExpr{Name: $1.Literal, SubExprs:$3}
+	}
+	/*
+	| simp_expr '(' opt_exprs ')'
+	*/
+	| non_post_simp_expr '(' opt_exprs ')'
+	{
+		$$ = &ast.AnonymousCallExpr{Expr: $1, SubExprs:$3}
+	}
+	/* FUNCTION DEFINITION */
+	| FUNC '(' ident_args ')' '{' opt_stmts '}'
+	{
+		$$ = &ast.FuncExpr{Args: $3, Stmts: $6}
+	}
+	/* ARITHMETIC EXPRESSION */
+	| '(' expr ')'
+	{
+		$$ = &ast.ParentExpr{SubExpr: $2}
+	}
+	/* COMPOSITE EXPRESSION */
+	| PLUSPLUS simp_expr
+	{
+		$$ = &ast.CompExpr{Left: $2, Operator: "++"}
+	}
+	| MINUSMINUS simp_expr
+	{
+		$$ = &ast.CompExpr{Left: $2, Operator: "--"}
+	}
+	/* LITERAL */
 	| NUMBER
 	{
 		$$ = &ast.NumExpr{Literal: $1.Literal}
@@ -360,98 +470,55 @@ simp_expr
 	{
 		$$ = &ast.StringExpr{Literal: $1.Literal}
 	}
-	/* REGEXP */
-	| simp_expr '~' REGEXP
-	{
-		$$ = &ast.MatchExpr{Expr: $1, RegExpr: $3.Literal}
-	}
-	| REGEXP
-	{
-		$$ = &ast.MatchExpr{Expr: &defaultExpr, RegExpr: $1.Literal}
-	}
-	/* TERNARY OPERATOR */
-	| expr '?' expr ':' expr
-	{
-		$$ = &ast.TriOpExpr{Cond: $1, Then: $3, Else: $5}
-	}
-	/* FUNCTION CALL */
-	| IDENT '(' opt_exprs ')'
-	{
-		$$ = &ast.CallExpr{Name: $1.Literal, SubExprs:$3}
-	}
-	| expr '(' opt_exprs ')'
-	{
-		$$ = &ast.AnonymousCallExpr{Expr: $1, SubExprs:$3}
-	}
-	/* COMPOSITE EXPRESSION */
-	| PLUSPLUS expr
-	{
-		$$ = &ast.CompExpr{Left: $2, Operator: "++"}
-	}
-	| expr PLUSPLUS
-	{
-		$$ = &ast.CompExpr{Left: $1, Operator: "++", After:true}
-	}
-	| MINUSMINUS expr
-	{
-		$$ = &ast.CompExpr{Left: $2, Operator: "--"}
-	}
-	| expr MINUSMINUS
-	{
-		$$ = &ast.CompExpr{Left: $1, Operator: "--", After:true}
-	}
 	/* UNARY EXPRESSION */
-	| '+' expr %prec UNARY
+	| '+' simp_expr %prec UNARY
 	{
 		$$ = &ast.UnaryExpr{Operator: "+", Expr:$2}
 	}
-	| '-' expr %prec UNARY
+	| '-' simp_expr %prec UNARY
 	{
 		$$ = &ast.UnaryExpr{Operator: "-", Expr:$2}
 	}
-	| '!' expr %prec UNARY
+	/* var */
+	| variable
 	{
-		$$ = &ast.UnaryExpr{Operator: "!", Expr:$2}
+		$$ = $1
 	}
-	/* ARITHMETIC EXPRESSION */
-	| '(' expr ')'
+	/*
+	*/
+
+variables
+	: variable
 	{
-		$$ = &ast.ParentExpr{SubExpr: $2}
+		$$ = []ast.Expr{$1}
 	}
-	| expr '+' expr
+	| variables ',' opt_term variable
 	{
-		$$ = &ast.BinOpExpr{Left: $1, Operator: "+", Right: $3}
-	}
-	| expr '-' expr
-	{
-		$$ = &ast.BinOpExpr{Left: $1, Operator: "-", Right: $3}
-	}
-	| expr '*' expr
-	{
-		$$ = &ast.BinOpExpr{Left: $1, Operator: "*", Right: $3}
-	}
-	| expr '/' expr
-	{
-		$$ = &ast.BinOpExpr{Left: $1, Operator: "/", Right: $3}
-	}
-	| expr '%' expr
-	{
-		$$ = &ast.BinOpExpr{Left: $1, Operator: "%", Right: $3}
+		$$ = append($1,$4)
 	}
 
 variable
-	: IDENT
-	{
-		$$ = &ast.IdentExpr{Literal: $1.Literal}
-	}
-	| '$' expr
-	{
-		$$ = &ast.FieldExpr{Expr: $2}
-	}
-	| simp_expr '[' exprs ']'
+	/*
+	: simp_expr '[' exprs ']'
+	: variable '[' exprs ']'
+	: non_post_simp_expr '[' exprs ']'
+	*/
+	: non_post_simp_expr '[' exprs ']'
 	{
 		$$ = &ast.ItemExpr{Expr: $1, Index:$3}
 	}
+	/*
+	*/
+	| IDENT
+	{
+		$$ = &ast.IdentExpr{Literal: $1.Literal}
+	}
+	| '$' non_post_simp_expr
+	{
+		$$ = &ast.FieldExpr{Expr: $2}
+	}
+	/*
+	*/
 
 ident_args
 	: /* empty */
@@ -462,7 +529,7 @@ ident_args
 	{
 		$$ = []string{$1.Literal}
 	}
-	| ident_args ',' opt_nls IDENT
+	| ident_args ',' opt_term IDENT
 	{
 		$$ = append($1,$4.Literal)
 	}
@@ -498,12 +565,14 @@ term
 semi
 	: ';'  /* go/scanner return semi when EOL */
 
+/*
 opt_nls
-	: /* empty */
+	: 
 	| nls
 
 nls
 	: '\n'
 	| nls '\n'
+*/
 
 %%

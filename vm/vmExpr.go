@@ -198,6 +198,50 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 		case "!":
 			return !toBool(val), nil
 		}
+	case *ast.AssExpr:
+		assExpr := expr.(*ast.AssExpr)
+		left, right := assExpr.Left, assExpr.Right
+
+		// evaluate right expressions
+		right_values := make([]interface{}, len(right))
+		var err error
+		for i, expr := range right {
+			right_values[i], err = evalExpr(expr, env)
+			if err != nil {
+				return nil, err
+			}
+		}
+
+		// evaluate assExpr
+		switch {
+		case len(left) == 1 && len(right) == 1:
+			return evalAssExpr(left[0], right_values[0], env)
+		case len(left) > 1 && len(right) == 1:
+			val := right_values[0]
+			if reflect.ValueOf(val).Kind() == reflect.Interface {
+				val = reflect.ValueOf(val).Elem().Interface()
+			}
+			if reflect.ValueOf(val).Kind() != reflect.Slice {
+				return nil, errors.New("single value assign to multi values")
+			} else {
+				elements := reflect.ValueOf(val)
+				right_values = make([]interface{}, elements.Len())
+				for i := 0; i < elements.Len(); i++ {
+					right_values[i] = elements.Index(i).Interface()
+				}
+			}
+			fallthrough
+		default:
+			for i, expr := range left {
+				if i >= len(right_values) {
+					return right_values[len(right_values)-1], nil
+				}
+				if _, err := evalAssExpr(expr, right_values[i], env); err != nil {
+					return nil, err
+				}
+			}
+			return right_values[len(left)-1], nil
+		}
 	case *ast.CompExpr:
 		left := expr.(*ast.CompExpr).Left
 		right := expr.(*ast.CompExpr).Right

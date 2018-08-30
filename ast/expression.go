@@ -45,6 +45,11 @@ type TriOpExpr struct {
 	Else Expr
 }
 
+type AssExpr struct {
+	Left  []Expr
+	Right []Expr
+}
+
 type CompExpr struct {
 	Left     Expr
 	Operator string
