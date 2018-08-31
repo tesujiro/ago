@@ -250,6 +250,12 @@ stmt_if
 		}
 	}
 
+multi_val_expr
+	: variables '=' exprs
+	{
+		$$ = &ast.AssExpr{Left: $1, Right: $3}
+	}
+
 opt_exprs
 	: /* empty */
 	{
@@ -261,29 +267,13 @@ opt_exprs
 	}
 
 exprs
-	/*
-	: expr
-	: simp_expr
-	: non_post_simp_expr
-	*/
 	: expr
 	{
 		$$ = []ast.Expr{$1}
 	}
-	/*
-	| exprs ',' opt_term expr
-	| exprs ',' opt_term simp_expr
-	| exprs ',' opt_term non_post_simp_expr
-	*/
 	| exprs ',' opt_term expr
 	{
 		$$ = append($1,$4)
-	}
-
-multi_val_expr
-	: variables '=' exprs
-	{
-		$$ = &ast.AssExpr{Left: $1, Right: $3}
 	}
 
 expr
@@ -418,9 +408,6 @@ non_post_simp_expr
 	{
 		$$ = &ast.CallExpr{Name: $1.Literal, SubExprs:$3}
 	}
-	/*
-	| simp_expr '(' opt_exprs ')'
-	*/
 	| non_post_simp_expr '(' opt_exprs ')'
 	{
 		$$ = &ast.AnonymousCallExpr{Expr: $1, SubExprs:$3}
@@ -479,8 +466,6 @@ non_post_simp_expr
 	{
 		$$ = &ast.UnaryExpr{Operator: "-", Expr:$2}
 	}
-	/*
-	*/
 
 variables
 	: variable
@@ -495,15 +480,11 @@ variables
 variable
 	/*
 	: simp_expr '[' exprs ']'
-	: variable '[' exprs ']'
-	: non_post_simp_expr '[' exprs ']'
 	*/
 	: non_post_simp_expr '[' exprs ']'
 	{
 		$$ = &ast.ItemExpr{Expr: $1, Index:$3}
 	}
-	/*
-	*/
 	| IDENT
 	{
 		$$ = &ast.IdentExpr{Literal: $1.Literal}
@@ -512,8 +493,6 @@ variable
 	{
 		$$ = &ast.FieldExpr{Expr: $2}
 	}
-	/*
-	*/
 
 ident_args
 	: /* empty */
