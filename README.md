@@ -5,7 +5,6 @@ go on awk (just like Unagi on Katsudon)
 under development
 
 # Still not implemented
-* string concatenate
 * array key predicate (ex: (key in map){}, if !(key in map){}
 * regular expressin not match "!~"
 * printf, sprintf
@@ -17,10 +16,11 @@ under development
 * datetime funcs
 * asort(),asorti()
 * import & call go library
+* goroutine
 
 # Difference from AWK
-* {} block has localscope. variables name beginning with uppercase are global, others are local
-* multiple value(ex. BEGIN{a,b=1,2})
+* {} block has a local scope. variables name beginning with uppercase are global, others are local
+* multiple value (ex. BEGIN{a,b=1,2})
 * define func in action (ex. { swap=func(a,b){return b,a}; print swap("a","b"); } // b a )
 * anonymous func (ex. { print func(a,b){return b,a}("a","b"); } // b a )
 * function call is call by value.
