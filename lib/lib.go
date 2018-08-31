@@ -6,6 +6,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/tesujiro/goa/vm"
 )
@@ -38,6 +39,10 @@ func Import(env *vm.Env) *vm.Env {
 		default:
 			return 0
 		}
+	}
+
+	toInt64 := func(v reflect.Value) int64 {
+		return int64(toInt(v)) //TODO: for Windows
 	}
 
 	length := func(v reflect.Value) int {
@@ -135,6 +140,43 @@ func Import(env *vm.Env) *vm.Env {
 		split := func(s, g, fs reflect.Value) int {
 		}
 		env.Define("split", reflect.ValueOf(split))
+	*/
+
+	systime := func() int64 {
+		return time.Now().Unix()
+	}
+	env.Define("systime", reflect.ValueOf(systime))
+
+	strftime := func(format, timestamp reflect.Value) string {
+		table := map[string]string{
+			"%Y": "2006", "%y": "06",
+			"%m": "01",
+			"%d": "02",
+			"%H": "15",
+			"%M": "04",
+			"%S": "05",
+		}
+		f := toStr(format)
+		for k, v := range table {
+			f = strings.Replace(f, k, v, -1)
+		}
+
+		//fmt.Printf("timestamp=%#v\ntimestamp.Kind=%#v\n", timestamp,timestamp.Kind().String())
+		//t := timestamp.Index(0).Interface()
+		//t := toInt(timestamp)
+		//t64, _ := t.(int64)
+		//t64 := int64(t)
+		t64 := toInt64(timestamp)
+		u := time.Unix(t64, 0)
+		return u.Format(f)
+	}
+	env.Define("strftime", reflect.ValueOf(strftime))
+
+	/*
+		mktime := func(datespec reflect.Value) int {
+
+		}
+		env.Define("mktime", reflect.ValueOf(mktime))
 	*/
 
 	return env
