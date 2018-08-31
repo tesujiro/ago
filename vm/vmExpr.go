@@ -334,6 +334,26 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 			return toFloat64(left) < toFloat64(right), nil
 		case "<=":
 			return toFloat64(left) <= toFloat64(right), nil
+		case "CAT":
+			l_kind := reflect.ValueOf(left).Kind()
+			r_kind := reflect.ValueOf(right).Kind()
+			switch {
+			case (l_kind == reflect.Slice || l_kind == reflect.Array) && (r_kind == reflect.Slice || r_kind == reflect.Array):
+				return reflect.AppendSlice(reflect.ValueOf(left), reflect.ValueOf(right)).Interface(), nil
+			case l_kind == reflect.Slice || l_kind == reflect.Array:
+				return reflect.Append(reflect.ValueOf(left), reflect.ValueOf(right)).Interface(), nil
+			case r_kind == reflect.Slice || r_kind == reflect.Array:
+				right = reflect.ValueOf(right).Index(0).Interface()
+				fallthrough
+			case l_kind == reflect.String || r_kind == reflect.String:
+				return toString(left) + toString(right), nil
+			case l_kind == reflect.Float64 || r_kind == reflect.Float64:
+				return toFloat64(left) + toFloat64(right), nil
+			case l_kind == reflect.Int || r_kind == reflect.Int:
+				return toInt(left) + toInt(right), nil
+			default:
+				return toString(left) + toString(right), nil
+			}
 		case "+":
 			l_kind := reflect.ValueOf(left).Kind()
 			r_kind := reflect.ValueOf(right).Kind()

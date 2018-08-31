@@ -32,6 +32,7 @@ var defaultExprs = []ast.Expr{&defaultExpr}
 %type <stmts>		opt_stmts
 %type <stmt>		stmt_if
 %type <expr>		expr
+%type <expr>		common_expr
 %type <expr>		multi_val_expr
 %type <expr>		simp_expr
 %type <expr>		non_post_simp_expr
@@ -55,13 +56,14 @@ var defaultExprs = []ast.Expr{&defaultExpr}
 %right '?' ':'
 %left OROR
 %left ANDAND
-%left IDENT
+/*%left IDENT*/
 %nonassoc ',' vars
 %left '~'
 %left EQEQ NEQ
 %left '>' '<' GE LE
 
 %left CONCAT_OP
+%left STRING NUMBER
 %left '+' '-'
 %left '*' '/' '%'
 %right '!' UNARY
@@ -96,8 +98,6 @@ rule
 	{
 		$$ = ast.Rule{Pattern: &ast.ExprPattern{}, Action: $1}
 	}
-	/*
-	*/
 
 pattern
 	/*
@@ -287,29 +287,10 @@ multi_val_expr
 	}
 
 expr
-	: simp_expr
-	{
-		$$ = $1
-	}
-	| variable '=' expr
+	: variable '=' expr
 	{
 		$$ = &ast.AssExpr{Left: []ast.Expr{$1}, Right: []ast.Expr{$3}}
 	}
-	/*
-	| variables '=' variables
-	*/
-	/*
-	| variables '=' exprs
-	{
-		$$ = &ast.AssExpr{Left: $1, Right: $3}
-	}
-	*/
-	/*
-	| expr simp_expr %prec CONCAT_OP
-	{
-		$$ = &ast.ConcatExpr{Left: $1, Right: $2}
-	}
-	*/
 	/* COMPOSITE EXPRESSION */
 	| variable PLUSEQ expr
 	{
@@ -341,7 +322,21 @@ expr
 	{
 		$$ = &ast.BinOpExpr{Left: $1, Operator: "&&", Right: $3}
 	}
+	| common_expr
+	{
+		$$ = $1
+	}
 
+common_expr
+	: simp_expr
+	{
+		$$ = $1
+	}
+	/* CONCATENATE */
+	| common_expr simp_expr %prec CONCAT_OP
+	{
+		$$ = &ast.BinOpExpr{Left: $1, Operator: "CAT", Right: $2}
+	}
 
 simp_expr
 	: non_post_simp_expr
@@ -470,6 +465,11 @@ non_post_simp_expr
 	{
 		$$ = &ast.StringExpr{Literal: $1.Literal}
 	}
+	/* var */
+	| variable
+	{
+		$$ = $1
+	}
 	/* UNARY EXPRESSION */
 	| '+' simp_expr %prec UNARY
 	{
@@ -478,11 +478,6 @@ non_post_simp_expr
 	| '-' simp_expr %prec UNARY
 	{
 		$$ = &ast.UnaryExpr{Operator: "-", Expr:$2}
-	}
-	/* var */
-	| variable
-	{
-		$$ = $1
 	}
 	/*
 	*/
