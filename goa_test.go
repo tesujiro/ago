@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 	"testing"
 )
@@ -500,11 +501,28 @@ ZZZ 1
 	realStdin := os.Stdin
 	realStdout := os.Stdout
 	realStderr := os.Stderr
+	case_number := 0
 
 	for _, test := range tests {
+		case_number++
 		//t.Logf("script:%v\n", test.script)
-		if os.Getenv("TESTCASE") == "1" {
-			fmt.Fprintf(realStdout, "script:%v\n", test.script)
+		switch os.Getenv("TESTCASE") {
+		case "":
+		case "0":
+			{
+				fmt.Fprintf(realStdout, "case:%v script:%v\n", case_number, test.script)
+			}
+		default:
+			{
+				c, err := strconv.Atoi(os.Getenv("TESTCASE"))
+				if err != nil {
+					t.Fatal("Atoi error:", err)
+				}
+				if case_number != c {
+					continue
+				}
+				fmt.Fprintf(realStdout, "case:%v script:%v\n", case_number, test.script)
+			}
 		}
 
 		// IN PIPE
