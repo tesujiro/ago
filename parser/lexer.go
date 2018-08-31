@@ -51,6 +51,7 @@ var compSymbols = map[string]int{
 	"-=": MINUSEQ,
 	"*=": MULEQ,
 	"/=": DIVEQ,
+	"%=": MODEQ,
 }
 
 func (l *Lexer) Lex(lval *yySymType) (token_id int) {

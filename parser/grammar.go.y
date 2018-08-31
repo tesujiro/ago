@@ -45,14 +45,14 @@ var defaultExprs = []ast.Expr{&defaultExpr}
 
 %token <token> IDENT NUMBER STRING TRUE FALSE NIL
 %token <token> EQEQ NEQ GE LE ANDAND OROR LEN 
-%token <token> PLUSPLUS MINUSMINUS PLUSEQ MINUSEQ MULEQ DIVEQ
+%token <token> PLUSPLUS MINUSMINUS PLUSEQ MINUSEQ MULEQ DIVEQ MODEQ
 %token <token> DELETE IN
 %token <token> BEGIN END PRINT REGEXP
 %token <token> IF ELSE FOR WHILE DO BREAK CONTINUE
 %token <token> FUNC RETURN EXIT NEXT
 %token <token> CONCAT_OP
 
-%right '=' PLUSEQ MINUSEQ MULEQ DIVEQ
+%right '=' PLUSEQ MINUSEQ MULEQ DIVEQ MODEQ
 %right '?' ':'
 %left OROR
 %left ANDAND
@@ -297,6 +297,10 @@ expr
 	| variable DIVEQ expr
 	{
 		$$ = &ast.CompExpr{Left: $1, Operator: "/=", Right: $3}
+	}
+	| variable MODEQ expr
+	{
+		$$ = &ast.CompExpr{Left: $1, Operator: "%=", Right: $3}
 	}
 	/* TERNARY OPERATOR */
 	| expr '?' expr ':' expr
