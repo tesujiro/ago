@@ -57,6 +57,7 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{print \"123\" \"45\"}", ok: "12345\n"},
 		{script: "BEGIN{print \"123\" 45}", ok: "12345\n"},
 		{script: "BEGIN{print \"123\" 4+5}", ok: "1239\n"},
+		{script: "BEGIN{print 123 45}", ok: "12345\n"},
 		{script: "BEGIN{a[1]=1;a[2]=10;print a[1]+a[2]}", ok: "11\n"},
 		{script: "BEGIN{a[1]=1;a[2]=10;print a[1]-a[2]}", ok: "-9\n"},
 		{script: "BEGIN{a[1]=10;a[2]=5;print a[1]*a[2]}", ok: "50\n"},
@@ -219,6 +220,8 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{a,b=1,2;print b}", ok: "2\n"},
 		{script: "BEGIN{a,b=1,2,3;print b}", ok: "2\n"},
 		{script: "BEGIN{a,b,c=1,2;print b}", ok: "2\n"},
+
+		// {script: "BEGIN{t=func(){return 1,2}();print t}", ok: "1 2\n"}, //TODO: SHOULD BE ERROR??
 
 		// if statement
 		{script: "BEGIN{a=1;if a==1 { a=2 ;print a;}}", ok: "2\n"},

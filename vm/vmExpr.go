@@ -350,7 +350,7 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 			case l_kind == reflect.Float64 || r_kind == reflect.Float64:
 				return toFloat64(left) + toFloat64(right), nil
 			case l_kind == reflect.Int || r_kind == reflect.Int:
-				return toInt(left) + toInt(right), nil
+				return toString(left) + toString(right), nil
 			default:
 				return toString(left) + toString(right), nil
 			}
