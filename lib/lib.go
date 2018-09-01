@@ -173,12 +173,17 @@ func Import(env *vm.Env) *vm.Env {
 	}
 	env.Define("strftime", reflect.ValueOf(strftime))
 
-	/*
-		mktime := func(datespec reflect.Value) int {
-
+	mktime := func(datespec reflect.Value) int64 {
+		//loc, _ := time.LoadLocation("Asia/Tokyo")
+		loc, _ := time.LoadLocation("Local")
+		t, err := time.ParseInLocation("2006 01 02 15 04 05", toStr(datespec), loc)
+		if err != nil {
+			return 0
 		}
-		env.Define("mktime", reflect.ValueOf(mktime))
-	*/
+		return t.Unix()
+
+	}
+	env.Define("mktime", reflect.ValueOf(mktime))
 
 	return env
 }

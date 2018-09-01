@@ -193,7 +193,7 @@ func runSingleStmt(stmt ast.Stmt, env *Env) (interface{}, error) {
 			}
 			//fmt.Printf("%v", result)
 			switch reflect.ValueOf(result).Kind() {
-			case reflect.Int, reflect.Float64, reflect.Bool, reflect.String:
+			case reflect.Int, reflect.Int64, reflect.Float64, reflect.Bool, reflect.String:
 				fmt.Printf("%v", result)
 			case reflect.Slice:
 				len := reflect.ValueOf(result).Len()

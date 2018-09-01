@@ -13,7 +13,6 @@ under development
 * func: rand, srand, int, split, system
 * var: FNR, OFMT, RS, ENVIRON, CONVFMT, RSTART, RLENGTH
 * print error with line number
-* datetime funcs
 * asort(),asorti()
 * import & call go library
 * goroutine

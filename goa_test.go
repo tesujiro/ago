@@ -420,6 +420,11 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{print gsub(\"/^a+/\",\"A\",\"aabbaacc\")}", ok: "Abbaacc\n"},
 		{script: "BEGIN{print sub(\"/^a+/\",\"\",\"aabbaacc\")}", ok: "bbaacc\n"},
 		{script: "BEGIN{print sub(\"/c+$/\",\"\",\"aabbaacc\")}", ok: "aabbaa\n"},
+		// lib: mktime,strftime
+		//{script: "BEGIN{print mktime(\"2018 09 01 13 07 50\")}", ok: "1535774870\n"},  //JAPAN
+		{script: "BEGIN{print mktime(\"2018 99 01 13 07 50\")}", ok: "0\n"}, //JAPAN
+		{script: "BEGIN{print strftime(\"%Y/%m/%d %H:%M:%S\",mktime(\"2018 09 01 13 07 50\"))}", ok: "2018/09/01 13:07:50\n"},
+		{script: "BEGIN{print strftime(\"%y-%m-%d %H:%M:%S\",mktime(\"2018 09 01 13 07 50\"))}", ok: "18-09-01 13:07:50\n"},
 
 		// field
 		{script: "{print $1}", in: "Hello World!\n", ok: "Hello\n"},
