@@ -425,7 +425,7 @@ func TestGoa(t *testing.T) {
 		{script: "{print $1}", in: "Hello World!\n", ok: "Hello\n"},
 		{script: "{print NF}", in: "\n \n\t\naaa\n", ok: "0\n0\n0\n1\n"},
 		{script: "{FS=\":\"}{print NF}", in: "\n:\naaa:bbb\n", ok: "0\n2\n2\n"},
-		{script: "{print length($1)}", in: "Hello World!\n", ok: "5\n"},
+		{script: "{print length($1)*1}", in: "Hello World!\n", ok: "5\n"},
 		{script: "$1==\"AAA\"{print;COUNT++} END{print COUNT}", in: "AAA BBB CCC\nAAA BBB CCC\n", ok: "AAA BBB CCC\nAAA BBB CCC\n2\n"},
 		{script: "NR==1{$2=$1 ;print $0,NF} NR==2{$5=$1; print $0,NF}", in: "AAA BBB CCC\nAAA BBB CCC\n", ok: "AAA AAA CCC 3\nAAA BBB CCC  AAA 5\n"},
 		// /start/./stop/

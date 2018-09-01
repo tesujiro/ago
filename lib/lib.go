@@ -42,7 +42,12 @@ func Import(env *vm.Env) *vm.Env {
 	}
 
 	toInt64 := func(v reflect.Value) int64 {
-		return int64(toInt(v)) //TODO: for Windows
+		switch v.Type().Kind() {
+		case reflect.Int64:
+			return v.Interface().(int64)
+		default:
+			return int64(toInt(v))
+		}
 	}
 
 	length := func(v reflect.Value) int {
@@ -161,11 +166,7 @@ func Import(env *vm.Env) *vm.Env {
 			f = strings.Replace(f, k, v, -1)
 		}
 
-		//fmt.Printf("timestamp=%#v\ntimestamp.Kind=%#v\n", timestamp,timestamp.Kind().String())
-		//t := timestamp.Index(0).Interface()
-		//t := toInt(timestamp)
-		//t64, _ := t.(int64)
-		//t64 := int64(t)
+		//fmt.Printf("timestamp=%#v\ntimestamp.Kind=%#v\n", timestamp, timestamp.Kind().String())
 		t64 := toInt64(timestamp)
 		u := time.Unix(t64, 0)
 		return u.Format(f)
