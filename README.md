@@ -17,9 +17,11 @@ under development
 * import & call go library
 * goroutine
 * comment
+* -g global varibale option
 
 # Difference from AWK
 * {} block has a local scope. variables name beginning with uppercase are global, others are local
+* with -g option all variables have global scopes.
 * multiple value (ex. BEGIN{a,b=1,2})
 * define func in action (ex. { swap=func(a,b){return b,a}; print swap("a","b"); } // b a )
 * anonymous func (ex. { print func(a,b){return b,a}("a","b"); } // b a )
