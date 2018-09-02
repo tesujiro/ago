@@ -114,9 +114,9 @@ func callFunc(callExpr *ast.CallExpr, env *Env) (interface{}, error) {
 		return nil, err
 	} else {
 		debug.Printf("args: %v\n", args)
-		for i, arg := range args {
-			debug.Printf("=>arg[%d]: %v\n", i, arg.Interface())
-		}
+		//for i, arg := range args {
+		//debug.Printf("=>arg[%d]: %v\n", i, arg.Interface())
+		//}
 
 		//fmt.Println("f.Call Start")
 		// Call Function
@@ -136,16 +136,26 @@ func isGoFunc(rt reflect.Type) bool {
 }
 
 func callArgs(f reflect.Value, callExpr *ast.CallExpr, env *Env) ([]reflect.Value, error) {
-	//if f.Type().IsVariadic() {
-	//return nil, errors.New("sorry! TODO:Variadic")
-	//}
 	if f.Type().NumIn() < 1 {
 		return []reflect.Value{}, nil
 	}
-	if f.Type().NumIn() != len(callExpr.SubExprs) {
+	if !f.Type().IsVariadic() && f.Type().NumIn() != len(callExpr.SubExprs) ||
+		f.Type().IsVariadic() && f.Type().NumIn()-1 > len(callExpr.SubExprs) {
 		return []reflect.Value{}, fmt.Errorf("function wants %v arguments but received %v", f.Type().NumIn(), len(callExpr.SubExprs))
 	}
-	args := make([]reflect.Value, f.Type().NumIn(), f.Type().NumIn())
+	var args []reflect.Value
+	args = make([]reflect.Value, len(callExpr.SubExprs), len(callExpr.SubExprs))
+	/*
+		if f.Type().NumIn() > len(callExpr.SubExprs) {
+			args = make([]reflect.Value, f.Type().NumIn(), f.Type().NumIn())
+		} else {
+			args = make([]reflect.Value, len(callExpr.SubExprs), len(callExpr.SubExprs))
+		}
+	*/
+	// func has variadic args
+	//hasVariadicArgs := f.Type().In(f.Type().NumIn()-1).Kind() == reflect.Slice
+	hasVariadicArgs := f.Type().IsVariadic()
+
 	for k, subExpr := range callExpr.SubExprs {
 		// User Defined Funcion
 		var arg interface{}
@@ -161,10 +171,32 @@ func callArgs(f reflect.Value, callExpr *ast.CallExpr, env *Env) ([]reflect.Valu
 			}
 			debug.Printf("callArg[%v]:%v %v\n", k, arg, reflect.TypeOf(arg))
 		}
-		args[k] = reflect.ValueOf(reflect.ValueOf(arg))
-		// TODO: Golang Pacakage Funcion
-		//
+		if isGoFunc(f.Type()) {
+			debug.Printf("call arg[%v]\t%v\ttype:%v\n", k, arg, reflect.TypeOf(arg))
+			if k < f.Type().NumIn() {
+				debug.Printf("func arg[%v]\ttype:%v\n", k, f.Type().In(k))
+			}
+
+			if hasVariadicArgs && f.Type().NumIn()-1 <= k {
+				// variadic arg
+				variadicArgType := f.Type().In(f.Type().NumIn() - 1).Elem()
+				if reflect.TypeOf(arg) == variadicArgType {
+					args[k] = reflect.ValueOf(arg)
+				} else {
+					args[k] = reflect.ValueOf(reflect.ValueOf(arg))
+				}
+			} else if reflect.TypeOf(arg) == f.Type().In(k) {
+				// not valiadic and same as func arg type
+				args[k] = reflect.ValueOf(arg)
+			} else {
+				// not valiadic and not same as func arg type
+				args[k] = reflect.ValueOf(reflect.ValueOf(arg))
+			}
+		} else {
+			args[k] = reflect.ValueOf(reflect.ValueOf(arg))
+		}
 	}
+	debug.Printf("len(args):%v\n", len(args))
 	return args, nil
 }
 

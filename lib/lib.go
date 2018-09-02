@@ -50,6 +50,27 @@ func Import(env *vm.Env) *vm.Env {
 		}
 	}
 
+	env.Define("println", reflect.ValueOf(fmt.Println))
+	env.Define("printf", reflect.ValueOf(fmt.Printf))
+
+	sum := func(args ...int) int {
+		var result int
+		for _, v := range args {
+			result += v
+		}
+		return result
+	}
+	env.Define("sum", reflect.ValueOf(sum))
+
+	cat := func(args ...string) string {
+		var result string
+		for _, v := range args {
+			result += v
+		}
+		return result
+	}
+	env.Define("cat", reflect.ValueOf(cat))
+
 	length := func(v reflect.Value) int {
 		switch v.Type().Kind() {
 		case reflect.Int:

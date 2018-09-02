@@ -16,6 +16,7 @@ under development
 * asort(),asorti()
 * import & call go library
 * goroutine
+* comment
 
 # Difference from AWK
 * {} block has a local scope. variables name beginning with uppercase are global, others are local

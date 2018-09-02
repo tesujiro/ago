@@ -326,6 +326,15 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{hash=func(){m[1]=1;m[2]=2;m[3]=3;return m}; m=hash();print m[1]}", ok: "1\n"},
 		{script: "BEGIN{map=func(){m[1]=1;m[2]=2;m[3]=3;return m}; print map()[1]}", ok: "1\n"},
 		{script: "BEGIN{print func(){m[1]=1;m[2]=2;m[3]=3;return m}()[1]}", ok: "1\n"},
+		// call go func with variadic args
+		{script: "BEGIN{println(\"abc\",\"def\")}", ok: "abc def\n"},
+		{script: "BEGIN{println()}", ok: "\n"},
+		//{script: "BEGIN{printf(\"hello, %s\\n\",\"world!\")}", ok: "hello, world!\n"}, //TOFIX
+		{script: "BEGIN{print sum(1,2,3)}", ok: "6\n"},
+		{script: "BEGIN{print sum()}", ok: "0\n"},
+		{script: "BEGIN{print cat(\"abc\",\"def\")}", ok: "abcdef\n"},
+		{script: "BEGIN{print cat()}", ok: "\n"},
+
 		// multi result function
 		{script: "BEGIN{Cross=func(a1,a2){return a2,a1;};print Cross(1,5)}", ok: "5 1\n"},
 		{script: "BEGIN{Cross=func(a1,a2){return a2,a1;};x,y=Cross(1,5);print x}", ok: "5\n"},
