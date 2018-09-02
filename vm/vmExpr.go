@@ -334,6 +334,14 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 			return toFloat64(left) < toFloat64(right), nil
 		case "<=":
 			return toFloat64(left) <= toFloat64(right), nil
+		case "in":
+			if reflect.ValueOf(right).Kind() != reflect.Map {
+				return 0, nil
+			}
+			k := toString(left)
+			m, _ := right.(map[interface{}]interface{})
+			_, ok := m[k]
+			return ok, nil
 		case "CAT":
 			l_kind := reflect.ValueOf(left).Kind()
 			r_kind := reflect.ValueOf(right).Kind()

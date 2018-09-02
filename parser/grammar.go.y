@@ -54,6 +54,7 @@ var defaultExprs = []ast.Expr{&defaultExpr}
 
 %right '=' PLUSEQ MINUSEQ MULEQ DIVEQ MODEQ
 %right '?' ':'
+%left IN
 %left OROR
 %left ANDAND
 /*%left IDENT*/
@@ -382,6 +383,10 @@ simp_expr
 	| simp_expr LE simp_expr
 	{
 		$$ = &ast.BinOpExpr{Left: $1, Operator: "<=", Right: $3}
+	}
+	| simp_expr IN simp_expr
+	{
+		$$ = &ast.BinOpExpr{Left: $1, Operator: "in", Right: $3}
 	}
 	/* REGEXP */
 	| simp_expr '~' REGEXP

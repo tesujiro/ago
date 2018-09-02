@@ -5,9 +5,9 @@ go on awk (just like Unagi on Katsudon)
 under development
 
 # Still not implemented
-* array key predicate (ex: (key in map){}, if !(key in map){}
 * regular expressin not match "!~"
 * printf, sprintf
+* comment
 * nextfile
 * getline
 * func: rand, srand, int, split, system
@@ -16,8 +16,8 @@ under development
 * asort(),asorti()
 * import & call go library
 * goroutine
-* comment
 * -g global varibale option
+* define variadice functions
 
 # Difference from AWK
 * {} block has a local scope. variables name beginning with uppercase are global, others are local
@@ -33,4 +33,5 @@ under development
 * REGEXP "/.../" -> /.../
 * function args cannot be omitted (like sub(r, t[, s]))
 * function match() does not set RSTART, RLENGTH
-* FS=="\n" : error
+* error: S=="\n"
+* error: !($0 in A){A[$0];print}
