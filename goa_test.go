@@ -280,6 +280,7 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{a[1]=1;print a[2]}", ok: "\n"},
 		{script: "BEGIN{a[1]=1;print 1 in a}", ok: "true\n"},
 		{script: "BEGIN{a[1]=1;print 2 in a}", ok: "false\n"},
+		{script: "BEGIN{print 1 in b}", ok: "false\n"},
 		{script: "BEGIN{a[1]=1;print \"1\" in a}", ok: "true\n"},
 		{script: "BEGIN{a[1]=1;print \"2\" in a}", ok: "false\n"},
 		{script: "BEGIN{a[\"1\"]=1;print 1 in a}", ok: "true\n"},
@@ -306,10 +307,10 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{delete a;a=2}", ok: "error:can't assign to a; it's an associated array name.\n"},
 		{script: "BEGIN{list=func(){a[1]=1;a[2]=2;a[3]=3;return a};delete list()[1]}", ok: "error:non variable does not support delete operation\n"},
 		{script: "BEGIN{list=func(){a[1]=1;a[2]=2;a[3]=3;return a};list()[1]=3}", ok: "error:invalid assignment\n"},
+		{script: "BEGIN{for (i in a) {print i,a[i]}}", ok: ""},
 		{script: "BEGIN{a[1]=1;a[2]=2;for (i in a) {print i,a[i]}}", ok: "1 1\n2 2\n"},
 		{script: "BEGIN{a[1]=1;a[2]=2;for (i in a) {};print i}", ok: "\n"},
 		{script: "BEGIN{a[1]=1;a[2]=2;i=0;for (i in a) {};print i}", ok: "2\n"},
-		{script: "BEGIN{for (i in a) {print i}}", ok: "error:unknown symbol\n"},
 		{script: "BEGIN{a=1;for (i in a) {print i}}", ok: "error:for key loop not in associated array,int\n"},
 		{script: "BEGIN{a[\"1\"]=1;a[\"2\"]=2;for (i in a) {print i,a[i]}}", ok: "1 1\n2 2\n"},
 		{script: "BEGIN{a[1]=1;a[2]=2;for (i in a) {print i,a[i]}}", ok: "1 1\n2 2\n"},
@@ -491,7 +492,7 @@ func TestGoa(t *testing.T) {
 		{script: "{$0=sub(\"/[ \t]+/\", \"\",$0)}1", in: "AAA \tBBB\n", ok: "AAABBB\n"},
 		//{script: "A !~ $0; {A=$0}", in: "AAA\nAAA\nAAA\nDDD\n\nAAA\n", ok: "AAA\nDDD\nAAA\n"},
 		{script: "!A[$0]++", in: "AAA\nAAA\nAAA\nDDD\nAAA\n", ok: "AAA\nDDD\n"},
-		//{script: "!($0 in A){A[$0];print}", in: "AAA\nAAA\nAAA\nDDD\nAAA\n", ok: "AAA\nDDD\n"}, //TODO
+		{script: "!($0 in A){A[$0];print}", in: "AAA\nAAA\nAAA\nDDD\nAAA\n", ok: "AAA\nDDD\n"}, //TODO
 		{script: "{A[++C]=$0}END{for i=C;i>0;--i{print A[i]}}", in: "AAA\nBBB\nAAA\nDDD\n", ok: "DDD\nAAA\nBBB\nAAA\n"},
 		{script: "\"/A+/\"{++N};END{print N+0}", in: "AAA\nBBB\nAAA\nDDD\n", ok: "2\n"},
 		//{script: "NF{$0=++a \" :\" $0};1", in: "AAA\n\nBBB\n", ok: "1 AAA\n\n2 BBB\n"},

@@ -221,7 +221,7 @@ stmt
 	}
 	| FOR '(' IDENT IN IDENT ')' '{' opt_stmts '}'
 	{
-		$$ = &ast.HashLoopStmt{Key: $3.Literal, Hash: $5.Literal, Stmts:$8}
+		$$ = &ast.MapLoopStmt{KeyId: $3.Literal, MapId: $5.Literal, Stmts:$8}
 	}
 	| RETURN opt_exprs
 	{
@@ -384,9 +384,9 @@ simp_expr
 	{
 		$$ = &ast.BinOpExpr{Left: $1, Operator: "<=", Right: $3}
 	}
-	| simp_expr IN simp_expr
+	| simp_expr IN IDENT
 	{
-		$$ = &ast.BinOpExpr{Left: $1, Operator: "in", Right: $3}
+		$$ = &ast.ContainKeyExpr{KeyExpr: $1, MapId: $3.Literal}
 	}
 	/* REGEXP */
 	| simp_expr '~' REGEXP

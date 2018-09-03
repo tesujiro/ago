@@ -279,7 +279,28 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 		} else {
 			return evalExpr(elseExpr, env)
 		}
+	case *ast.ContainKeyExpr:
+		key, err := evalExpr(expr.(*ast.ContainKeyExpr).KeyExpr, env)
+		if err != nil {
+			return nil, err
+		}
+		k := toString(key)
 
+		mapId := expr.(*ast.ContainKeyExpr).MapId
+		mapInterface, err := env.Get(mapId)
+		if err == ErrUnknownSymbol {
+			v, err := env.DefineDefaultMap(mapId)
+			if err != nil {
+				return nil, err
+			}
+			mapInterface = v
+		} else if err != nil {
+			return nil, err
+		}
+		m, _ := mapInterface.(map[interface{}]interface{})
+
+		_, ok := m[k]
+		return ok, nil
 	case *ast.BinOpExpr:
 		var left, right interface{}
 		var err error
@@ -334,14 +355,6 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 			return toFloat64(left) < toFloat64(right), nil
 		case "<=":
 			return toFloat64(left) <= toFloat64(right), nil
-		case "in":
-			if reflect.ValueOf(right).Kind() != reflect.Map {
-				return 0, nil
-			}
-			k := toString(left)
-			m, _ := right.(map[interface{}]interface{})
-			_, ok := m[k]
-			return ok, nil
 		case "CAT":
 			l_kind := reflect.ValueOf(left).Kind()
 			r_kind := reflect.ValueOf(right).Kind()

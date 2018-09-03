@@ -34,4 +34,3 @@ under development
 * function args cannot be omitted (like sub(r, t[, s]))
 * function match() does not set RSTART, RLENGTH
 * error: S=="\n"
-* error: !($0 in A){A[$0];print}

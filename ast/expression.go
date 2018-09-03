@@ -95,3 +95,8 @@ type MatchExpr struct {
 	Expr    Expr
 	RegExpr string
 }
+
+type ContainKeyExpr struct {
+	KeyExpr Expr
+	MapId   string
+}

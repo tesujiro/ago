@@ -394,12 +394,18 @@ func runSingleStmt(stmt ast.Stmt, env *Env) (interface{}, error) {
 			}
 		}
 		return nil, nil
-	case *ast.HashLoopStmt:
-		key := stmt.(*ast.HashLoopStmt).Key
-		hash := stmt.(*ast.HashLoopStmt).Hash
-		stmts := stmt.(*ast.HashLoopStmt).Stmts
-		v, err := env.Get(hash)
-		if err != nil {
+	case *ast.MapLoopStmt:
+		keyId := stmt.(*ast.MapLoopStmt).KeyId
+		mapId := stmt.(*ast.MapLoopStmt).MapId
+		stmts := stmt.(*ast.MapLoopStmt).Stmts
+		v, err := env.Get(mapId)
+		if err == ErrUnknownSymbol {
+			val, err := env.DefineDefaultMap(mapId)
+			if err != nil {
+				return nil, err
+			}
+			v = val
+		} else if err != nil {
 			return nil, err
 		}
 		if reflect.TypeOf(v).Kind() != reflect.Map {
@@ -417,8 +423,8 @@ func runSingleStmt(stmt ast.Stmt, env *Env) (interface{}, error) {
 
 		newEnv := env.NewEnv()
 		for _, index := range indecies {
-			if err := newEnv.Set(key, index); err == ErrUnknownSymbol {
-				if err := newEnv.Define(key, index); err != nil {
+			if err := newEnv.Set(keyId, index); err == ErrUnknownSymbol {
+				if err := newEnv.Define(keyId, index); err != nil {
 					return nil, err
 				}
 			} else if err != nil {

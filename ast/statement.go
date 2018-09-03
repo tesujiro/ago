@@ -51,9 +51,9 @@ type ContinueStmt struct {
 type NextStmt struct {
 }
 
-type HashLoopStmt struct {
-	Key   string
-	Hash  string
+type MapLoopStmt struct {
+	KeyId string
+	MapId string
 	Stmts []Stmt
 }
 
