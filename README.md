@@ -25,12 +25,12 @@ under development
 * multiple value (ex. BEGIN{a,b=1,2})
 * define func in action (ex. { swap=func(a,b){return b,a}; print swap("a","b"); } // b a )
 * anonymous func (ex. { print func(a,b){return b,a}("a","b"); } // b a )
-* function call is call by value.
-* sub,gsub returns replaced string
 * if, for, while conditions do not need parentheses, statements need curly braces. (ex. for a<10 {a=a+1}) 
 
 # To be fixed
+* no function option args (ex. sub(r, t[, s]))
+* function call is call by value.
+* sub,gsub returns replaced string
 * REGEXP "/.../" -> /.../
-* function args cannot be omitted (like sub(r, t[, s]))
 * function match() does not set RSTART, RLENGTH
 * error: S=="\n"

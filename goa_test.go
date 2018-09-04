@@ -50,6 +50,12 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{print \"a b c\"+1234}", ok: "1234\n"},
 		{script: "BEGIN{print \"a b c\"+\" d e f\"}", ok: "a b c d e f\n"},
 		{script: "BEGIN{print \"a b c\"-\" d e f\"}", ok: "0\n"},
+		{script: "BEGIN{print \"a b c\" \" d e f\"}", ok: "a b c d e f\n"},
+		{script: "BEGIN{print \"a\" \"b\"}", ok: "ab\n"},
+		{script: "BEGIN{print 1 \"b\"}", ok: "1b\n"},
+		{script: "BEGIN{print 1 1}", ok: "11\n"},
+		{script: "BEGIN{a=1;print ++a 1}", ok: "21\n"},
+		{script: "BEGIN{print \"a\" \"b\" \"c\"}", ok: "abc\n"},
 		{script: "BEGIN{print 15.2%7.1}", ok: "1\n"},
 		{script: "BEGIN{a=123;print a}", ok: "123\n"},
 		{script: "BEGIN{a=b=123;print a,b}", ok: "123 123\n"},
@@ -81,6 +87,7 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{a=\"b\";print a==\"a\"?a+\"1\":a+\"2\"}", ok: "b2\n"},
 		// composite expression
 		{script: "BEGIN{a=123;print ++a;print a}", ok: "124\n124\n"},
+		{script: "BEGIN{print ++1}", ok: "error:invalid operation\n"},
 		{script: "BEGIN{a=123;print a++;print a}", ok: "123\n124\n"},
 		{script: "BEGIN{a=123;print --a;print a}", ok: "122\n122\n"},
 		{script: "BEGIN{a=123;print a--;print a}", ok: "123\n122\n"},
@@ -495,8 +502,8 @@ func TestGoa(t *testing.T) {
 		{script: "!($0 in A){A[$0];print}", in: "AAA\nAAA\nAAA\nDDD\nAAA\n", ok: "AAA\nDDD\n"}, //TODO
 		{script: "{A[++C]=$0}END{for i=C;i>0;--i{print A[i]}}", in: "AAA\nBBB\nAAA\nDDD\n", ok: "DDD\nAAA\nBBB\nAAA\n"},
 		{script: "\"/A+/\"{++N};END{print N+0}", in: "AAA\nBBB\nAAA\nDDD\n", ok: "2\n"},
-		//{script: "NF{$0=++a \" :\" $0};1", in: "AAA\n\nBBB\n", ok: "1 AAA\n\n2 BBB\n"},
-		//{script: "{print (NF? ++a \" :\" :\"\") $0}", in: "AAA\n\nBBB\n", ok: "1 AAA\n\n2 BBB\n"},
+		{script: "NF{$0=++A \" :\" $0};1", in: "AAA\n\nBBB\n", ok: "1 :AAA\n\n2 :BBB\n"},
+		{script: "{print (NF? ++A \" :\" : \"\") $0}", in: "AAA\n\nBBB\n", ok: "1 :AAA\n\n2 :BBB\n"},
 		{script: "$1 > Max {Max=$1; Maxline=$0}; END{ print Max, Maxline}", in: "10 AAA\n30 BBB\n20 CCC\n10 DDD\n", ok: "30 30 BBB\n"},
 
 		// MAP

@@ -37,6 +37,7 @@ var defaultExprs = []ast.Expr{&defaultExpr}
 %type <expr>		simp_expr
 %type <expr>		non_post_simp_expr
 %type <expr>		variable
+%type <expr>		simple_variable
 %type <expr>		opt_expr
 %type <exprs>		exprs
 %type <exprs>		variables
@@ -486,10 +487,7 @@ variables
 		$$ = append($1,$4)
 	}
 
-variable
-	/*
-	: simp_expr '[' exprs ']'
-	*/
+simple_variable
 	: non_post_simp_expr '[' exprs ']'
 	{
 		$$ = &ast.ItemExpr{Expr: $1, Index:$3}
@@ -497,6 +495,12 @@ variable
 	| IDENT
 	{
 		$$ = &ast.IdentExpr{Literal: $1.Literal}
+	}
+
+variable
+	: simple_variable
+	{
+		$$ = $1
 	}
 	| '$' non_post_simp_expr
 	{
