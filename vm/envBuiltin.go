@@ -1,7 +1,6 @@
 package vm
 
 import (
-	"errors"
 	"fmt"
 	"regexp"
 )
@@ -144,12 +143,14 @@ func (e *Env) SetFieldFromLine(line string) error {
 	}
 	switch e.builtin.FS {
 	case "":
-		return errors.New("Field Seaparotor not set")
+		e.builtin.field = make([]string, len(line)+1)
+		for i, r := range line {
+			//fmt.Printf("c:%s\n", string(c))
+			e.builtin.field[i+1] = string(r)
+		}
 	case " ":
 		//THIS IS SPECIAL CASE FOR ORIGINAL AWK
-		//fmt.Printf("line %v:[%v]\n", e.builtin.NR, line)
 		line = re_org_awk_truncate.ReplaceAllString(line, "$1")
-		//fmt.Printf("line %v:[%v]\n", e.builtin.NR, line)
 		split("[ \t]+", line)
 	default:
 		//fmt.Printf("line %v:FS[%v]\n", e.builtin.NR, e.builtin.FS)
