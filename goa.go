@@ -18,18 +18,46 @@ import (
 	"github.com/tesujiro/goa/vm"
 )
 
+type hash map[string]string
+
+func (kvs hash) String() string {
+	var s string
+	for k, v := range kvs {
+		s = fmt.Sprintf("%s %s=%s", s, k, v)
+	}
+	return s
+}
+
+func (kvs hash) Set(s string) error {
+	z := strings.SplitN(s, "=", 2)
+	if len(z) < 2 {
+		return fmt.Errorf("parameter must be KEY=VALUE format :%v", s)
+	}
+	key := z[0]
+	value := z[1]
+	_, ok := kvs[key]
+	if ok {
+		kvs[key] = value
+	} else {
+		kvs[key] = value
+	}
+	return nil
+}
+
 var FS = flag.String("F", " ", "Field separator")
 var program_file = flag.String("f", "", "Program file")
 var dbg = flag.Bool("d", false, "debug option")
 var ast_dump = flag.Bool("a", false, "AST dump option")
 var mem_prof = flag.Bool("m", false, "Memory Profile")
 var cpu_prof = flag.Bool("c", false, "CPU Profile")
-var ver = flag.Bool("v", false, "version")
+var ver = flag.Bool("version", false, "version")
+var variables hash = hash{}
 
 const version = "0.0.0"
 
 func main() {
 	var file, script string
+	flag.Var(&variables, "v", "followed by var=value, assign variable before execution")
 	flag.Parse()
 	switch len(flag.Args()) {
 	case 1:
@@ -87,13 +115,24 @@ func main() {
 	os.Exit(runScript(script_reader, file_reader))
 }
 
-func runScript(script_reader io.Reader, file_reader io.Reader) int {
-
+func initEnv() *vm.Env {
 	env := vm.NewEnv()
 	env = lib.Import(env)
 	if *dbg {
 		env.Dump()
 	}
+	env.SetFS(*FS)
+
+	for k, v := range variables {
+		env.Set(k, v)
+	}
+
+	return env
+}
+
+func runScript(script_reader io.Reader, file_reader io.Reader) int {
+
+	env := initEnv()
 
 	bytes, err := ioutil.ReadAll(script_reader)
 	if err != nil {
@@ -117,9 +156,6 @@ func runScript(script_reader io.Reader, file_reader io.Reader) int {
 	if *ast_dump {
 		parser.Dump(ast)
 	}
-
-	//vm.Init() // TODO: NR=0
-	env.SetFS(*FS)
 
 	var result interface{}
 

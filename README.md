@@ -17,7 +17,6 @@ under development
 * import & call go library
 * goroutine
 * -g global varibale option
-* -v key=value
 * define variadic functions
 
 # Difference from AWK
