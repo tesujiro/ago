@@ -150,15 +150,21 @@ func Import(env *vm.Env) *vm.Env {
 	}
 	env.Define("sub", reflect.ValueOf(sub))
 
-	//TODO: how can i set RSTART,RLENGTH -> builtin function
 	match := func(s, r reflect.Value) int {
 		re := regexp.MustCompile(toStr(r))
 		loc := re.FindStringIndex(toStr(s))
+		result := re.FindString(toStr(s))
+		var retloc, retlen int
 		if len(loc) > 0 {
-			return loc[0] + 1
+			retloc = loc[0] + 1
+			retlen = len(result)
 		} else {
-			return 0
+			retloc = 0
+			retlen = -1
 		}
+		env.SetRSTART(retloc)
+		env.SetRLENGTH(retlen)
+		return retloc
 	}
 	env.Define("match", reflect.ValueOf(match))
 

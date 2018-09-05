@@ -422,8 +422,8 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{print substr(12.345,1,4)}", ok: "12.3\n"},
 		{script: "BEGIN{print substr(\"\",1,3)}", ok: "\n"},
 		// lib:match
-		//{script: "BEGIN{print match(\"abcde\",\"/cd+/\");print RSTART,RLENGTH}", ok: "3\n3,3\n"}, //TODO
-		//{script: "BEGIN{print match(\"abcde\",\"/dc+/\")}", ok: "0\n0,-1\n"}, //TODO
+		{script: "BEGIN{print match(\"abcdde\",\"/cd+/\");print RSTART,RLENGTH}", ok: "3\n3 3\n"},
+		{script: "BEGIN{print match(\"abcde\",\"/dc+/\");print RSTART,RLENGTH}", ok: "0\n0 -1\n"},
 		{script: "BEGIN{print match(\"abcde\",\"/cd+/\")}", ok: "3\n"},
 		{script: "BEGIN{print match(\"abcde\",\"/dc+/\")}", ok: "0\n"},
 		// lib:split

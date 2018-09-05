@@ -11,13 +11,14 @@ under development
 * nextfile
 * getline
 * func: rand, srand, int, split, system
-* var: FNR, OFMT, RS, ENVIRON, CONVFMT, RSTART, RLENGTH
+* var: FNR, OFMT, RS, ENVIRON, CONVFMT
 * print error with line number
 * asort(),asorti()
 * import & call go library
 * goroutine
 * -g global varibale option
-* define variadice functions
+* -v key=value
+* define variadic functions
 
 # Difference from AWK
 * {} block has a local scope. variables name beginning with uppercase are global, others are local
@@ -31,6 +32,6 @@ under development
 * no function option args (ex. sub(r, t[, s]))
 * function call is call by value.
 * sub,gsub returns replaced string
-* REGEXP "/.../" -> /.../
-* function match() does not set RSTART, RLENGTH
+* can't read '\n' '\t' as ascii chars
 * error: S=="\n"
+* REGEXP "/.../" -> /.../

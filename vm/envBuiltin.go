@@ -55,6 +55,14 @@ func (e *Env) SetSUBSEP(ss string) {
 	e.builtin.SUBSEP = ss
 }
 
+func (e *Env) SetRLENGTH(i int) {
+	e.builtin.RLENGTH = i
+}
+
+func (e *Env) SetRSTART(i int) {
+	e.builtin.RSTART = i
+}
+
 func (e *Env) GetField(i int) (string, error) {
 	// TODO: out of index
 	if i < 0 || i >= len(e.builtin.field) {
