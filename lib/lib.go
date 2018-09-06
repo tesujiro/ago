@@ -168,11 +168,23 @@ func Import(env *vm.Env) *vm.Env {
 	}
 	env.Define("match", reflect.ValueOf(match))
 
-	/*
-		split := func(s, g, fs reflect.Value) int {
+	split := func(str string, array map[interface{}]interface{}, vars ...string) int {
+		var sep string
+		if len(vars) > 0 {
+			sep = vars[0]
+		} else {
+			val, _ := env.Get("FS")
+			sep = val.(string)
 		}
-		env.Define("split", reflect.ValueOf(split))
-	*/
+
+		re := regexp.MustCompile(sep)
+		result := re.Split(str, -1)
+		for k, v := range result {
+			array[fmt.Sprintf("%d", k+1)] = v
+		}
+		return len(result)
+	}
+	env.Define("split", reflect.ValueOf(split))
 
 	systime := func() int64 {
 		return time.Now().Unix()

@@ -427,7 +427,9 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{print match(\"abcde\",\"/cd+/\")}", ok: "3\n"},
 		{script: "BEGIN{print match(\"abcde\",\"/dc+/\")}", ok: "0\n"},
 		// lib:split
-		//{script: "BEGIN{split(\"a:b:c\",ar,\":\");print ar[3]}", ok: "c\n"},
+		{script: "BEGIN{ar[1]=\"\";print split(\"a:b:c\",ar,\":\");print ar[1]}", ok: "3\na\n"},
+		{script: "BEGIN{ar[1]=\"\";print split(\"a:b:c\",ar);print ar[1]}", ok: "1\na:b:c\n"},
+		//{script: "BEGIN{split(\"a:b:c\",ar,\":\");print ar[3]}", ok: "c\n"}, //TODO:
 		// lib:index
 		{script: "BEGIN{print index(\"abc\",\"bc\")}", ok: "2\n"},
 		{script: "BEGIN{print index(\"abc\",\"yz\")}", ok: "0\n"},

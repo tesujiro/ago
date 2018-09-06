@@ -18,6 +18,7 @@ under development
 * goroutine
 * -g global varibale option
 * define variadic functions
+* test command option
 
 # Difference from AWK
 * {} block has a local scope. variables name beginning with uppercase are global, others are local
