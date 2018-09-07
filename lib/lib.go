@@ -2,10 +2,12 @@ package lib
 
 import (
 	"fmt"
+	"os/exec"
 	"reflect"
 	"regexp"
 	"strconv"
 	"strings"
+	"syscall"
 	"time"
 
 	"github.com/tesujiro/goa/vm"
@@ -70,6 +72,32 @@ func Import(env *vm.Env) *vm.Env {
 		return result
 	}
 	env.Define("cat", reflect.ValueOf(cat))
+
+	system := func(command string) int {
+		re := regexp.MustCompile("[ \t]+")
+		cmd_array := re.Split(command, -1)
+		cmd := exec.Command(cmd_array[0], cmd_array[1:]...)
+		if err := cmd.Start(); err != nil {
+			fmt.Printf("%v", err)
+			return 1
+		}
+		if err := cmd.Wait(); err != nil {
+			if exiterr, ok := err.(*exec.ExitError); ok {
+				// This works on both Unix and Windows. Although package
+				// syscall is generally platform dependent, WaitStatus is
+				// defined for both Unix and Windows and in both cases has
+				// an ExitStatus() method with the same signature.
+				if status, ok := exiterr.Sys().(syscall.WaitStatus); ok {
+					return status.ExitStatus()
+				}
+			} else {
+				fmt.Printf("%v", err)
+				return 1
+			}
+		}
+		return 0
+	}
+	env.Define("system", reflect.ValueOf(system))
 
 	length := func(v reflect.Value) int {
 		switch v.Type().Kind() {

@@ -455,6 +455,8 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{print mktime(\"2018 99 01 13 07 50\")}", ok: "0\n"}, //JAPAN
 		{script: "BEGIN{print strftime(\"%Y/%m/%d %H:%M:%S\",mktime(\"2018 09 01 13 07 50\"))}", ok: "2018/09/01 13:07:50\n"},
 		{script: "BEGIN{print strftime(\"%y-%m-%d %H:%M:%S\",mktime(\"2018 09 01 13 07 50\"))}", ok: "18-09-01 13:07:50\n"},
+		// lib: system
+		{script: "BEGIN{print system(\"echo aaa\")}", ok: "0\n"},
 
 		// field
 		{script: "{print $1}", in: "Hello World!\n", ok: "Hello\n"},
