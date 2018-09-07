@@ -137,16 +137,55 @@ func Import(env *vm.Env) *vm.Env {
 
 	// TODO: NOT SAME SPEC AS AWK gsub
 	// AWK : function call args by reference
-	gsub := func(v1, v2, v3 reflect.Value) string {
-		re := regexp.MustCompile(toStr(v1))
-		result := re.ReplaceAllString(toStr(v3), toStr(v2))
-		//fmt.Printf("lib:gsub v1:%v v2:%v v3:%v\tresult:%#v\n", v1, v2, v3, result)
-		return result
+	/*
+		gsub := func(v1, v2, v3 reflect.Value) string {
+			re := regexp.MustCompile(toStr(v1))
+			result := re.ReplaceAllString(toStr(v3), toStr(v2))
+			//fmt.Printf("lib:gsub v1:%v v2:%v v3:%v\tresult:%#v\n", v1, v2, v3, result)
+			return result
+		}
+	*/
+	gsub := func(before, after string, args ...*string) int {
+		// PARSE ARGS
+		var v_name string
+		var v_val interface{}
+		var err error
+		if len(args) > 0 {
+			v_name = *args[0] // arg[0] is a pointer to var name
+			v_val, err = env.Get(v_name)
+			if err == vm.ErrUnknownSymbol {
+				v_val = ""
+			} else if err != nil { // TODO: unknown symbol
+				fmt.Printf("err=%v\n", err)
+				return 0
+			}
+
+		} else {
+			//TODO: error
+			v_val, _ = env.GetField(0)
+		}
+		// MAIN
+		re := regexp.MustCompile(before)
+		result := re.ReplaceAllString(v_val.(string), after)
+		if len(args) > 0 {
+			v_name = *args[0]
+			err = env.Set(v_name, result)
+			if err != nil {
+				return 0
+			}
+		} else {
+			//TODO: error
+			_ = env.SetField(0, result)
+		}
+		return len(re.FindAllString(v_val.(string), -1))
 	}
 	env.Define("gsub", reflect.ValueOf(gsub))
 
-	sub := func(s, g, fs reflect.Value) string {
-		return gsub(reflect.ValueOf("^(.*?)"+toStr(s)+"(.*)$"), reflect.ValueOf("${1}"+toStr(g)+"${2}"), fs)
+	/*
+		sub := func(s, g, fs reflect.Value) string {
+	*/
+	sub := func(before, after string, args ...*string) int {
+		return gsub("^(.*?)"+before+"(.*)$", "${1}"+after+"${2}", args...)
 	}
 	env.Define("sub", reflect.ValueOf(sub))
 

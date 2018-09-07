@@ -156,6 +156,13 @@ func callArgs(f reflect.Value, callExpr *ast.CallExpr, env *Env) ([]reflect.Valu
 	//hasVariadicArgs := f.Type().In(f.Type().NumIn()-1).Kind() == reflect.Slice
 	hasVariadicArgs := f.Type().IsVariadic()
 
+	funcArgType := func(n int) reflect.Type {
+		if hasVariadicArgs && f.Type().NumIn()-1 <= n {
+			return f.Type().In(f.Type().NumIn() - 1).Elem()
+		}
+		return f.Type().In(n)
+	}
+
 	for k, subExpr := range callExpr.SubExprs {
 		// User Defined Funcion
 		var arg interface{}
@@ -163,6 +170,26 @@ func callArgs(f reflect.Value, callExpr *ast.CallExpr, env *Env) ([]reflect.Valu
 		case *ast.MatchExpr:
 			arg = subExpr.(*ast.MatchExpr).RegExpr
 			debug.Println("call parameter contains REGEXP:", arg)
+		case *ast.IdentExpr:
+			//fmt.Printf("Ident:%v   Func arg type:%v\n", subExpr.(*ast.IdentExpr).Literal, funcArgType(k).Kind().String())
+			switch funcArgType(k).Kind() {
+			case reflect.Map:
+				var err error
+				arg, err = env.Get(subExpr.(*ast.IdentExpr).Literal)
+				if err != nil {
+					return nil, err
+				}
+			case reflect.Ptr:
+				// set variable name to arg
+				arg = subExpr.(*ast.IdentExpr).Literal
+				//fmt.Printf("arg:%#v   type:%v\n", arg, reflect.TypeOf(arg))
+			default:
+				var err error
+				arg, err = evalExpr(subExpr, env)
+				if err != nil {
+					return nil, err
+				}
+			}
 		default:
 			var err error
 			arg, err = evalExpr(subExpr, env)
@@ -180,14 +207,28 @@ func callArgs(f reflect.Value, callExpr *ast.CallExpr, env *Env) ([]reflect.Valu
 			if hasVariadicArgs && f.Type().NumIn()-1 <= k {
 				// variadic arg
 				variadicArgType := f.Type().In(f.Type().NumIn() - 1).Elem()
-				if reflect.TypeOf(arg) == variadicArgType {
+				//fmt.Printf("variadicArgType :%v\n", variadicArgType)
+				if variadicArgType.Kind() == reflect.Ptr {
+					//fmt.Printf("POINTER to %v\n", reflect.PtrTo(variadicArgType))
+					//fmt.Printf("arg:%#v   type:%v\n", arg, reflect.TypeOf(arg))
+					s := arg.(string) //variable name
+					args[k] = reflect.ValueOf(&s)
+				} else if reflect.TypeOf(arg) == variadicArgType {
 					args[k] = reflect.ValueOf(arg)
 				} else {
+					//fmt.Printf("func arg[%v] :%v\n", k, f.Type().In(k))
 					args[k] = reflect.ValueOf(reflect.ValueOf(arg))
+					//args[k] = reflect.ValueOf(&arg.(string))
 				}
 			} else if reflect.TypeOf(arg) == f.Type().In(k) {
 				// not valiadic and same as func arg type
 				args[k] = reflect.ValueOf(arg)
+			} else if f.Type().In(k).Kind() == reflect.Ptr {
+				// TODO
+				//args[k] = reflect.ValueOf(reflect.ValueOf(arg))
+				s := arg.(string) //variable name
+				args[k] = reflect.ValueOf(&s)
+
 			} else {
 				// not valiadic and not same as func arg type
 				args[k] = reflect.ValueOf(reflect.ValueOf(arg))

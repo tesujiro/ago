@@ -186,8 +186,8 @@ func TestGoa(t *testing.T) {
 		{script: "\"AAA\"~\"/AAA/\"{print}", in: "AAA", ok: "AAA\n"},
 		{script: "$0~\"/AAA/\"{print}", in: "AAA", ok: "AAA\n"},
 		{script: "\"/AAA/\"{print}", in: "AAA", ok: "AAA\n"},
-		//{script: "BEGIN{s=\"abcaaa\";gsub(\"/a+/\",\"A\",s);print s}", ok: "AbcA\n"},  // TODO: AWK: call by reference
-		{script: "BEGIN{s=\"abcaaa\";print gsub(\"/a+/\",\"A\",s)}", ok: "AbcA\n"},
+		{script: "BEGIN{S=\"abcaaa\";gsub(\"/a+/\",\"A\",S);print S}", ok: "AbcA\n"}, // TODO: AWK: call by reference
+		{script: "BEGIN{S=\"abcaaa\";print gsub(\"/a+/\",\"A\",S);print S}", ok: "2\nAbcA\n"},
 
 		// assignment
 		{script: "BEGIN{a=1;b=2;print a+b}", ok: "3\n"},
@@ -442,12 +442,14 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{print toupper(\"\")}", ok: "\n"},
 		{script: "BEGIN{print toupper(\"Hello, World!\")}", ok: "HELLO, WORLD!\n"},
 		// lib: sub,gsub
-		{script: "BEGIN{print sub(\"/a/\",\"A\",\"aabbaacc\")}", ok: "Aabbaacc\n"},
-		{script: "BEGIN{print gsub(\"/a/\",\"A\",\"aabbaacc\")}", ok: "AAbbAAcc\n"},
-		{script: "BEGIN{print sub(\"/a+/\",\"A\",\"aabbaacc\")}", ok: "Abbaacc\n"},
-		{script: "BEGIN{print gsub(\"/^a+/\",\"A\",\"aabbaacc\")}", ok: "Abbaacc\n"},
-		{script: "BEGIN{print sub(\"/^a+/\",\"\",\"aabbaacc\")}", ok: "bbaacc\n"},
-		{script: "BEGIN{print sub(\"/c+$/\",\"\",\"aabbaacc\")}", ok: "aabbaa\n"},
+		{script: "BEGIN{S=\"aabbaacc\";print sub(\"/a/\",\"A\",S);print S}", ok: "1\nAabbaacc\n"},
+		{script: "BEGIN{S=\"aabbaacc\";print gsub(\"/a/\",\"A\",S);print S}", ok: "4\nAAbbAAcc\n"},
+		{script: "BEGIN{S=\"aabbaacc\";print sub(\"/a+/\",\"A\",S);print S}", ok: "1\nAbbaacc\n"},
+		{script: "BEGIN{S=\"aabbaacc\";print gsub(\"/^a+/\",\"A\",S);print S}", ok: "1\nAbbaacc\n"},
+		{script: "BEGIN{S=\"aabbaacc\";print sub(\"/^a+/\",\"\",S);print S}", ok: "1\nbbaacc\n"},
+		{script: "BEGIN{S=\"aabbaacc\";print sub(\"/c+$/\",\"\",S);print S}", ok: "1\naabbaa\n"},
+		{script: "{print sub(\"/a+/\",\"\");print }", in: "aabbaacc", ok: "1\nbbaacc\n"},
+		{script: "{print gsub(\"/a+/\",\"\");print }", in: "aabbaacc", ok: "2\nbbcc\n"},
 		// lib: mktime,strftime
 		//{script: "BEGIN{print mktime(\"2018 09 01 13 07 50\")}", ok: "1535774870\n"},  //JAPAN
 		{script: "BEGIN{print mktime(\"2018 99 01 13 07 50\")}", ok: "0\n"}, //JAPAN
@@ -499,8 +501,8 @@ func TestGoa(t *testing.T) {
 		{script: "{N+=length($0) } END{print N}", in: "AAA\nBBB\n", ok: "6\n"},
 		{script: "{N+=NF} END{print N}", in: "AAA\nBBB\n", ok: "2\n"},
 		{script: "END{print NR}", in: "AAA\nBBB\nAAA\nDDD\n", ok: "4\n"},
-		{script: "{$0=gsub(\"/[ \t]+/\", \"\",$0)}1", in: "AAA \tBBB\n", ok: "AAABBB\n"},
-		{script: "{$0=sub(\"/[ \t]+/\", \"\",$0)}1", in: "AAA \tBBB\n", ok: "AAABBB\n"},
+		{script: "{gsub(\"/[ \t]+/\", \"\")}1", in: "AAA \tBBB\n", ok: "AAABBB\n"},
+		{script: "{sub(\"/[ \t]+/\", \"\")}1", in: "AAA \tBBB\n", ok: "AAABBB\n"},
 		//{script: "A !~ $0; {A=$0}", in: "AAA\nAAA\nAAA\nDDD\n\nAAA\n", ok: "AAA\nDDD\nAAA\n"},
 		{script: "!A[$0]++", in: "AAA\nAAA\nAAA\nDDD\nAAA\n", ok: "AAA\nDDD\n"},
 		{script: "!($0 in A){A[$0];print}", in: "AAA\nAAA\nAAA\nDDD\nAAA\n", ok: "AAA\nDDD\n"}, //TODO

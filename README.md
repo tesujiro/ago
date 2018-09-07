@@ -10,7 +10,7 @@ under development
 * comment
 * nextfile
 * getline
-* func: rand, srand, int, split, system
+* func: rand, srand, int, system
 * var: FNR, OFMT, RS, ENVIRON, CONVFMT
 * print error with line number
 * asort(),asorti()
@@ -29,9 +29,9 @@ under development
 * if, for, while conditions do not need parentheses, statements need curly braces. (ex. for a<10 {a=a+1}) 
 
 # To be fixed
-* no function option args (ex. sub(r, t[, s]))
-* function call is call by value.
-* sub,gsub returns replaced string
+* split(s,g,f): arg g must be initialized before calling the func
+* no function option args (except: sub,gsub)
+* sub(), gsub() arg string must be global variable
 * can't read '\n' '\t' as ascii chars
 * error: S=="\n"
 * REGEXP "/.../" -> /.../
