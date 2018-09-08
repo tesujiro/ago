@@ -30,8 +30,9 @@ under development
 
 # To be fixed
 * split(s,g,f): arg g must be initialized before calling the func
-* no function option args (except: sub,gsub)
+* no function option args (func:length)
 * sub(), gsub() arg string must be global variable
 * can't read '\n' '\t' as ascii chars
 * error: S=="\n"
 * REGEXP "/.../" -> /.../
+* no bool literal (true/false->0/1)

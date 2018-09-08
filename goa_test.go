@@ -638,7 +638,7 @@ ZZZ 1
 		// Result Check
 		//fmt.Fprintf(realStdout, "result:[%v]\ttest.ok:[%v]\n", resultOut, test.ok)
 		if resultOut != strings.Replace(test.ok, "\r", "", -1) { //replace for Windows
-			t.Errorf("Stdout - received: %v - expected: %v - runSource: %v", resultOut, test.ok, test.script)
+			t.Errorf("Case:[%v] received: %v - expected: %v - runSource: %v", case_number, resultOut, test.ok, test.script)
 		}
 	}
 

@@ -4,8 +4,6 @@ import (
 	"bufio"
 	"flag"
 	"fmt"
-	"go/scanner"
-	"go/token"
 	"io"
 	"io/ioutil"
 	"os"
@@ -47,6 +45,7 @@ func (kvs hash) Set(s string) error {
 var FS = flag.String("F", " ", "Field separator")
 var program_file = flag.String("f", "", "Program file")
 var dbg = flag.Bool("d", false, "debug option")
+var dbglexer = flag.Bool("l", false, "debug lexer option")
 var ast_dump = flag.Bool("a", false, "AST dump option")
 var mem_prof = flag.Bool("m", false, "Memory Profile")
 var cpu_prof = flag.Bool("c", false, "CPU Profile")
@@ -142,13 +141,19 @@ func runScript(script_reader io.Reader, file_reader io.Reader) int {
 	}
 	source := string(bytes)
 	debug.Println("script:", source)
-	l := new(parser.Lexer)
+	//l := new(parser.Lexer)
 
-	fset := token.NewFileSet()                      // positions are relative to fset
-	f := fset.AddFile("", fset.Base(), len(source)) // register input "file"
-	l.Init(f, []byte(source), nil, scanner.ScanComments)
+	/*
+		fset := token.NewFileSet()                      // positions are relative to fset
+		f := fset.AddFile("", fset.Base(), len(source)) // register input "file"
+		l.Init(f, []byte(source), nil, scanner.ScanComments)
+	*/
 
-	ast, parseError := parser.Parse(l)
+	//ast, parseError := parser.Parse(l)
+	if *dbglexer {
+		parser.TraceLexer()
+	}
+	ast, parseError := parser.ParseSrc(source)
 	if parseError != nil {
 		fmt.Printf("Syntax error: %v \n", parseError)
 		return 1

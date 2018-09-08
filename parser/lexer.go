@@ -1,21 +1,48 @@
+// Package parser implements parser for anko.
 package parser
 
 import (
 	"errors"
-	"go/scanner"
-	"go/token"
+	"fmt"
+	"unicode"
 
 	"github.com/tesujiro/goa/ast"
 )
 
-type Lexer struct {
-	scanner.Scanner
-	result []ast.Rule
-	err    error
+const (
+	// EOF is short for End of file.
+	EOF = -1
+	// EOL is short for End of line.
+	EOL = '\n'
+)
+
+// Error provides a convenient interface for handling runtime error.
+// It can be Error interface with type cast which can call Pos().
+type Error struct {
+	Message  string
+	Pos      ast.Position
+	Filename string
+	Fatal    bool
 }
 
-// tokenTab is a correction of operation names.
-var tokenTab = map[string]int{
+var EOF_FLAG bool
+var traceLexer bool
+
+// Error returns the error message.
+func (e *Error) Error() string {
+	return e.Message
+}
+
+// Scanner stores informations for lexer.
+type Scanner struct {
+	src      []rune
+	offset   int
+	lineHead int
+	line     int
+}
+
+// opName is correction of operation names.
+var opName = map[string]int{
 	"BEGIN":    BEGIN,
 	"END":      END,
 	"delete":   DELETE,
@@ -38,103 +65,510 @@ var tokenTab = map[string]int{
 	"do":       DO,
 }
 
-var compSymbols = map[string]int{
-	"==": EQEQ,
-	"!=": NEQ,
-	">=": GE,
-	"<=": LE,
-	"&&": ANDAND,
-	"||": OROR,
-	"++": PLUSPLUS,
-	"--": MINUSMINUS,
-	"+=": PLUSEQ,
-	"-=": MINUSEQ,
-	"*=": MULEQ,
-	"/=": DIVEQ,
-	"%=": MODEQ,
+// Init resets code to scan.
+func (s *Scanner) Init(src string) {
+	s.src = []rune(src)
 }
 
-func (l *Lexer) Lex(lval *yySymType) (token_id int) {
-	//TODO: Position
+// Scan analyses token, and decide identify or literals.
+func (s *Scanner) Scan() (tok int, lit string, pos ast.Position, err error) {
+retry:
+	s.skipBlank()
+	pos = s.pos()
+	switch ch := s.peek(); {
+	case isLetter(ch):
+		lit, err = s.scanIdentifier()
+		if err != nil {
+			return
+		}
+		if name, ok := opName[lit]; ok {
+			tok = name
+		} else {
+			tok = IDENT
+		}
+	case isDigit(ch):
+		tok = NUMBER
+		lit, err = s.scanNumber()
+		if err != nil {
+			return
+		}
+	case ch == '"':
+		/*
+			tok = STRING
+		*/
+		lit, err = s.scanString('"')
+		if err != nil {
+			return
+		}
+		// STRING or REGEXP
+		if len(lit) > 1 && lit[:1] == "/" && lit[len(lit)-1:] == "/" {
+			tok = REGEXP
+			//fmt.Printf("REGEXP=%s\n", lit)
+			lit = lit[1 : len(lit)-1]
+		} else {
+			tok = STRING
+		}
+
+	case ch == '\'':
+		tok = STRING
+		lit, err = s.scanString('\'')
+		if err != nil {
+			return
+		}
 	/*
-		if IN_REGEXP {
-			fmt.Println("IN_REGEXP")
-			regexp := ""
-			for {
-				_, tok, lit := l.Scan()
-				if tok == token.QUO || tok == token.EOF || lit == "\n" {
-					break
-				}
-				fmt.Printf("lit=[%v] tok=[%v]\n", lit, tok)
-				if lit == "" {
-					regexp += tok.String()
-					//TODO; '\\'
-				} else {
-					regexp += lit
-				}
+		case ch == '`':
+			tok = STRING
+			lit, err = s.scanRawString('`')
+			if err != nil {
+				return
 			}
-			token_id = REGEXP
-			lval.token = ast.Token{Token: token_id, Literal: regexp}
-			//IN_REGEXP = false
-			return token_id
-		}
 	*/
-	_, tok, lit := l.Scan()
-	if name, ok := tokenTab[lit]; ok {
-		token_id = name
-		lval.token = ast.Token{Token: token_id, Literal: lit}
-		//fmt.Printf("tok=%v\ttoken=%#v\n", tok.String(), lval.token)
-		return token_id
-	}
-	switch tok {
-	case token.IDENT:
-		token_id = IDENT
-	case token.INT:
-		token_id = NUMBER
-	case token.FLOAT:
-		token_id = NUMBER
-	case token.STRING:
-		if len(lit) > 3 && lit[:2] == "\"/" && lit[len(lit)-2:] == "/\"" {
-			token_id = REGEXP
-			lit = lit[2 : len(lit)-2]
-		} else {
-			token_id = STRING
-			if len(lit) > 1 {
-				lit = lit[1 : len(lit)-1]
-			}
-		}
-	case token.EOF:
-		token_id = 0
-	case token.ILLEGAL:
-		switch lit {
-		case "$", "~", "?":
-			token_id = int([]rune(lit)[0])
-		}
 	default:
-		if symbol, ok := compSymbols[tok.String()]; ok {
-			token_id = symbol
-		} else {
-			if len(tok.String()) == 1 {
-				token_id = int(tok.String()[0])
+		switch ch {
+		case EOF:
+			if !EOF_FLAG {
+				tok = int(';')
+				lit = string(';')
+				EOF_FLAG = true
 			} else {
-				token_id = IDENT
+				tok = EOF
+				EOF_FLAG = false
 			}
+		case EOL:
+			tok = int(';')
+			lit = string(';')
+		case '#': // COMMENT
+			for !isEOL(s.peek()) {
+				s.next()
+			}
+			goto retry
+		case '!':
+			s.next()
+			switch s.peek() {
+			case '=':
+				tok = NEQ
+				lit = "!="
+			default:
+				s.back()
+				tok = int(ch)
+				lit = string(ch)
+			}
+		case '=':
+			s.next()
+			switch s.peek() {
+			case '=':
+				tok = EQEQ
+				lit = "=="
+			default:
+				s.back()
+				tok = int(ch)
+				lit = string(ch)
+			}
+		case '+':
+			s.next()
+			switch s.peek() {
+			case '+':
+				tok = PLUSPLUS
+				lit = "++"
+			case '=':
+				tok = PLUSEQ
+				lit = "+="
+			default:
+				s.back()
+				tok = int(ch)
+				lit = string(ch)
+			}
+		case '-':
+			s.next()
+			switch s.peek() {
+			case '-':
+				tok = MINUSMINUS
+				lit = "--"
+			case '=':
+				tok = MINUSEQ
+				lit = "-="
+			default:
+				s.back()
+				tok = int(ch)
+				lit = string(ch)
+			}
+		case '*':
+			s.next()
+			switch s.peek() {
+			case '=':
+				tok = MULEQ
+				lit = "*="
+			default:
+				s.back()
+				tok = int(ch)
+				lit = string(ch)
+			}
+		case '/':
+			s.next()
+			switch s.peek() {
+			case '=': //TODO:  ??
+				tok = DIVEQ
+				lit = "/="
+			case '/':
+				for !isEOL(s.peek()) {
+					s.next()
+				}
+				goto retry
+			/*
+				case '*':
+					for {
+						_, err = s.scanRawString('*')
+						if err != nil {
+							return
+						}
+
+						if s.peek() == '/' {
+							s.next()
+							goto retry
+						}
+
+						s.back()
+					}
+			*/
+			default:
+				s.back()
+				tok = int(ch)
+				lit = string(ch)
+			}
+		case '%':
+			s.next()
+			switch s.peek() {
+			case '=':
+				tok = MODEQ
+				lit = "%="
+			default:
+				s.back()
+				tok = int(ch)
+				lit = string(ch)
+			}
+		case '>':
+			s.next()
+			switch s.peek() {
+			case '=':
+				tok = GE
+				lit = ">="
+			default:
+				s.back()
+				tok = int(ch)
+				lit = string(ch)
+			}
+		case '<':
+			s.next()
+			switch s.peek() {
+			case '=':
+				tok = LE
+				lit = "<="
+			/*
+				case '-':
+					tok = OPCHAN
+					lit = "<-"
+			*/
+			default:
+				s.back()
+				tok = int(ch)
+				lit = string(ch)
+			}
+		case '|':
+			s.next()
+			switch s.peek() {
+			case '|':
+				tok = OROR
+				lit = "||"
+			default:
+				s.back()
+				tok = int(ch)
+				lit = string(ch)
+			}
+		case '&':
+			s.next()
+			switch s.peek() {
+			case '&':
+				tok = ANDAND
+				lit = "&&"
+			default:
+				s.back()
+				tok = int(ch)
+				lit = string(ch)
+			}
+		/*
+			case '.':
+				s.next()
+				if s.peek() == '.' {
+					s.next()
+					if s.peek() == '.' {
+						tok = VARARG
+					} else {
+						err = fmt.Errorf("syntax error on '%v' at %v:%v", string(ch), pos.Line, pos.Column)
+						return
+					}
+				} else {
+					s.back()
+					tok = int(ch)
+					lit = string(ch)
+				}
+		*/
+		case '(', ')', ':', ';', '{', '}', '[', ']', ',', '^', '?', '$', '~', '.':
+			tok = int(ch)
+			lit = string(ch)
+		default:
+			err = fmt.Errorf("syntax error on '%v' at %v:%v", string(ch), pos.Line, pos.Column)
+			tok = int(ch)
+			lit = string(ch)
+			return
+		}
+		s.next()
+	}
+	return
+}
+
+// isLetter returns true if the rune is a letter for identity.
+func isLetter(ch rune) bool {
+	return unicode.IsLetter(ch) || ch == '_'
+}
+
+// isDigit returns true if the rune is a number.
+func isDigit(ch rune) bool {
+	return '0' <= ch && ch <= '9'
+}
+
+// isHex returns true if the rune is a hex digits.
+func isHex(ch rune) bool {
+	return ('0' <= ch && ch <= '9') || ('a' <= ch && ch <= 'f') || ('A' <= ch && ch <= 'F')
+}
+
+// isEOL returns true if the rune is at end-of-line or end-of-file.
+func isEOL(ch rune) bool {
+	return ch == '\n' || ch == -1
+}
+
+// isBlank returns true if the rune is empty character..
+func isBlank(ch rune) bool {
+	return ch == ' ' || ch == '\t' || ch == '\r'
+}
+
+func appendNumberAndPoint(s *Scanner, ret []rune) []rune {
+	for isDigit(s.peek()) || s.peek() == '.' {
+		ret = append(ret, s.peek())
+		s.next()
+	}
+	return ret
+}
+
+// peek returns current rune in the code.
+func (s *Scanner) peek() rune {
+	if s.reachEOF() {
+		return EOF
+	}
+	return s.src[s.offset]
+}
+
+// next moves offset to next.
+func (s *Scanner) next() {
+	if !s.reachEOF() {
+		if s.peek() == '\n' {
+			s.lineHead = s.offset + 1
+			s.line++
+		}
+		s.offset++
+	}
+}
+
+// current returns the current offset.
+func (s *Scanner) current() int {
+	return s.offset
+}
+
+// offset sets the offset value.
+func (s *Scanner) set(o int) {
+	s.offset = o
+}
+
+// back moves back offset once to top.
+func (s *Scanner) back() {
+	s.offset--
+}
+
+// reachEOF returns true if offset is at end-of-file.
+func (s *Scanner) reachEOF() bool {
+	return len(s.src) <= s.offset
+}
+
+// pos returns the position of current.
+func (s *Scanner) pos() ast.Position {
+	return ast.Position{Line: s.line + 1, Column: s.offset - s.lineHead + 1}
+}
+
+// skipBlank moves position into non-black character.
+func (s *Scanner) skipBlank() {
+	for isBlank(s.peek()) {
+		s.next()
+	}
+}
+
+// scanIdentifier returns identifier beginning at current position.
+func (s *Scanner) scanIdentifier() (string, error) {
+	var ret []rune
+	for {
+		if !isLetter(s.peek()) && !isDigit(s.peek()) {
+			break
+		}
+		ret = append(ret, s.peek())
+		s.next()
+	}
+	return string(ret), nil
+}
+
+// scanNumber returns number beginning at current position.
+func (s *Scanner) scanNumber() (string, error) {
+	var ret []rune
+	ch := s.peek()
+	ret = append(ret, ch)
+	s.next()
+	if ch == '0' && s.peek() == 'x' {
+		ret = append(ret, s.peek())
+		s.next()
+		for isHex(s.peek()) {
+			ret = append(ret, s.peek())
+			s.next()
+		}
+	} else {
+		ret = appendNumberAndPoint(s, ret)
+		if s.peek() == 'e' {
+			ret = append(ret, s.peek())
+			s.next()
+			if isDigit(s.peek()) || s.peek() == '+' || s.peek() == '-' {
+				ret = append(ret, s.peek())
+				s.next()
+				ret = appendNumberAndPoint(s, ret)
+			}
+			ret = appendNumberAndPoint(s, ret)
+		}
+		if isLetter(s.peek()) {
+			return "", errors.New("identifier starts immediately after numeric literal")
 		}
 	}
-	lval.token = ast.Token{Token: token_id, Literal: lit}
-	//fmt.Printf("tok=%v\ttoken=%#v\n", tok.String(), lval.token)
-	return token_id
+	return string(ret), nil
 }
 
-func (l *Lexer) Error(e string) {
-	l.err = errors.New(e)
-	//l.position = l.Position //TODO
-}
-
-func Parse(yylex yyLexer) ([]ast.Rule, error) {
-	l := yylex.(*Lexer)
-	if yyParse(yylex) != 0 {
-		return nil, l.err
+// scanRawString returns raw-string starting at current position.
+func (s *Scanner) scanRawString(l rune) (string, error) {
+	var ret []rune
+	for {
+		s.next()
+		if s.peek() == EOF {
+			return "", errors.New("unexpected EOF")
+		}
+		if s.peek() == l {
+			s.next()
+			break
+		}
+		ret = append(ret, s.peek())
 	}
-	return l.result, nil
+	return string(ret), nil
+}
+
+// scanString returns string starting at current position.
+// This handles backslash escaping.
+func (s *Scanner) scanString(l rune) (string, error) {
+	var ret []rune
+eos:
+	for {
+		s.next()
+		switch s.peek() {
+		case EOL:
+			return "", errors.New("unexpected EOL")
+		case EOF:
+			return "", errors.New("unexpected EOF")
+		case l:
+			s.next()
+			break eos
+		case '\\':
+			s.next()
+			switch s.peek() {
+			case 'b':
+				ret = append(ret, '\b')
+				continue
+			case 'f':
+				ret = append(ret, '\f')
+				continue
+			case 'r':
+				ret = append(ret, '\r')
+				continue
+			case 'n':
+				ret = append(ret, '\n')
+				continue
+			case 't':
+				ret = append(ret, '\t')
+				continue
+			}
+			ret = append(ret, s.peek())
+			continue
+		default:
+			ret = append(ret, s.peek())
+		}
+	}
+	return string(ret), nil
+}
+
+// Lexer provides interface to parse codes.
+type Lexer struct {
+	s      *Scanner
+	lit    string
+	pos    ast.Position
+	e      error
+	result []ast.Rule
+}
+
+// Lex scans the token and literals.
+func (l *Lexer) Lex(lval *yySymType) int {
+	tok, lit, pos, err := l.s.Scan()
+	if traceLexer {
+		fmt.Printf("tok:%v\tlit:%v\tpos:%v\terr:%v\n", tok, lit, pos, err)
+	}
+	if err != nil {
+		l.e = &Error{Message: err.Error(), Pos: pos, Fatal: true}
+	}
+	lval.token = ast.Token{Token: tok, Literal: lit}
+	lval.token.SetPosition(pos)
+	l.lit = lit
+	l.pos = pos
+	return tok
+}
+
+// Error sets parse error.
+func (l *Lexer) Error(msg string) {
+	l.e = &Error{Message: msg, Pos: l.pos, Fatal: false}
+}
+
+// Parse provides way to parse the code using Scanner.
+func Parse(s *Scanner) ([]ast.Rule, error) {
+	l := Lexer{s: s}
+	if yyParse(&l) != 0 {
+		return nil, l.e
+	}
+	return l.result, l.e
+}
+
+/*
+// EnableErrorVerbose enabled verbose errors from the parser
+func EnableErrorVerbose() {
+	yyErrorVerbose = true
+}
+*/
+
+func TraceLexer() {
+	traceLexer = true
+}
+
+// ParseSrc provides way to parse the code from source.
+func ParseSrc(src string) ([]ast.Rule, error) {
+	scanner := &Scanner{
+		src: []rune(src),
+	}
+	return Parse(scanner)
 }
