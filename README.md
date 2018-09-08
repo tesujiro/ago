@@ -7,7 +7,6 @@ under development
 # Still not implemented
 * regular expressin not match "!~"
 * printf, sprintf
-* comment
 * nextfile
 * getline
 * func: rand, srand, int, sin, cos

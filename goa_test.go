@@ -19,6 +19,7 @@ func TestGoa(t *testing.T) {
 	tests := []test{
 		//BASIC EXPRESSION
 		{script: "BEGIN{print 1+1}", ok: "2\n"},
+		{script: "BEGIN{print 1+1}#comment", ok: "2\n"},
 		{script: "BEGIN{print 1+2}", ok: "3\n"},
 		{script: "BEGIN{print nil}", ok: "\n"},
 		{script: "BEGIN{print 1}", ok: "1\n"},
