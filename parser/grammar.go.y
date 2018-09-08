@@ -48,7 +48,7 @@ var defaultExprs = []ast.Expr{&defaultExpr}
 %token <token> EQEQ NEQ GE LE ANDAND OROR LEN 
 %token <token> PLUSPLUS MINUSMINUS PLUSEQ MINUSEQ MULEQ DIVEQ MODEQ
 %token <token> DELETE IN
-%token <token> BEGIN END PRINT REGEXP
+%token <token> BEGIN END PRINT PRINTF REGEXP
 %token <token> IF ELSE FOR WHILE DO BREAK CONTINUE
 %token <token> FUNC RETURN EXIT NEXT
 %token <token> CONCAT_OP
@@ -318,6 +318,10 @@ expr
 	{
 		$$ = &ast.BinOpExpr{Left: $1, Operator: "&&", Right: $3}
 	}
+	| PRINTF opt_exprs
+	{
+		$$ = &ast.CallExpr{Name: "printf", SubExprs:$2}
+	}
 	| common_expr
 	{
 		$$ = $1
@@ -415,6 +419,10 @@ non_post_simp_expr
 	}
 	/* FUNCTION CALL */
 	| IDENT '(' opt_exprs ')'
+	{
+		$$ = &ast.CallExpr{Name: $1.Literal, SubExprs:$3}
+	}
+	| PRINTF '(' opt_exprs ')'
 	{
 		$$ = &ast.CallExpr{Name: $1.Literal, SubExprs:$3}
 	}

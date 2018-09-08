@@ -6,7 +6,6 @@ under development
 
 # Still not implemented
 * regular expressin not match "!~"
-* printf, sprintf
 * nextfile
 * getline
 * func: rand, srand, int, sin, cos
@@ -30,8 +29,8 @@ under development
 # To be fixed
 * split(s,g,f): arg g must be initialized before calling the func
 * no function option args (func:length)
-* sub(), gsub() arg string must be global variable
-* can't read '\n' '\t' as ascii chars
+* sub(), gsub(): arg string must be set to a global variable
 * error: S=="\n"
 * REGEXP "/.../" -> /.../
 * no bool literal (true/false->0/1)
+* printf("%d",1.23):error

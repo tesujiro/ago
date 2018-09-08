@@ -81,6 +81,11 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{a[1]=1;a[2]=10;print 1-length(a)}", ok: "-1\n"},
 		{script: "BEGIN{a[1]=1;a[2]=10;print 1*length(a)}", ok: "2\n"},
 		{script: "BEGIN{a[1]=1;a[2]=10;print 1/length(a)}", ok: "0\n"},
+		// printf
+		{script: "BEGIN{a=1;printf \"%d\",a}", ok: "1\n"},
+		{script: "BEGIN{printf \"%.2d\",1}", ok: "01\n"},
+		{script: "BEGIN{printf \"%.2f\",1.34}", ok: "1.34\n"},
+		{script: "BEGIN{printf \"%s\",\"abc\"}", ok: "abc\n"},
 		// ternary operator
 		{script: "BEGIN{a=1;print a==1?a+1:a+2}", ok: "2\n"},
 		{script: "BEGIN{a=2;print a==1?a+1:a+2}", ok: "4\n"},
@@ -344,7 +349,7 @@ func TestGoa(t *testing.T) {
 		// call go func with variadic args
 		{script: "BEGIN{println(\"abc\",\"def\")}", ok: "abc def\n"},
 		{script: "BEGIN{println()}", ok: "\n"},
-		//{script: "BEGIN{printf(\"hello, %s\\n\",\"world!\")}", ok: "hello, world!\n"}, //TOFIX
+		{script: "BEGIN{printf(\"hello,\\t%s\\n\",\"world!\")}", ok: "hello,\tworld!\n"}, //TOFIX
 		{script: "BEGIN{print sum(1,2,3)}", ok: "6\n"},
 		{script: "BEGIN{print sum()}", ok: "0\n"},
 		{script: "BEGIN{print cat(\"abc\",\"def\")}", ok: "abcdef\n"},
@@ -409,6 +414,8 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{a[1]=1;a[2]=2;print len(a)}", ok: "2\n"},
 		{script: "BEGIN{f=func(){return 1,2};print len(f())}", ok: "2\n"},
 		{script: "BEGIN{print length(123)}", ok: "3\n"},
+		// lib:sprintf
+		{script: "BEGIN{print sprintf(\"%d:%s\",100,\"abc\")}", ok: "100:abc\n"},
 		// lib:substr
 		{script: "BEGIN{print substr(\"abcde\",1,3)}", ok: "abc\n"},
 		{script: "BEGIN{print substr(\"abcde\",0,3)}", ok: "abc\n"},

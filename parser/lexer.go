@@ -47,6 +47,7 @@ var opName = map[string]int{
 	"END":      END,
 	"delete":   DELETE,
 	"print":    PRINT,
+	"printf":   PRINTF,
 	"if":       IF,
 	"else":     ELSE,
 	"for":      FOR,

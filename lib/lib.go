@@ -54,6 +54,7 @@ func Import(env *vm.Env) *vm.Env {
 
 	env.Define("println", reflect.ValueOf(fmt.Println))
 	env.Define("printf", reflect.ValueOf(fmt.Printf))
+	env.Define("sprintf", reflect.ValueOf(fmt.Sprintf))
 
 	sum := func(args ...int) int {
 		var result int
