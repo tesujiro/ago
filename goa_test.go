@@ -648,6 +648,11 @@ ZZZ 1
 		if resultOut != strings.Replace(test.ok, "\r", "", -1) { //replace for Windows
 			t.Errorf("Case:[%v] received: %v - expected: %v - runSource: %v", case_number, resultOut, test.ok, test.script)
 		}
+
+		readFromIn.Close()
+		writeToIn.Close()
+		readFromOut.Close()
+		writeToOut.Close()
 	}
 
 	os.Stdin = realStdin

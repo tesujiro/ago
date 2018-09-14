@@ -33,4 +33,3 @@ under development
 * error: S=="\n"
 * REGEXP "/.../" -> /.../
 * no bool literal (true/false->0/1)
-* printf("%d",1.23):error

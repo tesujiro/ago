@@ -133,7 +133,7 @@ retry:
 				EOF_FLAG = true
 			} else {
 				tok = EOF
-				EOF_FLAG = false
+				EOF_FLAG = true
 			}
 		case EOL:
 			tok = int(';')
@@ -566,8 +566,13 @@ func TraceLexer() {
 	traceLexer = true
 }
 
+func initialize() {
+	EOF_FLAG = false
+}
+
 // ParseSrc provides way to parse the code from source.
 func ParseSrc(src string) ([]ast.Rule, error) {
+	initialize()
 	scanner := &Scanner{
 		src: []rune(src),
 	}

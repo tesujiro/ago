@@ -77,15 +77,16 @@ var defaultExprs = []ast.Expr{&defaultExpr}
 %%
 
 program
-	: /* empty */
+	: opt_term /* empty */
 	{
 		$$ = []ast.Rule{}
 	}
-	| program rule
+	| program rule 
 	{
 		$$ = append($1,$2)
 		yylex.(*Lexer).result = $$
 	}
+
 
 rule
 	: pattern action opt_term
