@@ -27,6 +27,8 @@ type Error struct {
 
 var EOF_FLAG bool
 var traceLexer bool
+var maybe_regexp int
+var regexp_str string
 
 // Error returns the error message.
 func (e *Error) Error() string {
@@ -74,8 +76,36 @@ func (s *Scanner) Init(src string) {
 // Scan analyses token, and decide identify or literals.
 func (s *Scanner) Scan() (tok int, lit string, pos ast.Position, err error) {
 retry:
-	s.skipBlank()
-	pos = s.pos()
+	//s.skipBlank()
+	//pos = s.pos()
+	if maybe_regexp == 0 {
+		s.skipBlank()
+		pos = s.pos()
+	} else {
+		//fmt.Println("maybe_regexp:", maybe_regexp, " IN_REGEXP:", IN_REGEXP)
+		maybe_regexp++
+		blank := s.skipBlank()
+		regexp_str = blank
+		pos = s.pos()
+		if IN_REGEXP {
+			for ch := s.peek(); !isEOL(ch) && ch != '/'; ch = s.peek() {
+				regexp_str = fmt.Sprintf("%s%c", regexp_str, ch)
+				s.next()
+			}
+			tok = REGEXP
+			lit = regexp_str
+			regexp_str = ""
+			IN_REGEXP = false
+			s.next()
+			return
+		}
+		maybe_regexp = 0
+		regexp_str = ""
+	}
+	ch := s.peek()
+	if maybe_regexp != 0 {
+		regexp_str = fmt.Sprintf("%s%c", regexp_str, ch)
+	}
 	switch ch := s.peek(); {
 	case isLetter(ch):
 		lit, err = s.scanIdentifier()
@@ -94,20 +124,10 @@ retry:
 			return
 		}
 	case ch == '"':
-		/*
-			tok = STRING
-		*/
+		tok = STRING
 		lit, err = s.scanString('"')
 		if err != nil {
 			return
-		}
-		// STRING or REGEXP
-		if len(lit) > 1 && lit[:1] == "/" && lit[len(lit)-1:] == "/" {
-			tok = REGEXP
-			//fmt.Printf("REGEXP=%s\n", lit)
-			lit = lit[1 : len(lit)-1]
-		} else {
-			tok = STRING
 		}
 
 	case ch == '\'':
@@ -149,6 +169,9 @@ retry:
 			case '=':
 				tok = NEQ
 				lit = "!="
+			case '~':
+				tok = NOTTILDE
+				lit = "!~"
 			default:
 				s.back()
 				tok = int(ch)
@@ -205,16 +228,20 @@ retry:
 				lit = string(ch)
 			}
 		case '/':
+			//fmt.Println("in lexer: QUO")
+			maybe_regexp = 1
 			s.next()
 			switch s.peek() {
 			case '=': //TODO:  ??
 				tok = DIVEQ
 				lit = "/="
-			case '/':
-				for !isEOL(s.peek()) {
-					s.next()
-				}
-				goto retry
+			/*
+				case '/':
+					for !isEOL(s.peek()) {
+						s.next()
+					}
+					goto retry
+			*/
 			/*
 				case '*':
 					for {
@@ -405,10 +432,20 @@ func (s *Scanner) pos() ast.Position {
 }
 
 // skipBlank moves position into non-black character.
+/*
 func (s *Scanner) skipBlank() {
 	for isBlank(s.peek()) {
 		s.next()
 	}
+}
+*/
+func (s *Scanner) skipBlank() string {
+	str := ""
+	for ch := s.peek(); isBlank(ch); ch = s.peek() {
+		str = fmt.Sprintf("%s%c", str, ch)
+		s.next()
+	}
+	return str
 }
 
 // scanIdentifier returns identifier beginning at current position.

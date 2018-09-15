@@ -91,9 +91,13 @@ type MapExpr struct {
 	MapExpr map[Expr]Expr
 }
 
+type RegExpr struct {
+	Literal string
+}
+
 type MatchExpr struct {
 	Expr    Expr
-	RegExpr string
+	RegExpr Expr
 }
 
 type ContainKeyExpr struct {

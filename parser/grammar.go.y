@@ -7,7 +7,7 @@
 
 var defaultExpr = ast.FieldExpr{Expr: &ast.NumExpr{Literal: "0"}}
 var defaultExprs = []ast.Expr{&defaultExpr}
-//var IN_REGEXP bool
+var IN_REGEXP bool
 %}
 
 %union{
@@ -39,13 +39,14 @@ var defaultExprs = []ast.Expr{&defaultExpr}
 %type <expr>		variable
 %type <expr>		simple_variable
 %type <expr>		opt_expr
+%type <expr>		regexpr
 %type <exprs>		exprs
 %type <exprs>		variables
 %type <exprs>		opt_exprs
 %type <ident_args>	ident_args
 
 %token <token> IDENT NUMBER STRING TRUE FALSE NIL
-%token <token> EQEQ NEQ GE LE ANDAND OROR LEN 
+%token <token> EQEQ NEQ GE LE NOTTILDE ANDAND OROR LEN 
 %token <token> PLUSPLUS MINUSMINUS PLUSEQ MINUSEQ MULEQ DIVEQ MODEQ
 %token <token> DELETE IN
 %token <token> BEGIN END PRINT PRINTF REGEXP
@@ -60,7 +61,7 @@ var defaultExprs = []ast.Expr{&defaultExpr}
 %left ANDAND
 /*%left IDENT*/
 %nonassoc ',' vars
-%left '~'
+%left '~' NOTTILDE
 %left EQEQ NEQ
 %left '>' '<' GE LE
 
@@ -126,11 +127,11 @@ pattern
 	{
 		$$ = &ast.ExprPattern{Expr:$1}
 	}
-	| REGEXP ',' REGEXP
+	| regexpr ',' regexpr
 	{
 		$$ = &ast.StartStopPattern{
-			Start: &ast.MatchExpr{Expr: &defaultExpr, RegExpr: $1.Literal},
-			Stop:  &ast.MatchExpr{Expr: &defaultExpr, RegExpr: $3.Literal},
+			Start: &ast.MatchExpr{Expr: &defaultExpr, RegExpr: $1},
+			Stop:  &ast.MatchExpr{Expr: &defaultExpr, RegExpr: $3},
 		}
 	}
 
@@ -395,13 +396,17 @@ simp_expr
 		$$ = &ast.ContainKeyExpr{KeyExpr: $1, MapId: $3.Literal}
 	}
 	/* REGEXP */
-	| simp_expr '~' REGEXP
+	| simp_expr '~' regexpr
 	{
-		$$ = &ast.MatchExpr{Expr: $1, RegExpr: $3.Literal}
+		$$ = &ast.MatchExpr{Expr: $1, RegExpr: $3}
 	}
-	| REGEXP
+	| simp_expr NOTTILDE regexpr
 	{
-		$$ = &ast.MatchExpr{Expr: &defaultExpr, RegExpr: $1.Literal}
+		$$ = &ast.UnaryExpr{Operator: "!", Expr: &ast.MatchExpr{Expr: $1, RegExpr: $3}}
+	}
+	| regexpr
+	{
+		$$ = &ast.MatchExpr{Expr: &defaultExpr, RegExpr: $1}
 	}
 	/* COMPOSITE EXPRESSION */
 	| simp_expr PLUSPLUS
@@ -413,10 +418,26 @@ simp_expr
 		$$ = &ast.CompExpr{Left: $1, Operator: "--", After:true}
 	}
 
+regexpr
+	: a_slash
+	{
+		//fmt.Println("YACC: want regexp!!")
+		IN_REGEXP=true
+	}
+	REGEXP
+	{
+		//fmt.Println("FINISH")
+		$$ = &ast.RegExpr{Literal: $3.Literal}
+	}
+
 non_post_simp_expr
 	: '!' simp_expr %prec UNARY
 	{
 		$$ = &ast.UnaryExpr{Operator: "!", Expr:$2}
+	}
+	| regexpr
+	{
+		$$ = $1
 	}
 	/* FUNCTION CALL */
 	| IDENT '(' opt_exprs ')'
@@ -561,6 +582,8 @@ term
 semi
 	: ';'  /* go/scanner return semi when EOL */
 
+a_slash
+	: '/'
 /*
 opt_nls
 	: 

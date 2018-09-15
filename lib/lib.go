@@ -10,6 +10,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/tesujiro/goa/ast"
 	"github.com/tesujiro/goa/vm"
 )
 
@@ -22,6 +23,20 @@ func Import(env *vm.Env) *vm.Env {
 			return fmt.Sprintf("%v", v.Interface().(int))
 		case reflect.Float64:
 			return fmt.Sprintf("%v", v.Interface().(float64))
+		default:
+			return ""
+		}
+	}
+
+	regexpToStr := func(v reflect.Value) string {
+		//fmt.Printf("v=%#v", v.Elem().Interface())
+		if v.Type().Kind() == reflect.String {
+			return v.Interface().(string)
+		}
+		switch v.Elem().Interface().(type) {
+		case ast.RegExpr:
+			//return v.Elem().Interface().(string)
+			return v.Elem().FieldByName("Literal").String()
 		default:
 			return ""
 		}
@@ -174,7 +189,7 @@ func Import(env *vm.Env) *vm.Env {
 			return result
 		}
 	*/
-	gsub := func(before, after string, args ...*string) int {
+	gsub := func(before reflect.Value, after string, args ...*string) int {
 		// PARSE ARGS
 		var v_name string
 		var v_val interface{}
@@ -194,7 +209,8 @@ func Import(env *vm.Env) *vm.Env {
 			v_val, _ = env.GetField(0)
 		}
 		// MAIN
-		re := regexp.MustCompile(before)
+		regex_str := regexpToStr(before)
+		re := regexp.MustCompile(regex_str)
 		result := re.ReplaceAllString(v_val.(string), after)
 		if len(args) > 0 {
 			v_name = *args[0]
@@ -210,16 +226,16 @@ func Import(env *vm.Env) *vm.Env {
 	}
 	env.Define("gsub", reflect.ValueOf(gsub))
 
-	/*
-		sub := func(s, g, fs reflect.Value) string {
-	*/
-	sub := func(before, after string, args ...*string) int {
-		return gsub("^(.*?)"+before+"(.*)$", "${1}"+after+"${2}", args...)
+	sub := func(before reflect.Value, after string, args ...*string) int {
+		regex_str := regexpToStr(before)
+		regex_str = "^(.*?)" + regex_str + "(.*)$"
+		return gsub(reflect.ValueOf(regex_str), "${1}"+after+"${2}", args...)
 	}
 	env.Define("sub", reflect.ValueOf(sub))
 
 	match := func(s, r reflect.Value) int {
-		re := regexp.MustCompile(toStr(r))
+		//fmt.Printf("s=%v r=%#v\n", toStr(s), r)
+		re := regexp.MustCompile(regexpToStr(r))
 		loc := re.FindStringIndex(toStr(s))
 		result := re.FindString(toStr(s))
 		var retloc, retlen int

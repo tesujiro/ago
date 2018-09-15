@@ -5,7 +5,6 @@ go on awk (just like Unagi on Katsudon)
 under development
 
 # Still not implemented
-* regular expressin not match "!~"
 * nextfile
 * getline
 * func: rand, srand, int, sin, cos
@@ -31,5 +30,4 @@ under development
 * no function option args (func:length)
 * sub(), gsub(): arg string must be set to a global variable
 * error: S=="\n"
-* REGEXP "/.../" -> /.../
 * no bool literal (true/false->0/1)

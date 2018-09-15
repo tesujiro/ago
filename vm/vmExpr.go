@@ -452,7 +452,7 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 			return nil, err
 		}
 		s := toString(val)
-		re := expr.(*ast.MatchExpr).RegExpr
+		re := expr.(*ast.MatchExpr).RegExpr.(*ast.RegExpr).Literal
 		return regexp.MatchString(re, s)
 	}
 	return 0, nil
