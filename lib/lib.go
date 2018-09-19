@@ -2,6 +2,7 @@ package lib
 
 import (
 	"fmt"
+	"math/rand"
 	"os/exec"
 	"reflect"
 	"regexp"
@@ -314,6 +315,16 @@ func Import(env *vm.Env) *vm.Env {
 		return toInt(v)
 	}
 	env.Define("int", reflect.ValueOf(toInteger))
+
+	random := func() float64 {
+		return rand.Float64()
+	}
+	env.Define("rand", reflect.ValueOf(random))
+
+	srandom := func() {
+		rand.Seed(time.Now().UnixNano())
+	}
+	env.Define("srand", reflect.ValueOf(srandom))
 
 	return env
 }
