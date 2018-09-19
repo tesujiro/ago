@@ -7,7 +7,7 @@ under development
 # Still not implemented
 * nextfile
 * getline
-* func: rand, srand, int, sin, cos
+* func: rand, srand, sin, cos
 * var: FNR, OFMT, RS, ENVIRON, CONVFMT
 * print error with line number
 * asort(),asorti()

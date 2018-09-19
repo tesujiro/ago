@@ -53,6 +53,8 @@ func Import(env *vm.Env) *vm.Env {
 			}
 		case reflect.Int:
 			return v.Interface().(int)
+		case reflect.Float64, reflect.Float32:
+			return int(v.Interface().(float64))
 		default:
 			return 0
 		}
@@ -307,6 +309,11 @@ func Import(env *vm.Env) *vm.Env {
 
 	}
 	env.Define("mktime", reflect.ValueOf(mktime))
+
+	toInteger := func(v reflect.Value) int {
+		return toInt(v)
+	}
+	env.Define("int", reflect.ValueOf(toInteger))
 
 	return env
 }

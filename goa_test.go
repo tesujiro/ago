@@ -403,6 +403,9 @@ func TestGoa(t *testing.T) {
 
 		// Numeric Built-in Functions
 		// lib: int
+		{script: "BEGIN{print int(123)}", ok: "123\n"},
+		{script: "BEGIN{print int(\"123\")}", ok: "123\n"},
+		{script: "BEGIN{print int(123.45)}", ok: "123\n"},
 		// lib: sqrt,exp,log
 		// lib: sin,cos,atan2
 		// lib: rand,arand,srand
