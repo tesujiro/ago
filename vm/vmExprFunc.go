@@ -93,7 +93,11 @@ func callFunc(callExpr *ast.CallExpr, env *Env) (interface{}, error) {
 	if callExpr.Name != "" {
 		fn, err := env.Get(callExpr.Name) // fn: interface{}
 		if err != nil {
-			return nil, err
+			//return nil, err
+			fn, err = env.GetDynamicFunc(callExpr.Name)
+			if err != nil {
+				return nil, err
+			}
 		}
 		var ok bool
 		f, ok = fn.(reflect.Value) // interface{} ==> reflect.Value

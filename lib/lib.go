@@ -326,5 +326,15 @@ func Import(env *vm.Env) *vm.Env {
 	}
 	env.Define("srand", reflect.ValueOf(srandom))
 
+	// Dynamic Func : use env in the func
+
+	importShowEnv := func(env *vm.Env) (reflect.Value, error) {
+		f := func() {
+			env.Dump()
+		}
+		return reflect.ValueOf(f), nil
+	}
+	env.DefineImportFunc("env", importShowEnv)
+
 	return env
 }

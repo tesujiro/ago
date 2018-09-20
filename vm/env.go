@@ -11,28 +11,31 @@ const defaultValue = ""
 var ErrUnknownSymbol = errors.New("unknown symbol")
 
 type Env struct {
-	env     map[string]interface{}
-	parent  *Env
-	builtin *builtin
-	global  map[string]interface{}
+	env        map[string]interface{}
+	parent     *Env
+	builtin    *builtin
+	global     map[string]interface{}
+	importFunc map[string]func(*Env) (reflect.Value, error)
 }
 
 // Global Scope
 func NewEnv() *Env {
 	return &Env{
-		env:     make(map[string]interface{}),
-		parent:  nil,
-		builtin: NewBuiltIn(),
-		global:  make(map[string]interface{}),
+		env:        make(map[string]interface{}),
+		parent:     nil,
+		builtin:    NewBuiltIn(),
+		global:     make(map[string]interface{}),
+		importFunc: make(map[string]func(*Env) (reflect.Value, error)),
 	}
 }
 
 func (e *Env) NewEnv() *Env {
 	return &Env{
-		env:     make(map[string]interface{}),
-		parent:  e,
-		builtin: e.builtin,
-		global:  e.global,
+		env:        make(map[string]interface{}),
+		parent:     e,
+		builtin:    e.builtin,
+		global:     e.global,
+		importFunc: e.importFunc,
 	}
 }
 
@@ -157,6 +160,24 @@ func (e *Env) getLocalVar(k string) (interface{}, error) {
 		return nil, ErrUnknownSymbol
 	}
 	return e.parent.getLocalVar(k)
+}
+
+func (e *Env) DefineImportFunc(k string, f func(*Env) (reflect.Value, error)) error {
+	e.importFunc[k] = f
+	return nil
+}
+
+func (e *Env) GetDynamicFunc(k string) (interface{}, error) {
+	impf, ok := e.importFunc[k]
+	if !ok {
+		return nil, ErrUnknownSymbol
+	}
+	fn, err := impf(e)
+	if err != nil {
+		return nil, err
+	}
+	e.Define(k, fn) // for cache
+	return fn, nil
 }
 
 func (e *Env) Dump() {
