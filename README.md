@@ -27,7 +27,6 @@ under development
 
 # To be fixed
 * split(s,g,f): arg g must be initialized before calling the func
-* no function option args (func:length)
 * sub(), gsub(): arg string must be set to a global variable
 * error: S=="\n"
 * no bool literal (true/false->0/1)

@@ -417,6 +417,7 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{a[1]=1;a[2]=2;print len(a)}", ok: "2\n"},
 		{script: "BEGIN{f=func(){return 1,2};print len(f())}", ok: "2\n"},
 		{script: "BEGIN{print length(123)}", ok: "3\n"},
+		{script: "{print length()}", in: "Hello!", ok: "6\n"},
 		// lib:sprintf
 		{script: "BEGIN{print sprintf(\"%d:%s\",100,\"abc\")}", ok: "100:abc\n"},
 		// lib:substr

@@ -118,7 +118,14 @@ func Import(env *vm.Env) *vm.Env {
 	}
 	env.Define("system", reflect.ValueOf(system))
 
-	length := func(v reflect.Value) int {
+	length := func(v_args ...reflect.Value) int { // TODO: reflect.Value => string
+		var v reflect.Value
+		if len(v_args) > 0 {
+			v = v_args[0] // arg[0] is a pointer to var name
+		} else {
+			v_string, _ := env.GetField(0)
+			v = reflect.ValueOf(v_string)
+		}
 		switch v.Type().Kind() {
 		case reflect.Int:
 			return len(toStr(v))
@@ -138,7 +145,7 @@ func Import(env *vm.Env) *vm.Env {
 	env.Define("length", reflect.ValueOf(length))
 	env.Define("len", reflect.ValueOf(length))
 
-	substr := func(str, begin reflect.Value, end_args ...reflect.Value) string {
+	substr := func(str, begin reflect.Value, end_args ...reflect.Value) string { // TODO: reflect.Value => string
 		var end reflect.Value
 		if len(end_args) > 0 {
 			end = end_args[0] // arg[0] is a pointer to var name
