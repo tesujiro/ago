@@ -342,7 +342,7 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{one=func(){return 1}; print one()}", ok: "1\n"},
 		{script: "BEGIN{a=10;plusone=func(){a++};plusone();print a}", ok: "11\n"},
 		{script: "BEGIN{print func(){return 1}()}", ok: "1\n"},
-		//{script: "BEGIN{a=10;func plusone(){a++;return};plusone();print a}", ok: "11\n"}, //TODO: panic
+		{script: "BEGIN{a=10;plusone=func(){a++;return};plusone();print a}", ok: "11\n"},
 		{script: "BEGIN{hash=func(){m[1]=1;m[2]=2;m[3]=3;return m}; m=hash();print m[1]}", ok: "1\n"},
 		{script: "BEGIN{map=func(){m[1]=1;m[2]=2;m[3]=3;return m}; print map()[1]}", ok: "1\n"},
 		{script: "BEGIN{print func(){m[1]=1;m[2]=2;m[3]=3;return m}()[1]}", ok: "1\n"},
@@ -426,7 +426,7 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{print substr(\"abcde\",1,5)}", ok: "abcde\n"},
 		{script: "BEGIN{print substr(\"abcde\",1,6)}", ok: "abcde\n"},
 		{script: "BEGIN{print substr(\"abcde\",3,2)}", ok: "cd\n"},
-		//{script: "BEGIN{print substr(\"abcde\",3)}", ok: "cde\n"}, //TODO: Default parameter
+		{script: "BEGIN{print substr(\"abcde\",3)}", ok: "cde\n"},
 		{script: "BEGIN{print substr(\"abcde\",2,0)}", ok: "\n"},
 		{script: "BEGIN{print substr(\"abcde\",2,-1)}", ok: "\n"},
 		{script: "BEGIN{print substr(12345,1,3)}", ok: "123\n"},

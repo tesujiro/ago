@@ -138,7 +138,13 @@ func Import(env *vm.Env) *vm.Env {
 	env.Define("length", reflect.ValueOf(length))
 	env.Define("len", reflect.ValueOf(length))
 
-	substr := func(str, begin, end reflect.Value) string {
+	substr := func(str, begin reflect.Value, end_args ...reflect.Value) string {
+		var end reflect.Value
+		if len(end_args) > 0 {
+			end = end_args[0] // arg[0] is a pointer to var name
+		} else {
+			end = reflect.ValueOf(len(toStr(str)))
+		}
 		s := toStr(str)
 		b := toInt(begin)
 		e := toInt(end)
