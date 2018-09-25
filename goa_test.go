@@ -408,6 +408,12 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{print int(123.45)}", ok: "123\n"},
 		// lib: sqrt,exp,log
 		// lib: sin,cos,atan2
+		{script: "BEGIN{print sin(0)}", ok: "0\n"},
+		{script: "BEGIN{print sin(3.141592650358979/2)}", ok: "1\n"},
+		{script: "BEGIN{print cos(0)}", ok: "1\n"},
+		{script: "BEGIN{print int(cos(3.141592650358979/3)*200)}", ok: "100\n"},
+		{script: "BEGIN{print atan2(0,0)}", ok: "0\n"},
+		{script: "BEGIN{print atan2(1,0)}", ok: "1.5707963267948966\n"},
 		// lib: rand,arand,srand
 
 		// Built-in Functions for String Manipulation

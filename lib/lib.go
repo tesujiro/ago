@@ -2,6 +2,7 @@ package lib
 
 import (
 	"fmt"
+	"math"
 	"math/rand"
 	"os/exec"
 	"reflect"
@@ -67,6 +68,17 @@ func Import(env *vm.Env) *vm.Env {
 			return v.Interface().(int64)
 		default:
 			return int64(toInt(v))
+		}
+	}
+
+	toFloat64 := func(v reflect.Value) float64 {
+		switch v.Type().Kind() {
+		case reflect.Int, reflect.Int32, reflect.Int64:
+			return float64(v.Interface().(int))
+		case reflect.Float64, reflect.Float32:
+			return v.Interface().(float64)
+		default:
+			return float64(toInt(v))
 		}
 	}
 
@@ -338,6 +350,21 @@ func Import(env *vm.Env) *vm.Env {
 		rand.Seed(time.Now().UnixNano())
 	}
 	env.Define("srand", reflect.ValueOf(srandom))
+
+	sin := func(arg reflect.Value) float64 {
+		return math.Sin(toFloat64(arg))
+	}
+	env.Define("sin", reflect.ValueOf(sin))
+
+	cos := func(arg reflect.Value) float64 {
+		return math.Cos(toFloat64(arg))
+	}
+	env.Define("cos", reflect.ValueOf(cos))
+
+	atan2 := func(arg1, arg2 reflect.Value) float64 {
+		return math.Atan2(toFloat64(arg1), toFloat64(arg2))
+	}
+	env.Define("atan2", reflect.ValueOf(atan2))
 
 	// Dynamic Func : use env in the func
 
