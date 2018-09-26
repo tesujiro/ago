@@ -12,7 +12,6 @@ under development
 * asort(),asorti()
 * import & call go library
 * goroutine
-* -g global varibale option
 * define variadic functions
 * test command option
 

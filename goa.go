@@ -45,6 +45,7 @@ func (kvs hash) Set(s string) error {
 var FS = flag.String("F", " ", "Field separator")
 var program_file = flag.String("f", "", "Program file")
 var dbg = flag.Bool("d", false, "debug option")
+var globalVar = flag.Bool("g", false, "global variable option")
 var dbglexer = flag.Bool("l", false, "debug lexer option")
 var ast_dump = flag.Bool("a", false, "AST dump option")
 var mem_prof = flag.Bool("m", false, "Memory Profile")
@@ -121,6 +122,10 @@ func initEnv() *vm.Env {
 		env.Dump()
 	}
 	env.SetFS(*FS)
+
+	if *globalVar {
+		vm.SetGlobalVariables()
+	}
 
 	for k, v := range variables {
 		env.Set(k, v)

@@ -39,7 +39,16 @@ func (e *Env) NewEnv() *Env {
 	}
 }
 
+var globalVars bool
+
+func SetGlobalVariables() {
+	globalVars = true
+}
+
 func isGlobalVarName(s string) bool {
+	if globalVars {
+		return true
+	}
 	if len(s) == 0 {
 		return false
 	}
