@@ -1,5 +1,5 @@
-# goa
-go on awk (just like Unagi on Katsudon)
+# ago
+awk goes on - awk implementation on go
 
 # version
 under development
