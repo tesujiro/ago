@@ -10,10 +10,10 @@ import (
 	"strings"
 
 	"github.com/pkg/profile"
-	"github.com/tesujiro/goa/debug"
-	"github.com/tesujiro/goa/lib"
-	"github.com/tesujiro/goa/parser"
-	"github.com/tesujiro/goa/vm"
+	"github.com/tesujiro/ago/debug"
+	"github.com/tesujiro/ago/lib"
+	"github.com/tesujiro/ago/parser"
+	"github.com/tesujiro/ago/vm"
 )
 
 type hash map[string]string

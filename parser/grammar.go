@@ -6,7 +6,7 @@ import __yyfmt__ "fmt"
 //line ./parser/grammar.go.y:2
 import (
 	//"fmt"
-	"github.com/tesujiro/goa/ast"
+	"github.com/tesujiro/ago/ast"
 )
 
 var defaultExpr = ast.FieldExpr{Expr: &ast.NumExpr{Literal: "0"}}

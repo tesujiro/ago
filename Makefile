@@ -1,7 +1,7 @@
-all : goa
+all : ago
 
-goa : goa.go ./parser/*.y ./parser/*.go ./ast/*.go ./vm/*.go ./lib/*.go ./parser/grammar.go
-	go build -o goa .
+ago : ago.go ./parser/*.y ./parser/*.go ./ast/*.go ./vm/*.go ./lib/*.go ./parser/grammar.go
+	go build -o ago .
 
 ./parser/grammar.go : ./parser/grammar.go.y ./ast/*.go
 	goyacc -o ./parser/grammar.go ./parser/grammar.go.y
@@ -23,4 +23,4 @@ testcase: ./*_test.go ./vm/*_test.go ./parser/grammar.go
 .PHONY: prof
 prof:
 	# make prof ARG=[PPROF PATH]
-	go tool pprof --pdf ./goa ${ARG} > ./prof.pdf
+	go tool pprof --pdf ./ago ${ARG} > ./prof.pdf

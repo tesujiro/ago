@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"unicode"
 
-	"github.com/tesujiro/goa/ast"
+	"github.com/tesujiro/ago/ast"
 )
 
 const (

@@ -12,8 +12,8 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/tesujiro/goa/ast"
-	"github.com/tesujiro/goa/vm"
+	"github.com/tesujiro/ago/ast"
+	"github.com/tesujiro/ago/vm"
 )
 
 func Import(env *vm.Env) *vm.Env {

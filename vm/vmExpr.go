@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/tesujiro/goa/ast"
+	"github.com/tesujiro/ago/ast"
 )
 
 func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {

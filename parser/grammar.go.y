@@ -2,7 +2,7 @@
 	package parser
 	import (
 		//"fmt"
-		"github.com/tesujiro/goa/ast"
+		"github.com/tesujiro/ago/ast"
 	)
 
 var defaultExpr = ast.FieldExpr{Expr: &ast.NumExpr{Literal: "0"}}

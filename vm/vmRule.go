@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/tesujiro/goa/ast"
-	"github.com/tesujiro/goa/debug"
+	"github.com/tesujiro/ago/ast"
+	"github.com/tesujiro/ago/debug"
 )
 
 func SeparateRules(rules []ast.Rule) (Func, Begin, Main, End []ast.Rule) {

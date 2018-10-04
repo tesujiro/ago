@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/tesujiro/goa/debug"
+	"github.com/tesujiro/ago/debug"
 )
 
 func Dump(obj interface{}) {

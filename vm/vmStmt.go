@@ -6,7 +6,7 @@ import (
 	"reflect"
 	"sort"
 
-	"github.com/tesujiro/goa/ast"
+	"github.com/tesujiro/ago/ast"
 )
 
 var (
