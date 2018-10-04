@@ -1,8 +1,24 @@
 # ago
-awk goes on - awk implementation on go
+awk goes on
+- awk implementation on go
 
-# version
+# Installation
+```
+$ go get -u github.com/tesujiro/ago
+```
+
+# Examples
+```
+# echo Once Time Ago | ago '{print "Hello",$NF,"!"}'
+Hello Ago !
+
+```
+
+# Version
 under development
+
+Please note that the language and API may change at any time.
+
 
 # Still not implemented
 * nextfile
