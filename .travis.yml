@@ -8,7 +8,7 @@ env:
 
 before_install:
  #- go get -u github.com/haya14busa/goverage
-  - go get -u github.com/tesujiro/goa
+  - go get -u github.com/tesujiro/ago
 
 script:
   - go test -v -coverprofile=coverage.txt -covermode=count . ./vm
