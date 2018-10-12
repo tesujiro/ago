@@ -1,6 +1,6 @@
 # ago
 awk goes on
-- awk implementated on go
+- awk implemented on go
 
 # Installation
 ```
