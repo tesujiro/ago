@@ -11,6 +11,11 @@ $ go get -u github.com/tesujiro/ago
 ```
 # echo Once Time Ago | ago '{print "Hello",$NF,"!"}'
 Hello Ago !
+# printf "AAA\nBBB\nAAA\DDD" |ago '/A+/{++N};END{print N+0}'
+2
+# printf "AAA\nAAA\nDDD\nDDD\n" | ago '!A[$0]++'
+AAA
+DDD
 
 ```
 
