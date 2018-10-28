@@ -368,13 +368,15 @@ func Import(env *vm.Env) *vm.Env {
 
 	// Dynamic Func : use env in the func
 
-	importShowEnv := func(env *vm.Env) (reflect.Value, error) {
-		f := func() {
-			env.Dump()
+	/*
+		importShowEnv := func(env *vm.Env) (reflect.Value, error) {
+			f := func() {
+				env.Dump()
+			}
+			return reflect.ValueOf(f), nil
 		}
-		return reflect.ValueOf(f), nil
-	}
-	env.DefineImportFunc("env", importShowEnv)
+		env.DefineImportFunc("env", importShowEnv)
+	*/
 
 	return env
 }

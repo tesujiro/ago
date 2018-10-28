@@ -415,6 +415,8 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{print atan2(0,0)}", ok: "0\n"},
 		{script: "BEGIN{print atan2(1,0)}", ok: "1.5707963267948966\n"},
 		// lib: rand,arand,srand
+		{script: "BEGIN{r1,r2=rand(),rand(); print r1==r2}", ok: "false\n"},
+		{script: "BEGIN{srand();r1,r2=rand(),rand(); print r1==r2}", ok: "false\n"},
 
 		// Built-in Functions for String Manipulation
 		// lib:len
@@ -460,6 +462,7 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{print toupper(\"\")}", ok: "\n"},
 		{script: "BEGIN{print toupper(\"Hello, World!\")}", ok: "HELLO, WORLD!\n"},
 		// lib: sub,gsub
+		{script: "BEGIN{print gsub(/a/,\"A\",S)}", ok: "0\n"},
 		{script: "BEGIN{S=\"aabbaacc\";print sub(/a/,\"A\",S);print S}", ok: "1\nAabbaacc\n"},
 		{script: "BEGIN{S=\"aabbaacc\";print gsub(/a/,\"A\",S);print S}", ok: "4\nAAbbAAcc\n"},
 		{script: "BEGIN{S=\"aabbaacc\";print sub(/a+/,\"A\",S);print S}", ok: "1\nAbbaacc\n"},
@@ -473,6 +476,8 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{print mktime(\"2018 99 01 13 07 50\")}", ok: "0\n"}, //JAPAN
 		{script: "BEGIN{print strftime(\"%Y/%m/%d %H:%M:%S\",mktime(\"2018 09 01 13 07 50\"))}", ok: "2018/09/01 13:07:50\n"},
 		{script: "BEGIN{print strftime(\"%y-%m-%d %H:%M:%S\",mktime(\"2018 09 01 13 07 50\"))}", ok: "18-09-01 13:07:50\n"},
+		// lib: systime
+		{script: "BEGIN{systime()}", ok: ""},
 		// lib: system
 		{script: "BEGIN{print system(\"echo aaa\")}", ok: "0\n"},
 
