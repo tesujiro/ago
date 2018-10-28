@@ -28,6 +28,7 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{print 123}", ok: "123\n"},
 		{script: "BEGIN{print 123.456}", ok: "123.456\n"},
 		{script: "BEGIN{print \"abc\"}", ok: "abc\n"},
+		{script: "BEGIN{print 'abc'}", ok: "abc\n"},
 		{script: "BEGIN{print +1+4}", ok: "5\n"},
 		{script: "BEGIN{print -1+3}", ok: "2\n"},
 		{script: "BEGIN{print 1+1}", ok: "2\n"},
@@ -81,6 +82,11 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{a[1]=1;a[2]=10;print 1-length(a)}", ok: "-1\n"},
 		{script: "BEGIN{a[1]=1;a[2]=10;print 1*length(a)}", ok: "2\n"},
 		{script: "BEGIN{a[1]=1;a[2]=10;print 1/length(a)}", ok: "0\n"},
+		// basic error
+		{script: "BEGIN{a", ok: "Syntax error: syntax error\n"},
+		{script: "BEGIN{a='", ok: "Syntax error: syntax error\n"},
+		{script: "BEGIN{a='\n", ok: "Syntax error: syntax error\n"},
+		{script: "BEGIN{a\n=1;print a;", ok: "Syntax error: syntax error\n"},
 		// printf
 		{script: "BEGIN{a=1;printf \"%d\",a}", ok: "1\n"},
 		{script: "BEGIN{printf \"%.2d\",1}", ok: "01\n"},
