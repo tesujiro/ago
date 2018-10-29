@@ -70,18 +70,6 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 	case *ast.CallExpr:
 		//fmt.Printf("CallExpr env:%v builtin.field:%#v\n", env, env.builtin.field)
 		return (callFunc(expr.(*ast.CallExpr), env))
-	case *ast.LenExpr:
-		sub := expr.(*ast.LenExpr).Expr
-		result, err := evalExpr(sub, env)
-		if err != nil {
-			return nil, err
-		}
-		switch reflect.ValueOf(result).Kind() {
-		case reflect.Slice, reflect.Array, reflect.String, reflect.Map:
-			return reflect.ValueOf(result).Len(), nil
-		default:
-			return nil, fmt.Errorf("type %s does not support len operation", reflect.ValueOf(result).Kind().String())
-		}
 	case *ast.AnonymousCallExpr:
 		return (callAnonymousFunc(expr.(*ast.AnonymousCallExpr), env))
 	case *ast.ParentExpr:

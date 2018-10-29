@@ -84,6 +84,7 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{a[1]=10;a[2]=5;print a[1]*a}", ok: "0\n"},
 		{script: "BEGIN{a[1]=10;a[2]=5;print a[1]/a}", ok: "+Inf\n"}, //TODO: error
 		{script: "BEGIN{a[1]=1;a[2]=10;print 1+length(a)}", ok: "3\n"},
+		{script: "BEGIN{a[1]=1;a[2]=10;print 1+len(a)}", ok: "3\n"},
 		{script: "BEGIN{a[1]=1;a[2]=10;print 1-length(a)}", ok: "-1\n"},
 		{script: "BEGIN{a[1]=1;a[2]=10;print 1*length(a)}", ok: "2\n"},
 		{script: "BEGIN{a[1]=1;a[2]=10;print 1/length(a)}", ok: "0\n"},
