@@ -35,6 +35,7 @@ Please note that the language and API may change at any time.
 * goroutine
 * define variadic functions
 * test command option
+* number format: exponent format (ex.2e+3), octal format (ex.0123)
 
 # Difference from AWK
 * {} block has a local scope. variables name beginning with uppercase are global, others are local

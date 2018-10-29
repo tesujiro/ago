@@ -102,10 +102,13 @@ retry:
 		maybe_regexp = 0
 		regexp_str = ""
 	}
-	ch := s.peek()
-	if maybe_regexp != 0 {
-		regexp_str = fmt.Sprintf("%s%c", regexp_str, ch)
-	}
+	s.peek()
+	/*
+		ch := s.peek()
+			if maybe_regexp != 0 {
+				regexp_str = fmt.Sprintf("%s%c", regexp_str, ch)
+			}
+	*/
 	switch ch := s.peek(); {
 	case isLetter(ch):
 		lit, err = s.scanIdentifier()
