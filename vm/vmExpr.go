@@ -75,18 +75,6 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 	case *ast.ParentExpr:
 		sub := expr.(*ast.ParentExpr).SubExpr
 		return evalExpr(sub, env)
-	case *ast.ArrayExpr:
-		exprs := expr.(*ast.ArrayExpr).Exprs
-		array := make([]interface{}, len(exprs))
-		for i, expr := range exprs {
-			if val, err := evalExpr(expr, env); err != nil {
-				fmt.Println("ArrayExpr error at index:", i) // TODO:
-				return nil, err
-			} else {
-				array[i] = val
-			}
-		}
-		return array, nil
 	case *ast.ItemExpr:
 		var value, index interface{}
 		var err error

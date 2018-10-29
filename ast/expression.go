@@ -74,10 +74,6 @@ type AnonymousCallExpr struct {
 	SubExprs []Expr
 }
 
-type ArrayExpr struct {
-	Exprs []Expr
-}
-
 type ItemExpr struct {
 	Expr  Expr
 	Index []Expr
