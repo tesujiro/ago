@@ -171,6 +171,7 @@ func (e *Env) getLocalVar(k string) (interface{}, error) {
 	return e.parent.getLocalVar(k)
 }
 
+/*
 func (e *Env) DefineImportFunc(k string, f func(*Env) (reflect.Value, error)) error {
 	e.importFunc[k] = f
 	return nil
@@ -188,6 +189,7 @@ func (e *Env) GetDynamicFunc(k string) (interface{}, error) {
 	e.Define(k, fn) // for cache
 	return fn, nil
 }
+*/
 
 func (e *Env) Dump() {
 	var dump_helper func(*Env) string
