@@ -148,24 +148,6 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 		default:
 			return nil, errors.New("type " + reflect.ValueOf(value).Kind().String() + " does not support index operation")
 		}
-	case *ast.MapExpr:
-		exprs := expr.(*ast.MapExpr).MapExpr
-		m := make(map[interface{}]interface{}, len(exprs))
-		var keyResult, valResult interface{}
-		var err error
-		for keyExpr, valExpr := range exprs {
-			keyResult, err = evalExpr(keyExpr, env)
-			if err != nil {
-				return nil, err
-			}
-			valResult, err = evalExpr(valExpr, env)
-			if err != nil {
-				return nil, err
-			}
-			m[keyResult] = valResult
-		}
-		return m, nil
-
 	case *ast.UnaryExpr:
 		var val interface{}
 		var err error

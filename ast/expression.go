@@ -83,10 +83,6 @@ type ItemExpr struct {
 	Index []Expr
 }
 
-type MapExpr struct {
-	MapExpr map[Expr]Expr
-}
-
 type RegExpr struct {
 	Literal string
 }
