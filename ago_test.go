@@ -71,6 +71,7 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{print \"123\" 45}", ok: "12345\n"},
 		{script: "BEGIN{print \"123\" 4+5}", ok: "1239\n"},
 		{script: "BEGIN{print 123 45}", ok: "12345\n"},
+		{script: "BEGIN{print 1.23 4.5}", ok: "5.73\n"},
 		{script: "BEGIN{a[1]=1;a[2]=10;print a[1]+a[2]}", ok: "11\n"},
 		{script: "BEGIN{a[1]=1;a[2]=10;print a[1]-a[2]}", ok: "-9\n"},
 		{script: "BEGIN{a[1]=10;a[2]=5;print a[1]*a[2]}", ok: "50\n"},
@@ -88,6 +89,7 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{a[1]=1;a[2]=10;print 1-length(a)}", ok: "-1\n"},
 		{script: "BEGIN{a[1]=1;a[2]=10;print 1*length(a)}", ok: "2\n"},
 		{script: "BEGIN{a[1]=1;a[2]=10;print 1/length(a)}", ok: "0\n"},
+		{script: "BEGIN{a[1]=1;print b[3/0]}", ok: "error:devision by zero\n"},
 		// basic error
 		{script: "BEGIN{a", ok: "Syntax error: syntax error\n"},
 		{script: "BEGIN{a='", ok: "Syntax error: syntax error\n"},
@@ -495,6 +497,10 @@ func TestGoa(t *testing.T) {
 
 		// field
 		{script: "{print $1}", in: "Hello World!\n", ok: "Hello\n"},
+		{script: "{print $(1/1)}", in: "Hello World!\n", ok: "Hello\n"},
+		{script: "{print $(1/0)}", in: "Hello World!\n", ok: "error:devision by zero\n"},
+		{script: "{a=1;print $a}", in: "Hello World!\n", ok: "Hello\n"},
+		//{script: "{a='a';print $a}", in: "Hello World!\n", ok: "Hello\n"}, //TODO:
 		{script: "{print NF}", in: "\n \n\t\naaa\n", ok: "0\n0\n0\n1\n"},
 		{script: "BEGIN{FS=\":\"}{print NF}", in: "\n:\naaa:bbb\n", ok: "0\n2\n2\n"},
 		{script: "BEGIN{FS=\"\"}{print NF}", in: "aaa\n", ok: "3\n"},
