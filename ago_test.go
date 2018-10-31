@@ -499,8 +499,15 @@ func TestGoa(t *testing.T) {
 		{script: "{print $1}", in: "Hello World!\n", ok: "Hello\n"},
 		{script: "{print $(1/1)}", in: "Hello World!\n", ok: "Hello\n"},
 		{script: "{print $(1/0)}", in: "Hello World!\n", ok: "error:devision by zero\n"},
-		{script: "{a=1;print $a}", in: "Hello World!\n", ok: "Hello\n"},
 		//{script: "{a='a';print $a}", in: "Hello World!\n", ok: "Hello\n"}, //TODO:
+		{script: "{a=1;b=$a;print b}", in: "Hello World!\n", ok: "Hello\n"},
+		//{script: "{a=1.1;b=$a;print b}", in: "Hello World!\n", ok: "Hello\n"}, //TODO
+		//{script: "{a='x';b=$a;print b}", in: "Hello World!\n", ok: "Hello\n"}, //TODO
+		//{script: "{a=1;$a=1;print $a}", in: "Hello World!\n", ok: "Hello\n"}, //TODO: BUG
+		//{script: "{a=-1;$a=1;print $a}", in: "Hello World!\n", ok: "Hello\n"}, //TODO: BUG
+		{script: "{a=1.1;$a=1;print $a}", in: "Hello World!\n", ok: "error:field index not int :float64\n"},
+		{script: "{$(1/0)=1;print $a}", in: "Hello World!\n", ok: "error:devision by zero\n"},
+		{script: "{a[1]=2;$1=a;print $1}", in: "Hello World!\n", ok: "error:field value is not string :map[interface {}]interface {}\n"},
 		{script: "{print NF}", in: "\n \n\t\naaa\n", ok: "0\n0\n0\n1\n"},
 		{script: "BEGIN{FS=\":\"}{print NF}", in: "\n:\naaa:bbb\n", ok: "0\n2\n2\n"},
 		{script: "BEGIN{FS=\"\"}{print NF}", in: "aaa\n", ok: "3\n"},

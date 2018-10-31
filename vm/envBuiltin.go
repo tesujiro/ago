@@ -71,6 +71,7 @@ func (e *Env) GetField(i int) (string, error) {
 	return e.builtin.field[i], nil
 }
 
+/*
 func (e *Env) GetFieldPtr(i int) (*string, error) {
 	// TODO: out of index
 	if i < 0 || i >= len(e.builtin.field) {
@@ -78,6 +79,7 @@ func (e *Env) GetFieldPtr(i int) (*string, error) {
 	}
 	return &e.builtin.field[i], nil
 }
+*/
 
 func (e *Env) SetFieldZero() error {
 	//fmt.Println("SetFieldZero:", e.builtin.field)
