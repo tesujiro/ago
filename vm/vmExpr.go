@@ -32,11 +32,16 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 		if err != nil {
 			return nil, err
 		}
-		i, _ := index.(int)
-		if field, err := env.GetField(i); err != nil {
-			return nil, err
-		} else {
-			return field, nil
+		switch index.(type) {
+		case int:
+			i, _ := index.(int)
+			if field, err := env.GetField(i); err != nil {
+				return nil, err
+			} else {
+				return field, nil
+			}
+		default:
+			return nil, fmt.Errorf("field index not int :%v", reflect.TypeOf(index))
 		}
 	case *ast.NumExpr:
 		lit := expr.(*ast.NumExpr).Literal
@@ -458,14 +463,19 @@ func evalAssExpr(lexp ast.Expr, val interface{}, env *Env) (interface{}, error) 
 			return nil, fmt.Errorf("field index not int :%v", reflect.TypeOf(i_val))
 		}
 		switch val.(type) {
-		case []interface{}:
-			val = reflect.ValueOf(val).Index(0).Interface()
+		case string:
+			break
+		//case []interface{}:
+		//val = reflect.ValueOf(val).Index(0).Interface()
+		case int:
+			val = fmt.Sprintf("%v", val.(int))
 		}
 		//fmt.Printf("evalAssExpr FieldExpr: index:%v \tval:%v\n", index, val) //TODO
 		val_string, ok := val.(string)
 		if !ok {
 			return nil, fmt.Errorf("field value is not string :%v", reflect.TypeOf(val))
 		}
+
 		err = env.SetField(index, val_string)
 		if err != nil {
 			//fmt.Println("fieldExpr SetField error") //TODO
