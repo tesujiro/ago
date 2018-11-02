@@ -13,13 +13,12 @@ test: ./*_test.go ./vm/*_test.go ./parser/grammar.go
 ifdef case
 	TESTCASE=${case} go test -v -count=1 .
 else
-	go test -v -count=1 . ./vm -coverpkg ./...
+	go test -v -count=1 ./vm . -coverpkg ./...
 endif
 
 .PHONY: cover
 cover:
-	go test -v . ./vm -coverpkg ./... -coverprofile=cover.out
-	go tool cover -html=cover.out -o cover.html
+	go test -v ./vm . -coverpkg ./... -coverprofile=cover.out && go tool cover -html=cover.out -o cover.html
 
 .PHONY: testcase
 testcase: ./*_test.go ./vm/*_test.go ./parser/grammar.go
