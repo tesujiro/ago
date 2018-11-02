@@ -181,9 +181,9 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 			return evalAssExpr(left[0], right_values[0], env)
 		case len(left) > 1 && len(right) == 1:
 			val := right_values[0]
-			if reflect.ValueOf(val).Kind() == reflect.Interface {
-				val = reflect.ValueOf(val).Elem().Interface()
-			}
+			//if reflect.ValueOf(val).Kind() == reflect.Interface {
+			//val = reflect.ValueOf(val).Elem().Interface()
+			//}
 			if reflect.ValueOf(val).Kind() != reflect.Slice {
 				return nil, errors.New("single value assign to multi values")
 			} else {
@@ -214,15 +214,13 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 			afterStmts = append(afterStmts, &ast.ExprStmt{Expr: afterCompExpr})
 			return evalExpr(left, env)
 		}
-		switch operator {
-		case "++", "--":
+		if operator == "++" || operator == "--" {
 			right = &ast.NumExpr{Literal: "1"}
 		}
 		result, err := evalExpr(&ast.BinOpExpr{Left: left, Operator: operator[0:1], Right: right}, env)
 		if err != nil {
 			return nil, err
 		}
-		//fmt.Printf("ast.CompExpr: result:%v\n", result)
 		return evalAssExpr(left, result, env)
 
 	case *ast.TriOpExpr:

@@ -34,7 +34,10 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{print '[\\f]'}", ok: "[\f]\n"},
 		{script: "BEGIN{print '\\c'}", ok: "c\n"},
 		{script: "BEGIN{print +1+4}", ok: "5\n"},
+		{script: "BEGIN{print +1.0+4}", ok: "5\n"},
 		{script: "BEGIN{print -1+3}", ok: "2\n"},
+		{script: "BEGIN{print -1.0+3}", ok: "2\n"},
+		{script: "BEGIN{print +(1/0)}", ok: "error:devision by zero\n"},
 		{script: "BEGIN{print 1+1}", ok: "2\n"},
 		{script: "BEGIN{print 1+1.1}", ok: "2.1\n"},
 		{script: "BEGIN{print 1.1+4}", ok: "5.1\n"},
@@ -62,10 +65,12 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{print 1 \"b\"}", ok: "1b\n"},
 		{script: "BEGIN{print 1 1}", ok: "11\n"},
 		{script: "BEGIN{a=1;print ++a 1}", ok: "21\n"},
+		{script: "BEGIN{a=1/0;print a}", ok: "error:devision by zero\n"},
 		{script: "BEGIN{print \"a\" \"b\" \"c\"}", ok: "abc\n"},
 		{script: "BEGIN{print 15.2%7.1}", ok: "1\n"},
 		{script: "BEGIN{a=123;print a}", ok: "123\n"},
 		{script: "BEGIN{a=b=123;print a,b}", ok: "123 123\n"},
+		{script: "BEGIN{a,b=123,123;print a,b}", ok: "123 123\n"},
 		{script: "BEGIN{map=123;print map}", ok: "123\n"},
 		{script: "BEGIN{print \"123\" \"45\"}", ok: "12345\n"},
 		{script: "BEGIN{print \"123\" 45}", ok: "12345\n"},
@@ -90,6 +95,11 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{a[1]=1;a[2]=10;print 1*length(a)}", ok: "2\n"},
 		{script: "BEGIN{a[1]=1;a[2]=10;print 1/length(a)}", ok: "0\n"},
 		{script: "BEGIN{a[1]=1;print b[3/0]}", ok: "error:devision by zero\n"},
+		{script: "BEGIN{a,b=123,123,123;print a,b}", ok: "123 123\n"},
+		{script: "BEGIN{m[1]=123;m[2]=456;a,b=m[1],m[2];print a,b}", ok: "123 456\n"},
+		{script: "BEGIN{a,b=123;print a,b}", ok: "error:single value assign to multi values\n"},
+		{script: "BEGIN{a,b=1/0,2;print a,b}", ok: "error:devision by zero\n"},
+		{script: "BEGIN{NF[0],b=1,2;print a,b}", ok: "error:type int does not support index operation\n"},
 		// basic error
 		{script: "BEGIN{a", ok: "Syntax error: syntax error\n"},
 		{script: "BEGIN{a='", ok: "Syntax error: syntax error\n"},
@@ -105,6 +115,8 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{a=2;print a==1?a+1:a+2}", ok: "4\n"},
 		{script: "BEGIN{a=\"a\";print a==\"a\"?a+\"1\":a+\"2\"}", ok: "a1\n"},
 		{script: "BEGIN{a=\"b\";print a==\"a\"?a+\"1\":a+\"2\"}", ok: "b2\n"},
+		{script: "BEGIN{print 1/0?a+1:a+2}", ok: "error:devision by zero\n"},
+		{script: "BEGIN{a[1]=1;print a?a+1:a+2}", ok: "error:convert to bool failed in ternary operator\n"},
 		// composite expression
 		{script: "BEGIN{a=123;print ++a;print a}", ok: "124\n124\n"},
 		{script: "BEGIN{print ++1}", ok: "error:invalid operation\n"},
@@ -125,6 +137,7 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{a=123;a/=4;print a}", ok: "30\n"},
 		{script: "BEGIN{a=123;a%=4;print a}", ok: "3\n"},
 		//{script: "BEGIN{a=123;a%=4;print a}", ok: "30\n"}, //TODO
+		{script: "BEGIN{a+=1/0}", ok: "error:devision by zero\n"},
 
 		// JAPANESE
 		{script: "BEGIN{print \"あいう\"}", ok: "あいう\n"},
@@ -193,8 +206,18 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{a=1;b=2;print a==1||b==2}", ok: "true\n"},
 		{script: "BEGIN{a=1;b=2;print a==2||b==2}", ok: "true\n"},
 		{script: "BEGIN{a=1;b=2;print a||b}", ok: "true\n"},
-		{script: "BEGIN{a[1]=1;b=2;print a||b}", ok: "error:convert to bool failed in left expression of OR operator\n"},
-		{script: "BEGIN{a=1;b[1]=2;print a&&b}", ok: "error:convert to bool failed in right expression of AND operator\n"},
+		{script: "BEGIN{print 1||1}", ok: "true\n"},
+		{script: "BEGIN{print 0||0}", ok: "false\n"},
+		{script: "BEGIN{print 1/0||1}", ok: "error:devision by zero\n"},
+		{script: "BEGIN{print 1||1/0}", ok: "error:devision by zero\n"},
+		{script: "BEGIN{a[1]=1;print a||0}", ok: "error:convert to bool failed in left expression of OR operator\n"},
+		{script: "BEGIN{a[1]=1;print 0||a}", ok: "error:convert to bool failed in right expression of OR operator\n"},
+		{script: "BEGIN{print 0&&1}", ok: "false\n"},
+		{script: "BEGIN{print 1&&0}", ok: "false\n"},
+		{script: "BEGIN{print 1/0&&1}", ok: "error:devision by zero\n"},
+		{script: "BEGIN{print 1&&1/0}", ok: "error:devision by zero\n"},
+		{script: "BEGIN{a[1]=1;print a&&1}", ok: "error:convert to bool failed in left expression of AND operator\n"},
+		{script: "BEGIN{a[1]=1;print 1&&a}", ok: "error:convert to bool failed in right expression of AND operator\n"},
 
 		// regular expression
 		{script: "BEGIN{print \"aaa\"~/aaa/}", ok: "true\n"},
@@ -208,6 +231,7 @@ func TestGoa(t *testing.T) {
 		{script: "/AAA/{print}", in: "AAA", ok: "AAA\n"},
 		{script: "BEGIN{S=\"abcaaa\";gsub(/a+/,\"A\",S);print S}", ok: "AbcA\n"},
 		{script: "BEGIN{S=\"abcaaa\";print gsub(/a+/,\"A\",S);print S}", ok: "2\nAbcA\n"},
+		{script: "BEGIN{print 1/0~/aaa/}", ok: "error:devision by zero\n"},
 
 		// assignment
 		{script: "BEGIN{a=1;b=2;print a+b}", ok: "3\n"},
@@ -303,11 +327,18 @@ func TestGoa(t *testing.T) {
 
 		// map: awk-array (associated array = map)
 		{script: "BEGIN{print a[1]}", ok: "\n"},
+		{script: "BEGIN{print a[1/0]}", ok: "error:devision by zero\n"},
+		{script: "BEGIN{print NF[1]}", ok: "error:type int does not support index operation\n"},
+		{script: "BEGIN{a[1/0]=1}", ok: "error:devision by zero\n"},
+		{script: "BEGIN{NF[1]=1}", ok: "error:type int does not support index operation\n"},
 		{script: "BEGIN{a[1]=1;print a[1]}", ok: "1\n"},
 		{script: "BEGIN{a[1]=1;print a[2]}", ok: "\n"},
+		{script: "BEGIN{a[1]=1;a[2]=2;print a[1]+a[2]}", ok: "3\n"},
+		{script: "BEGIN{a[1]=1;a[2]=2;print a+a}", ok: "0\n"},
 		{script: "BEGIN{a[1]=1;print 1 in a}", ok: "true\n"},
 		{script: "BEGIN{a[1]=1;print 2 in a}", ok: "false\n"},
 		{script: "BEGIN{print 1 in b}", ok: "false\n"},
+		{script: "BEGIN{print 1/0 in b}", ok: "error:devision by zero\n"},
 		{script: "BEGIN{a[1]=1;print \"1\" in a}", ok: "true\n"},
 		{script: "BEGIN{a[1]=1;print \"2\" in a}", ok: "false\n"},
 		{script: "BEGIN{a[\"1\"]=1;print 1 in a}", ok: "true\n"},
@@ -507,6 +538,7 @@ func TestGoa(t *testing.T) {
 		//{script: "{print $'1.xx'}", in: "Hello World!\n", ok: "Hello\n"}, //TODO
 		{script: "{a=1.1;$a=1;print $a}", in: "Hello World!\n", ok: "error:field index not int :float64\n"},
 		{script: "{$(1/0)=1;print $a}", in: "Hello World!\n", ok: "error:devision by zero\n"},
+		{script: "{$(-1)='xx';}", in: "Hello World!\n", ok: "error:Field Index Out of Range:-1\n"},
 		{script: "{a[1]=2;$1=a;print $1}", in: "Hello World!\n", ok: "error:field value is not string :map[interface {}]interface {}\n"},
 		{script: "{print NF}", in: "\n \n\t\naaa\n", ok: "0\n0\n0\n1\n"},
 		{script: "BEGIN{FS=\":\"}{print NF}", in: "\n:\naaa:bbb\n", ok: "0\n2\n2\n"},
