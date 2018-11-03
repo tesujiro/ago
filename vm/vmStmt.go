@@ -42,8 +42,10 @@ func run(stmts []ast.Stmt, env *Env) (interface{}, error) {
 		case *ast.NextStmt:
 			return result, ErrNext
 		case *ast.ReturnStmt:
+			//fmt.Println("Return1")
 			result, err = runSingleStmt(stmt, env)
 			if err != nil && err != ErrReturn {
+				//fmt.Printf("Return1 error !! err:%v\n", err)
 				return nil, err
 			}
 			return result, ErrReturn
@@ -255,6 +257,7 @@ func runSingleStmt(stmt ast.Stmt, env *Env) (interface{}, error) {
 		}
 		return result, nil
 	case *ast.ReturnStmt:
+		//fmt.Println("Return2")
 		returnStmt := stmt.(*ast.ReturnStmt)
 		length := len(returnStmt.Exprs)
 
@@ -263,6 +266,7 @@ func runSingleStmt(stmt ast.Stmt, env *Env) (interface{}, error) {
 		for i, expr := range returnStmt.Exprs {
 			resultExpr[i], err = evalExpr(expr, env)
 			if err != nil {
+				//fmt.Printf("Return2 error!  err;%v\n", err)
 				return nil, err
 			}
 		}
@@ -349,7 +353,8 @@ func runSingleStmt(stmt ast.Stmt, env *Env) (interface{}, error) {
 				break
 			}
 			if err == ErrContinue {
-				continue
+				//continue
+				err = nil
 			}
 			if err != nil {
 				return nil, err

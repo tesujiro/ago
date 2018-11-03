@@ -29,6 +29,7 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{print 123.456}", ok: "123.456\n"},
 		{script: "BEGIN{print \"abc\"}", ok: "abc\n"},
 		{script: "BEGIN{print 'abc'}", ok: "abc\n"},
+		{script: "BEGIN{print ''}", ok: "\n"},
 		{script: "BEGIN{print '\\b'}", ok: "\b\n"},
 		{script: "BEGIN{print '\\r'}", ok: "\r\n"},
 		{script: "BEGIN{print '[\\f]'}", ok: "[\f]\n"},
@@ -319,6 +320,13 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{for 1;;++i{print i;if i==3{break}}}", ok: "\n1\n2\n3\n"},
 		{script: "BEGIN{for ;;++i{print i;if i==3{break}}}", ok: "\n1\n2\n3\n"},
 		{script: "BEGIN{for ;;{print i;if i==3{break};i++}}", ok: "\n1\n2\n3\n"},
+		{script: "BEGIN{for i=1;i<=3;++i{if i<3{continue};print i}}", ok: "3\n"},
+		{script: "BEGIN{for i=1/0;i<=3;++i{print i}}", ok: "error:devision by zero\n"},
+		{script: "BEGIN{for i=1;i<=3/0;++i{print i}}", ok: "error:devision by zero\n"},
+		{script: "BEGIN{for i=1;i<=3;i/0{i++}}", ok: "error:devision by zero\n"},
+		{script: "BEGIN{for i=1;i<=3;++i{i/0}}", ok: "error:devision by zero\n"},
+		{script: "BEGIN{fnc=func(){return 1/0};for i=1;i<=3;++i{fnc()}}", ok: "error:devision by zero\n"},
+		{script: "BEGIN{a[1]=1;for i=1;a;++i{print i}}", ok: "error:convert to bool failed in for loop condition\n"},
 		// do while statement
 		{script: "BEGIN{a=0;do{a=a+1} while(a<10);print a}", ok: "10\n"},
 		{script: "BEGIN{a=0;do{a=a+1;if a==5{break}} while(a<10);print a}", ok: "5\n"},
@@ -360,7 +368,9 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{a[1]=1;delete a[1];print a[2]}", ok: "\n"},
 		{script: "BEGIN{a[1]=1;delete a[2];print a[1]}", ok: "1\n"},
 		{script: "BEGIN{a[1]=1;delete a;print a[1]}", ok: "\n"},
+		{script: "BEGIN{a[1]=1;delete a[1/0]}", ok: "error:devision by zero\n"},
 		{script: "BEGIN{a=1;delete a}", ok: "error:type int does not support delete operation\n"},
+		{script: "BEGIN{delete 1}", ok: "error:type *ast.NumExpr does not support delete operation\n"},
 		{script: "BEGIN{a[1]=1;delete a;a=2}", ok: "error:can't assign to a; it's an associated array name.\n"},
 		{script: "BEGIN{delete a;a=2}", ok: "error:can't assign to a; it's an associated array name.\n"},
 		{script: "BEGIN{list=func(){a[1]=1;a[2]=2;a[3]=3;return a};delete list()[1]}", ok: "error:non variable does not support delete operation\n"},
@@ -378,6 +388,8 @@ func TestGoa(t *testing.T) {
 
 		// function
 		{script: "BEGIN{add=func(a,b){return a+b}; x=add(10,5);print x}", ok: "15\n"},
+		{script: "BEGIN{x=add(10,5);print x}", ok: "error:unknown symbol\n"},
+		{script: "BEGIN{add=123;x=add(10,5);print x}", ok: "error:cannot call type int\n"},
 		{script: "BEGIN{add=func(a,b){return a+b}; print add(10,5)}", ok: "15\n"},
 		{script: "BEGIN{add=func(a,b){return a+b}; print add(1.1,2.1)}", ok: "3.2\n"},
 		{script: "BEGIN{add=func(a,b){return a+b}; print add(\"あ\",\"いう\")}", ok: "あいう\n"},
@@ -404,6 +416,8 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{Cross=func(a1,a2){return a2,a1;};print Cross(1,5)}", ok: "5 1\n"},
 		{script: "BEGIN{Cross=func(a1,a2){return a2,a1;};x,y=Cross(1,5);print x}", ok: "5\n"},
 		{script: "BEGIN{Cross=func(a1,a2){return a2,a1;};x,y=Cross(1,5);print y}", ok: "1\n"},
+		{script: "BEGIN{First=func(a1,a2){return a1;};x,y=First(1,5);print x}", ok: "error:single value assign to multi values\n"},
+		{script: "BEGIN{Error=func(){return 1/0;};err=Error();print x}", ok: "error:devision by zero\n"},
 		{script: "BEGIN{Cross=func(a1,a2){return a2,a1;};print Cross(\"a\",\"b\")}", ok: "b a\n"},
 		{script: "BEGIN{a=1;Fn=func(){a=100;};Fn();print a}", ok: "100\n"},
 		// anonymous func
@@ -533,6 +547,7 @@ func TestGoa(t *testing.T) {
 		{script: "{b=$1;print b}", in: "Hello World!\n", ok: "Hello\n"},
 		{script: "{$1=2;b=$1;print b}", in: "Hello World!\n", ok: "2\n"},
 		{script: "{print $'a'}", in: "Hello World!\n", ok: "error:field index not int :string\n"},
+		{script: "{print $''}", in: "Hello World!\n", ok: "error:field index not int :string\n"},
 		//{script: "{print $'1'}", in: "Hello World!\n", ok: "Hello\n"}, //TODO
 		//{script: "{print $'1.1'}", in: "Hello World!\n", ok: "Hello\n"}, //TODO
 		//{script: "{print $'1.xx'}", in: "Hello World!\n", ok: "Hello\n"}, //TODO

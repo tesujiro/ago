@@ -104,9 +104,6 @@ func callFunc(callExpr *ast.CallExpr, env *Env) (interface{}, error) {
 		f = callExpr.Func
 	}
 	//debug.Println("func kind:", f.Kind())
-	if f.Kind() != reflect.Func {
-		return nil, errors.New("cannot call type " + f.Type().String())
-	}
 	if f.Kind() == reflect.Interface && !f.IsNil() {
 		f = f.Elem()
 	}
@@ -125,7 +122,6 @@ func callFunc(callExpr *ast.CallExpr, env *Env) (interface{}, error) {
 
 		return makeResult(refvals, isGoFunc(f.Type()))
 	}
-	return nil, nil
 }
 
 func isGoFunc(rt reflect.Type) bool {
@@ -243,7 +239,7 @@ func callArgs(f reflect.Value, callExpr *ast.CallExpr, env *Env) ([]reflect.Valu
 
 func makeResult(ret []reflect.Value, isGoFunction bool) (interface{}, error) {
 	debug.Println("ret length:", len(ret))
-	// FOR DEBUB
+	// FOR DEBUG
 	for i, _ := range ret {
 		a := ret[i]
 		debug.Printf("ret[%d]           : \tType:%v\tValue:%v\tKind():%v\n", i, reflect.TypeOf(a), reflect.ValueOf(a), reflect.ValueOf(a).Kind())
