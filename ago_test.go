@@ -305,13 +305,14 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{s=\"\";for s { s= s+1 };print s}", ok: "\n"},
 		{script: "BEGIN{s=\"str\";for s { s= \"\" };print s}", ok: "\n"},
 		// while statement == for statement
-		//{script: "BEGIN{a=0;while{ if a==10 { break }; a= a+1 };print a}", ok: "10\n"},
 		{script: "BEGIN{a=0;b=0;while{ a=a+1;if a==10 { break }; if b==5 {continue};b= b+1 };print b}", ok: "5\n"},
 		{script: "BEGIN{a=0;while a<=10 { a= a+1 };print a}", ok: "11\n"},
 		{script: "BEGIN{a=0;while a { a= a+1 };print a}", ok: "0\n"},
 		{script: "BEGIN{a=1;while a { a= a-1 };print a}", ok: "0\n"},
 		{script: "BEGIN{s=\"\";while s { s= s+1 };print s}", ok: "\n"},
 		{script: "BEGIN{s=\"str\";while s { s= \"\" };print s}", ok: "\n"},
+		{script: "BEGIN{a=1;while a/0 { a= a+1 };print a}", ok: "error:devision by zero\n"},
+		{script: "BEGIN{fnc=func(){a=1;while a { return a };};print fnc()}", ok: "1\n"},
 		// for;;{}
 		{script: "BEGIN{for i=1;i<=3;++i{print i}}", ok: "1\n2\n3\n"},
 		{script: "BEGIN{for 1;i<=3;++i{print i}}", ok: "\n1\n2\n3\n"},
@@ -321,17 +322,21 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{for ;;++i{print i;if i==3{break}}}", ok: "\n1\n2\n3\n"},
 		{script: "BEGIN{for ;;{print i;if i==3{break};i++}}", ok: "\n1\n2\n3\n"},
 		{script: "BEGIN{for i=1;i<=3;++i{if i<3{continue};print i}}", ok: "3\n"},
+		{script: "BEGIN{fnc=func(){for i=1;i<=3;++i{return i}};print fnc()}", ok: "1\n"},
 		{script: "BEGIN{for i=1/0;i<=3;++i{print i}}", ok: "error:devision by zero\n"},
 		{script: "BEGIN{for i=1;i<=3/0;++i{print i}}", ok: "error:devision by zero\n"},
 		{script: "BEGIN{for i=1;i<=3;i/0{i++}}", ok: "error:devision by zero\n"},
 		{script: "BEGIN{for i=1;i<=3;++i{i/0}}", ok: "error:devision by zero\n"},
-		{script: "BEGIN{fnc=func(){return 1/0};for i=1;i<=3;++i{fnc()}}", ok: "error:devision by zero\n"},
 		{script: "BEGIN{a[1]=1;for i=1;a;++i{print i}}", ok: "error:convert to bool failed in for loop condition\n"},
 		// do while statement
 		{script: "BEGIN{a=0;do{a=a+1} while(a<10);print a}", ok: "10\n"},
 		{script: "BEGIN{a=0;do{a=a+1;if a==5{break}} while(a<10);print a}", ok: "5\n"},
 		{script: "BEGIN{a=-10;do{a=a+1} while(a);print a}", ok: "0\n"},
 		{script: "BEGIN{a[1]=1;do{a[1]=a[1]+1} while(a);print a[1]}", ok: "error:convert to bool failed in do loop condition\n"},
+		{script: "BEGIN{a=0;do{a=a+1;if a<10 {continue}else{break}} while(1);print a}", ok: "10\n"},
+		{script: "BEGIN{a=0;do{a=a/0} while(a<10);print a}", ok: "error:devision by zero\n"},
+		{script: "BEGIN{a=0;do{a=a+1} while(a<10/0);print a}", ok: "error:devision by zero\n"},
+		{script: "BEGIN{fnc=func(){a=0;do{return a} while(a<10)};print fnc()}", ok: "0\n"},
 
 		// map: awk-array (associated array = map)
 		{script: "BEGIN{print a[1]}", ok: "\n"},
@@ -403,6 +408,7 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{hash=func(){m[1]=1;m[2]=2;m[3]=3;return m}; m=hash();print m[1]}", ok: "1\n"},
 		{script: "BEGIN{map=func(){m[1]=1;m[2]=2;m[3]=3;return m}; print map()[1]}", ok: "1\n"},
 		{script: "BEGIN{print func(){m[1]=1;m[2]=2;m[3]=3;return m}()[1]}", ok: "1\n"},
+		{script: "BEGIN{err=func(a){return a/0}; x=err(10);print x}", ok: "error:devision by zero\n"},
 		// call go func with variadic args
 		{script: "BEGIN{println(\"abc\",\"def\")}", ok: "abc def\n"},
 		{script: "BEGIN{println()}", ok: "\n"},
@@ -417,7 +423,6 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{Cross=func(a1,a2){return a2,a1;};x,y=Cross(1,5);print x}", ok: "5\n"},
 		{script: "BEGIN{Cross=func(a1,a2){return a2,a1;};x,y=Cross(1,5);print y}", ok: "1\n"},
 		{script: "BEGIN{First=func(a1,a2){return a1;};x,y=First(1,5);print x}", ok: "error:single value assign to multi values\n"},
-		{script: "BEGIN{Error=func(){return 1/0;};err=Error();print x}", ok: "error:devision by zero\n"},
 		{script: "BEGIN{Cross=func(a1,a2){return a2,a1;};print Cross(\"a\",\"b\")}", ok: "b a\n"},
 		{script: "BEGIN{a=1;Fn=func(){a=100;};Fn();print a}", ok: "100\n"},
 		// anonymous func
@@ -580,6 +585,7 @@ func TestGoa(t *testing.T) {
 
 		// exit (no check return code)
 		{script: "BEGIN{exit 0}1", in: "AAA\nBBB\nCCC\nDDD\n", ok: ""},
+		{script: "BEGIN{exit 0/0}1", in: "\n", ok: "error:devision by zero\n"},
 		{script: "NR==3{exit 0}1", in: "AAA\nBBB\nCCC\nDDD\n", ok: "AAA\nBBB\n"},
 		{script: "NR==3{exit 1+1}1", in: "AAA\nBBB\nCCC\nDDD\n", ok: "AAA\nBBB\n"},
 		{script: "{if $0==\"BBB\" {exit 1}}1", in: "AAA\nBBB\nCCC\nDDD\n", ok: "AAA\n"},
