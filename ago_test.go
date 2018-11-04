@@ -294,6 +294,11 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{a=1;if a==1 { env_test=11 } else if a==2 { env_test=12 } else { env_test=13 };print env_test}", ok: "\n"},
 		{script: "BEGIN{a=2;if a==1 { env_test=11 } else if a==2 { env_test=12 } else { env_test=13 };print env_test}", ok: "\n"},
 		{script: "BEGIN{a=3;if a==1 { env_test=11 } else if a==2 { env_test=12 } else { env_test=13 };print env_test}", ok: "\n"},
+		{script: "BEGIN{if a==1/0 { print a;}}", ok: "error:devision by zero\n"},
+		{script: "BEGIN{a[1]=1;if a { print a;}}", ok: "error:convert to bool failed in if condition\n"},
+		{script: "BEGIN{a=1;if a==0 { print a}else if a/0 { print a}}", ok: "error:devision by zero\n"},
+		{script: "BEGIN{a[1]=1;if a[1]==0 { print a}else if a { print a}}", ok: "error:convert to bool failed in else if condition\n"},
+		{script: "BEGIN{a=1;if a==0 { print a}else if a==1 { print a/0}}", ok: "error:devision by zero\n"},
 
 		// for statement
 		{script: "BEGIN{a=0;for{ if a==10 { break }; a= a+1 };print a}", ok: "10\n"},
@@ -380,6 +385,7 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{delete a;a=2}", ok: "error:can't assign to a; it's an associated array name.\n"},
 		{script: "BEGIN{list=func(){a[1]=1;a[2]=2;a[3]=3;return a};delete list()[1]}", ok: "error:non variable does not support delete operation\n"},
 		{script: "BEGIN{list=func(){a[1]=1;a[2]=2;a[3]=3;return a};list()[1]=3}", ok: "error:invalid assignment\n"},
+		// for ( key in map )
 		{script: "BEGIN{for (i in a) {print i,a[i]}}", ok: ""},
 		{script: "BEGIN{a[1]=1;a[2]=2;for (i in a) {print i,a[i]}}", ok: "1 1\n2 2\n"},
 		{script: "BEGIN{a[1]=1;a[2]=2;for (i in a) {};print i}", ok: "\n"},
@@ -390,6 +396,8 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{a[1]++;a[2]=2;for (i in a) {print i,a[i]}}", ok: "1 1\n2 2\n"},
 		{script: "BEGIN{a[1]=1;a[2]=2;a[3]=3;for (i in a) {print i;if i==\"2\" { break }}}", ok: "1\n2\n"},
 		{script: "{A[$0]++} END{for(key in A){print key}}", in: "AAA", ok: "AAA\n"},
+		{script: "BEGIN{fnc=func(){a[1]=1;a[2]=2;for (i in a) {if i=='2'{return i}else {continue}}};print fnc()}", ok: "2\n"},
+		{script: "BEGIN{a[1]=1;for (i in a) {print i/0}}", ok: "error:devision by zero\n"},
 
 		// function
 		{script: "BEGIN{add=func(a,b){return a+b}; x=add(10,5);print x}", ok: "15\n"},
