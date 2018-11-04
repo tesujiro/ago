@@ -21,6 +21,7 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{print 1+1}", ok: "2\n"},
 		{script: "BEGIN{print 1+1}#comment", ok: "2\n"},
 		{script: "BEGIN{print 1+2}", ok: "3\n"},
+		{script: "BEGIN{print 1+'2'}", ok: "3\n"},
 		{script: "BEGIN{print nil}", ok: "\n"},
 		{script: "BEGIN{print 1}", ok: "1\n"},
 		//{script: "BEGIN{print 9223372036854775807}", ok: "9223372036854775807\n"},
@@ -76,6 +77,7 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{print \"123\" \"45\"}", ok: "12345\n"},
 		{script: "BEGIN{print \"123\" 45}", ok: "12345\n"},
 		{script: "BEGIN{print \"123\" 4+5}", ok: "1239\n"},
+		{script: "BEGIN{print '1' 0.2}", ok: "10.2\n"},
 		{script: "BEGIN{print 123 45}", ok: "12345\n"},
 		{script: "BEGIN{print 1.23 4.5}", ok: "5.73\n"},
 		{script: "BEGIN{a[1]=1;a[2]=10;print a[1]+a[2]}", ok: "11\n"},
@@ -278,6 +280,7 @@ func TestGoa(t *testing.T) {
 		// if statement
 		{script: "BEGIN{a=1;if a==1 { a=2 ;print a;}}", ok: "2\n"},
 		{script: "BEGIN{a=1;if 100 { a=2 ;print a;}}", ok: "2\n"},
+		{script: "BEGIN{a=1;if 1.23 { a=2 ;print a;}}", ok: "2\n"},
 		{script: "BEGIN{a=1;if 0 { a=2 ;print a;}}", ok: ""},
 		{script: "BEGIN{a=1;if \"a\" { a=2 ;print a;}}", ok: "2\n"},
 		{script: "BEGIN{a=1;if \"\" { a=2 ;print a;}}", ok: ""},

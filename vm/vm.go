@@ -79,8 +79,6 @@ func toString(val interface{}) string {
 	default:
 		return ""
 	}
-	s, _ := val.(string)
-	return s
 }
 
 func getHashIndex(env *Env, exprs []ast.Expr) (string, error) {
