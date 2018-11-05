@@ -406,6 +406,8 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{add=func(a,b){return a+b}; x=add(10,5);print x}", ok: "15\n"},
 		{script: "BEGIN{x=add(10,5);print x}", ok: "error:unknown symbol\n"},
 		{script: "BEGIN{add=123;x=add(10,5);print x}", ok: "error:cannot call type int\n"},
+		{script: "BEGIN{add=func(a,b){return a+b}; x=add(10/0,5);print x}", ok: "error:devision by zero\n"},
+		{script: "BEGIN{A[1]=10;add=func(a,b){return a+b}; x=add(A,5);print x}", ok: "5\n"},
 		{script: "BEGIN{add=func(a,b){return a+b}; print add(10,5)}", ok: "15\n"},
 		{script: "BEGIN{add=func(a,b){return a+b}; print add(1.1,2.1)}", ok: "3.2\n"},
 		{script: "BEGIN{add=func(a,b){return a+b}; print add(\"あ\",\"いう\")}", ok: "あいう\n"},
@@ -461,8 +463,6 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{print func(x){return func(){return x}}(1)()}", ok: "1\n"},
 		{script: "BEGIN{print func(x){if true {return func(){return x}}}(1)()}", ok: "1\n"},
 		// func rule
-		{script: "BEGIN{print 1}BEGIN{print 2}", ok: "1\n2\n"},
-		{script: "BEGIN{print 1}END{print 2}", ok: "1\n2\n"},
 		{script: "function one(){return 1}BEGIN{print one()}", ok: "1\n"},
 		{script: "func one(){return 1}BEGIN{print one()}", ok: "1\n"},
 		{script: "func printOne(){print 1}BEGIN{printOne()}", ok: "1\n"},
@@ -578,6 +578,11 @@ func TestGoa(t *testing.T) {
 		{script: "{print length($1)*1}", in: "Hello World!\n", ok: "5\n"},
 		{script: "$1==\"AAA\"{print;COUNT++} END{print COUNT}", in: "AAA BBB CCC\nAAA BBB CCC\n", ok: "AAA BBB CCC\nAAA BBB CCC\n2\n"},
 		{script: "NR==1{$2=$1 ;print $0,NF} NR==2{$5=$1; print $0,NF}", in: "AAA BBB CCC\nAAA BBB CCC\n", ok: "AAA AAA CCC 3\nAAA BBB CCC  AAA 5\n"},
+
+		//patterns
+		{script: "BEGIN{print 1}BEGIN{print 2}", ok: "1\n2\n"},
+		{script: "BEGIN{print 1}END{print 2}", ok: "1\n2\n"},
+		{script: "1/0{print 1.5}", in: "AAA\n", ok: "error:devision by zero\n"},
 		// /start/./stop/
 		{script: "/AAA/,/CCC/", in: "AAA\nBBB\nCCC\nDDD\n", ok: "AAA\nBBB\nCCC\n"},
 		{script: "/AAA/,/CCC/{print}", in: "AAA\nBBB\nCCC\nDDD\n", ok: "AAA\nBBB\nCCC\n"},
