@@ -9,11 +9,11 @@ $ go get -u github.com/tesujiro/ago
 
 # Examples
 ```
-# echo Once Time Ago | ago '{print "Hello",$NF,"!"}'
+> echo Once Time Ago | ago '{print "Hello",$NF,"!"}'
 Hello Ago !
-# printf "AAA\nBBB\nAAA\DDD" |ago '/A+/{++N};END{print N+0}'
+> printf "AAA\nBBB\nAAA\DDD" | ago '/A+/{++N};END{print N+0}'
 2
-# printf "AAA\nAAA\nDDD\nDDD\n" | ago '!A[$0]++'
+> printf "AAA\nAAA\nDDD\nDDD\n" | ago '!A[$0]++'
 AAA
 DDD
 
