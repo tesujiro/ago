@@ -652,6 +652,25 @@ BBB 1
 CCC 2
 ZZZ 1
 `},
+		// MAP
+		/*
+					{script: `{
+									for i=1; i<=NF; i++{
+										COUNT[$i]++
+									}
+								}
+								END{
+									for (key in COUNT){
+										print key,COUNT[key]
+									}
+									exit 0
+								}`, in: `AAA BBB CCC AAA ZZZ AAA CCC
+			`, ok: `AAA 3
+			BBB 1
+			CCC 2
+			ZZZ 1
+			`},
+		*/
 	}
 
 	realStdin := os.Stdin
