@@ -653,8 +653,7 @@ CCC 2
 ZZZ 1
 `},
 		// MAP
-		/*
-					{script: `{
+		{script: `{
 									for i=1; i<=NF; i++{
 										COUNT[$i]++
 									}
@@ -666,11 +665,10 @@ ZZZ 1
 									exit 0
 								}`, in: `AAA BBB CCC AAA ZZZ AAA CCC
 			`, ok: `AAA 3
-			BBB 1
-			CCC 2
-			ZZZ 1
-			`},
-		*/
+BBB 1
+CCC 2
+ZZZ 1
+`},
 	}
 
 	realStdin := os.Stdin

@@ -51,4 +51,3 @@ Please note that the language and API may change at any time.
 * sub(), gsub(): arg string must be set to a global variable
 * error: S=="\n"
 * no bool literal (true/false->0/1)
-* i++, i-- evaluattion problem in loop (ex: for i=1;i<=NF;i++{ ... })

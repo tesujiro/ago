@@ -209,11 +209,11 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 		left := expr.(*ast.CompExpr).Left
 		right := expr.(*ast.CompExpr).Right
 		operator := expr.(*ast.CompExpr).Operator
-		if expr.(*ast.CompExpr).After {
-			afterCompExpr := &ast.CompExpr{Left: left, Right: right, Operator: operator, After: false} //After: false!
-			afterStmts = append(afterStmts, &ast.ExprStmt{Expr: afterCompExpr})
-			return evalExpr(left, env)
+		before_val, err := evalExpr(left, env)
+		if err != nil {
+			return nil, err
 		}
+
 		if operator == "++" || operator == "--" {
 			right = &ast.NumExpr{Literal: "1"}
 		}
@@ -221,7 +221,16 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 		if err != nil {
 			return nil, err
 		}
-		return evalAssExpr(left, result, env)
+
+		after_val, err := evalAssExpr(left, result, env)
+		if err != nil {
+			return nil, err
+		}
+		if expr.(*ast.CompExpr).After {
+			return before_val, nil
+		} else {
+			return after_val, nil
+		}
 
 	case *ast.TriOpExpr:
 		condExpr := expr.(*ast.TriOpExpr).Cond
