@@ -112,6 +112,7 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{a", ok: "Syntax error: syntax error\n"},
 		{script: "BEGIN{a='", ok: "Syntax error: syntax error\n"},
 		{script: "BEGIN{a='\n", ok: "Syntax error: syntax error\n"},
+		{script: "BEGIN{a=\"\n", ok: "Syntax error: syntax error\n"},
 		{script: "BEGIN{a\n=1;print a;", ok: "Syntax error: syntax error\n"},
 		// printf
 		{script: "BEGIN{a=1;printf \"%d\",a}", ok: "1\n"},
@@ -146,6 +147,14 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{a=123;a%=4;print a}", ok: "3\n"},
 		//{script: "BEGIN{a=123;a%=4;print a}", ok: "30\n"}, //TODO
 		{script: "BEGIN{a+=1/0}", ok: "error:devision by zero\n"},
+
+		// Comment
+		{script: `BEGIN{ /*a=100;*/ a= a+100;print a; }`, ok: "100\n"},
+		{script: `BEGIN{ /*a=100;a= a+100;print a; 
+		*}`, ok: "Syntax error: syntax error\n"},
+		{script: `BEGIN{ #a=100;
+		a= a+100;print a; }`, ok: "100\n"},
+		{script: `BEGIN{ #a=100; }`, ok: "Syntax error: syntax error\n"},
 
 		// JAPANESE
 		{script: "BEGIN{print \"あいう\"}", ok: "あいう\n"},
@@ -211,9 +220,11 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{a=1;b=2;print a==1&&b==2}", ok: "true\n"},
 		{script: "BEGIN{a=1;b=2;print a==2&&b==2}", ok: "false\n"},
 		{script: "BEGIN{a=1;b=2;print a&&b}", ok: "true\n"},
+		{script: "BEGIN{a=1;b=2;print a&b}", ok: "Syntax error: syntax error\n"},
 		{script: "BEGIN{a=1;b=2;print a==1||b==2}", ok: "true\n"},
 		{script: "BEGIN{a=1;b=2;print a==2||b==2}", ok: "true\n"},
 		{script: "BEGIN{a=1;b=2;print a||b}", ok: "true\n"},
+		{script: "BEGIN{a=1;b=2;print a|b}", ok: "Syntax error: syntax error\n"},
 		{script: "BEGIN{print 1||1}", ok: "true\n"},
 		{script: "BEGIN{print 0||0}", ok: "false\n"},
 		{script: "BEGIN{print 1/0||1}", ok: "error:devision by zero\n"},

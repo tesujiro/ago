@@ -238,29 +238,27 @@ retry:
 			case '=': //TODO:  ??
 				tok = DIVEQ
 				lit = "/="
-			/*
-				case '/':
-					for !isEOL(s.peek()) {
-						s.next()
-					}
-					goto retry
-			*/
-			/*
-				case '*':
-					for {
-						_, err = s.scanRawString('*')
-						if err != nil {
-							return
-						}
-
-						if s.peek() == '/' {
+				/*
+					case '/':
+						for !isEOL(s.peek()) {
 							s.next()
-							goto retry
 						}
-
-						s.back()
+						goto retry
+				*/
+			case '*':
+				for {
+					_, err = s.scanRawString('*')
+					if err != nil {
+						return
 					}
-			*/
+
+					if s.peek() == '/' {
+						s.next()
+						goto retry
+					}
+
+					s.back()
+				}
 			default:
 				s.back()
 				tok = int(ch)
