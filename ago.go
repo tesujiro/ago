@@ -146,15 +146,7 @@ func runScript(script_reader io.Reader, file_reader io.Reader) int {
 	}
 	source := string(bytes)
 	debug.Println("script:", source)
-	//l := new(parser.Lexer)
 
-	/*
-		fset := token.NewFileSet()                      // positions are relative to fset
-		f := fset.AddFile("", fset.Base(), len(source)) // register input "file"
-		l.Init(f, []byte(source), nil, scanner.ScanComments)
-	*/
-
-	//ast, parseError := parser.Parse(l)
 	if *dbglexer {
 		parser.TraceLexer()
 	}

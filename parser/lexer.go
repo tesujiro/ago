@@ -68,16 +68,10 @@ var opName = map[string]int{
 	"do":       DO,
 }
 
-// Init resets code to scan.
-func (s *Scanner) Init(src string) {
-	s.src = []rune(src)
-}
-
 // Scan analyses token, and decide identify or literals.
 func (s *Scanner) Scan() (tok int, lit string, pos ast.Position, err error) {
 retry:
 	//s.skipBlank()
-	//pos = s.pos()
 	if maybe_regexp == 0 {
 		s.skipBlank()
 		pos = s.pos()
@@ -238,12 +232,12 @@ retry:
 			case '=': //TODO:  ??
 				tok = DIVEQ
 				lit = "/="
-				/*
-					case '/':
-						for !isEOL(s.peek()) {
-							s.next()
-						}
-						goto retry
+				/*  in AWK , '//' is not a comment, but a regexp
+				case '/':
+					for !isEOL(s.peek()) {
+						s.next()
+					}
+					goto retry
 				*/
 			case '*':
 				for {
