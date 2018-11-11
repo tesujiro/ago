@@ -35,7 +35,6 @@ Please note that the language and API may change at any time.
 * goroutine
 * define variadic functions
 * test command option
-* number format: exponent format (ex.2e+3), octal format (ex.0123)
 
 # Difference from AWK
 * {} block has a local scope. variables name beginning with uppercase are global, others are local
@@ -45,6 +44,7 @@ Please note that the language and API may change at any time.
 * anonymous func (ex. { print func(a,b){return b,a}("a","b"); } // b a )
 * if, for, while conditions do not need parentheses, statements need curly braces. (ex. for a<10 {a=a+1}) 
 * atan2(0,-0)=0 (not Pi)
+* number format: exponent format (ex.2e+3) and hexadecimal (ex.0x10) is supported, octal format (ex.0123) is NOT supported.
 
 # To be fixed
 * split(s,g,f): arg g must be initialized before calling the func

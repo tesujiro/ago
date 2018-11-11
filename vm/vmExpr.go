@@ -45,19 +45,25 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 		}
 	case *ast.NumExpr:
 		lit := expr.(*ast.NumExpr).Literal
-		if strings.Contains(lit, ".") {
+		if strings.Contains(lit, ".") || strings.Contains(lit, "e") {
 			if f, err := strconv.ParseFloat(lit, 64); err != nil {
 				return 0.0, err
 			} else {
 				return f, nil
 			}
 		}
-		//if i, err := strconv.ParseInt(lit, 10, 64); err != nil {
-		if i, err := strconv.ParseInt(lit, 10, 0); err != nil {
-			return 0, err
+		var i int64
+		var err error
+		if strings.HasPrefix(lit, "0x") {
+			i, err = strconv.ParseInt(lit[2:], 16, 0)
 		} else {
-			return int(i), nil
+			i, err = strconv.ParseInt(lit, 10, 0)
 		}
+		if err != nil {
+			return 0, err
+		}
+		return int(i), nil
+
 	case *ast.StringExpr:
 		str := expr.(*ast.StringExpr).Literal
 		return str, nil
