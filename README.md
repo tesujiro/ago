@@ -16,6 +16,12 @@ Hello Ago !
 > printf "AAA\nAAA\nDDD\nDDD\n" | ago '!A[$0]++'
 AAA
 DDD
+> echo AAA BBB CCC AAA ZZZ AAA CCC | ago '{for i=1; i<=NF; i++{ COUNT[$i]++ }} END{for (key in COUNT){ print key,COUNT[key] }}'
+AAA 3
+BBB 1
+CCC 2
+ZZZ 1
+> 
 
 ```
 
