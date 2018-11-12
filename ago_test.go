@@ -801,3 +801,31 @@ ZZZ 1
 	os.Stderr = realStderr
 	os.Stdout = realStdout
 }
+
+func TestGoaCommand(t *testing.T) {
+	tests := []struct {
+		//test
+		prepare func()
+		cleanup func()
+		rc      int
+	}{
+		{prepare: func() {}, cleanup: func() {}, rc: 0},
+		//{prepare: func() { *dbg = true }, cleanup: func() { *dbg = false }, rc: 0},
+		{prepare: func() { *globalVar = true }, cleanup: func() { *globalVar = false }, rc: 0},
+		{prepare: func() { *ver = true }, cleanup: func() { *ver = false }, rc: 0},
+		{prepare: func() { *ast_dump = true }, cleanup: func() { *ast_dump = false }, rc: 0},
+	}
+
+	for _, test := range tests {
+		if test.prepare != nil {
+			test.prepare()
+		}
+		rc := _main()
+		if rc != test.rc {
+			t.Errorf("return code want:%v get:%v case:%v\n", test.rc, rc, test)
+		}
+		if test.cleanup != nil {
+			test.cleanup()
+		}
+	}
+}

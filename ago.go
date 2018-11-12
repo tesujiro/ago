@@ -56,9 +56,13 @@ var variables hash = hash{}
 const version = "0.0.0"
 
 func main() {
-	var file, script string
 	flag.Var(&variables, "v", "followed by var=value, assign variable before execution")
 	flag.Parse()
+	os.Exit(_main())
+}
+
+func _main() int {
+	var file, script string
 	switch len(flag.Args()) {
 	case 1:
 		if *program_file != "" {
@@ -73,7 +77,7 @@ func main() {
 
 	if *ver {
 		fmt.Println("Version:", version)
-		os.Exit(0)
+		return 0
 	}
 
 	if *dbg {
@@ -92,7 +96,7 @@ func main() {
 		fp, err := os.Open(*program_file)
 		if err != nil {
 			fmt.Println("script file open error:", err)
-			os.Exit(1)
+			return 1
 		}
 		defer fp.Close()
 		script_reader = bufio.NewReader(fp)
@@ -105,22 +109,19 @@ func main() {
 		file_reader, err := os.Open(file)
 		if err != nil {
 			fmt.Println("input file open error:", err)
-			os.Exit(1)
+			return 1
 		}
 		defer file_reader.Close()
 	} else {
 		file_reader = os.Stdin
 	}
 
-	os.Exit(runScript(script_reader, file_reader))
+	return runScript(script_reader, file_reader)
 }
 
 func initEnv() *vm.Env {
 	env := vm.NewEnv()
 	env = lib.Import(env)
-	if *dbg {
-		env.Dump()
-	}
 	env.SetFS(*FS)
 
 	if *globalVar {
@@ -141,7 +142,6 @@ func runScript(script_reader io.Reader, file_reader io.Reader) int {
 	bytes, err := ioutil.ReadAll(script_reader)
 	if err != nil {
 		fmt.Printf("Read error: %v \n", err)
-		//os.Exit(1)
 		return 1
 	}
 	source := string(bytes)
@@ -170,9 +170,6 @@ func runScript(script_reader io.Reader, file_reader io.Reader) int {
 		if err != nil {
 			fmt.Printf("error:%v\n", err)
 			return 1
-		}
-		if *dbg {
-			env.Dump()
 		}
 	}
 
