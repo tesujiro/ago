@@ -3,6 +3,8 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"io/ioutil"
+	"log"
 	"os"
 	"strconv"
 	"strings"
@@ -19,6 +21,8 @@ type test struct {
 }
 
 func TestGoa(t *testing.T) {
+	var tempScriptPath string
+	//var tempDataPath string
 	tests := []test{
 		//BASIC EXPRESSION
 		{script: "BEGIN{print 1+1}", ok: "2\n"},
@@ -691,10 +695,48 @@ ZZZ 1
 
 		// Command argment test
 		{prepare: func() {}, cleanup: func() {}, rc: 0},
-		//{prepare: func() { *dbg = true }, cleanup: func() { *dbg = false }, rc: 0},
-		{prepare: func() { *globalVar = true }, cleanup: func() { *globalVar = false }, rc: 0},
+		{prepare: func() { os.Args = []string{os.Args[0], "-version"} }, cleanup: func() { *ver = false }, rc: 0, ok: "Version: 0.0.0\n"},
 		{prepare: func() { *ver = true }, cleanup: func() { *ver = false }, rc: 0, ok: "Version: 0.0.0\n"},
+		//{prepare: func() { *dbg = true }, cleanup: func() { *dbg = false }, rc: 0},
 		{prepare: func() { *ast_dump = true }, cleanup: func() { *ast_dump = false }, rc: 0},
+		{prepare: func() { *globalVar = true }, cleanup: func() { *globalVar = false }, rc: 0},
+		{prepare: func() { variables.Set("XX=xx") }, cleanup: func() { variables = hash{} }, rc: 0, script: "BEGIN{print XX}", ok: "xx\n"},
+		// test for script file
+		{
+			prepare: func() {
+				scriptfile, err := ioutil.TempFile("", "example.*.ago")
+				if err != nil {
+					log.Fatal(err)
+				}
+				tempScriptPath = scriptfile.Name()
+				fmt.Fprintf(scriptfile, "BEGIN{print 'Hello, World!';}")
+				os.Args = []string{os.Args[0], "-f", scriptfile.Name()}
+			},
+			cleanup: func() {
+				os.Remove(tempScriptPath)
+			},
+			rc: 0,
+			ok: "Hello, World!\n",
+		},
+		// test for data file
+		/*
+			{
+				prepare: func() {
+					datafile, err := ioutil.TempFile("", "example.*.data.ago")
+					if err != nil {
+						log.Fatal(err)
+					}
+					tempDataPath = datafile.Name()
+					fmt.Fprintf(datafile, "AAA BBB CCC\nDDD EEE FFF\n")
+					os.Args = []string{os.Args[0], "{print $1}", datafile.Name()}
+				},
+				cleanup: func() {
+					os.Remove(tempDataPath)
+				},
+				rc: 0,
+				ok: "AAA\nDDD\n",
+			},
+		*/
 	}
 
 	realStdin := os.Stdin
@@ -757,10 +799,12 @@ ZZZ 1
 		// Run Script goroutine
 		go func() {
 
+			os.Args = []string{"ago"}
 			if test.prepare != nil {
 				test.prepare()
 			}
-			rc := _main([]string{test.script})
+			os.Args = append(os.Args, test.script)
+			rc := _main()
 			if rc != test.rc && !strings.Contains(test.ok, "error") {
 				t.Errorf("return code want:%v get:%v case:%v\n", test.rc, rc, test)
 			}

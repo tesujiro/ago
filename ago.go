@@ -33,12 +33,15 @@ func (kvs hash) Set(s string) error {
 	}
 	key := z[0]
 	value := z[1]
-	_, ok := kvs[key]
-	if ok {
-		kvs[key] = value
-	} else {
-		kvs[key] = value
-	}
+	/*
+		_, ok := kvs[key]
+		if ok {
+			kvs[key] = value
+		} else {
+			kvs[key] = value
+		}
+	*/
+	kvs[key] = value
 	return nil
 }
 
@@ -57,11 +60,12 @@ const version = "0.0.0"
 
 func main() {
 	flag.Var(&variables, "v", "followed by var=value, assign variable before execution")
-	flag.Parse()
-	os.Exit(_main(flag.Args()))
+	os.Exit(_main())
 }
 
-func _main(args []string) int {
+func _main() int {
+	flag.Parse()
+	args := flag.Args()
 	var file, script string
 	switch len(args) {
 	case 1:
@@ -92,7 +96,6 @@ func _main(args []string) int {
 
 	var script_reader io.Reader
 	if *program_file != "" {
-		fmt.Println("program_file=", *program_file)
 		fp, err := os.Open(*program_file)
 		if err != nil {
 			fmt.Println("script file open error:", err)
