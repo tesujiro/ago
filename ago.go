@@ -107,9 +107,10 @@ func _main() int {
 		script_reader = strings.NewReader(script)
 	}
 
-	var file_reader io.Reader
+	var file_reader *os.File
+	var err error
 	if file != "" {
-		file_reader, err := os.Open(file)
+		file_reader, err = os.Open(file)
 		if err != nil {
 			fmt.Println("input file open error:", err)
 			return 1

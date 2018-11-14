@@ -22,7 +22,7 @@ type test struct {
 
 func TestGoa(t *testing.T) {
 	var tempScriptPath string
-	//var tempDataPath string
+	var tempDataPath string
 	tests := []test{
 		//BASIC EXPRESSION
 		{script: "BEGIN{print 1+1}", ok: "2\n"},
@@ -714,29 +714,29 @@ ZZZ 1
 			},
 			cleanup: func() {
 				os.Remove(tempScriptPath)
+				*program_file = ""
 			},
 			rc: 0,
 			ok: "Hello, World!\n",
 		},
 		// test for data file
-		/*
-			{
-				prepare: func() {
-					datafile, err := ioutil.TempFile("", "example.*.data.ago")
-					if err != nil {
-						log.Fatal(err)
-					}
-					tempDataPath = datafile.Name()
-					fmt.Fprintf(datafile, "AAA BBB CCC\nDDD EEE FFF\n")
-					os.Args = []string{os.Args[0], "{print $1}", datafile.Name()}
-				},
-				cleanup: func() {
-					os.Remove(tempDataPath)
-				},
-				rc: 0,
-				ok: "AAA\nDDD\n",
+		{
+			prepare: func() {
+				datafile, err := ioutil.TempFile("", "example.*.data.ago")
+				if err != nil {
+					log.Fatal(err)
+				}
+				tempDataPath = datafile.Name()
+				fmt.Fprintf(datafile, "AAA BBB CCC\nDDD EEE FFF\n")
+				os.Args = []string{os.Args[0], "{print $1}", datafile.Name()}
+				//fmt.Printf("os.Args=%#v\n", os.Args)
 			},
-		*/
+			cleanup: func() {
+				os.Remove(tempDataPath)
+			},
+			rc: 0,
+			ok: "AAA\nDDD\n",
+		},
 	}
 
 	realStdin := os.Stdin
@@ -803,7 +803,9 @@ ZZZ 1
 			if test.prepare != nil {
 				test.prepare()
 			}
-			os.Args = append(os.Args, test.script)
+			if test.script != "" {
+				os.Args = append(os.Args, test.script)
+			}
 			rc := _main()
 			if rc != test.rc && !strings.Contains(test.ok, "error") {
 				t.Errorf("return code want:%v get:%v case:%v\n", test.rc, rc, test)
