@@ -58,21 +58,21 @@ const version = "0.0.0"
 func main() {
 	flag.Var(&variables, "v", "followed by var=value, assign variable before execution")
 	flag.Parse()
-	os.Exit(_main())
+	os.Exit(_main(flag.Args()))
 }
 
-func _main() int {
+func _main(args []string) int {
 	var file, script string
-	switch len(flag.Args()) {
+	switch len(args) {
 	case 1:
 		if *program_file != "" {
-			file = flag.Arg(0)
+			file = args[0]
 		} else {
-			script = flag.Arg(0)
+			script = args[0]
 		}
 	case 2:
-		script = flag.Arg(0)
-		file = flag.Arg(1)
+		script = args[0]
+		file = args[1]
 	}
 
 	if *ver {

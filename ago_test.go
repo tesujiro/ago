@@ -10,9 +10,12 @@ import (
 )
 
 type test struct {
-	script string
-	in     string
-	ok     string
+	script  string
+	in      string
+	ok      string
+	prepare func()
+	cleanup func()
+	rc      int
 }
 
 func TestGoa(t *testing.T) {
@@ -619,8 +622,8 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{exit 0}1", in: "AAA\nBBB\nCCC\nDDD\n", ok: ""},
 		{script: "BEGIN{exit 0/0}1", in: "\n", ok: "error:devision by zero\n"},
 		{script: "NR==3{exit 0}1", in: "AAA\nBBB\nCCC\nDDD\n", ok: "AAA\nBBB\n"},
-		{script: "NR==3{exit 1+1}1", in: "AAA\nBBB\nCCC\nDDD\n", ok: "AAA\nBBB\n"},
-		{script: "{if $0==\"BBB\" {exit 1}}1", in: "AAA\nBBB\nCCC\nDDD\n", ok: "AAA\n"},
+		{script: "NR==3{exit 1+1}1", in: "AAA\nBBB\nCCC\nDDD\n", ok: "AAA\nBBB\n", rc: 2},
+		{script: "{if $0==\"BBB\" {exit 1}}1", in: "AAA\nBBB\nCCC\nDDD\n", ok: "AAA\n", rc: 1},
 
 		// One Liner
 		{script: "1", in: "AAA\n", ok: "AAA\n"},
@@ -685,6 +688,13 @@ BBB 1
 CCC 2
 ZZZ 1
 `},
+
+		// Command argment test
+		{prepare: func() {}, cleanup: func() {}, rc: 0},
+		//{prepare: func() { *dbg = true }, cleanup: func() { *dbg = false }, rc: 0},
+		{prepare: func() { *globalVar = true }, cleanup: func() { *globalVar = false }, rc: 0},
+		{prepare: func() { *ver = true }, cleanup: func() { *ver = false }, rc: 0, ok: "Version: 0.0.0\n"},
+		{prepare: func() { *ast_dump = true }, cleanup: func() { *ast_dump = false }, rc: 0},
 	}
 
 	realStdin := os.Stdin
@@ -746,8 +756,18 @@ ZZZ 1
 
 		// Run Script goroutine
 		go func() {
-			script_reader := strings.NewReader(test.script)
-			runScript(script_reader, os.Stdin)
+
+			if test.prepare != nil {
+				test.prepare()
+			}
+			rc := _main([]string{test.script})
+			if rc != test.rc && !strings.Contains(test.ok, "error") {
+				t.Errorf("return code want:%v get:%v case:%v\n", test.rc, rc, test)
+			}
+			if test.cleanup != nil {
+				test.cleanup()
+			}
+
 			/*
 				rc := runScript(script_reader, os.Stdin)
 				if rc != 0 {
@@ -800,32 +820,4 @@ ZZZ 1
 	os.Stdin = realStdin
 	os.Stderr = realStderr
 	os.Stdout = realStdout
-}
-
-func TestGoaCommand(t *testing.T) {
-	tests := []struct {
-		//test
-		prepare func()
-		cleanup func()
-		rc      int
-	}{
-		{prepare: func() {}, cleanup: func() {}, rc: 0},
-		//{prepare: func() { *dbg = true }, cleanup: func() { *dbg = false }, rc: 0},
-		{prepare: func() { *globalVar = true }, cleanup: func() { *globalVar = false }, rc: 0},
-		{prepare: func() { *ver = true }, cleanup: func() { *ver = false }, rc: 0},
-		{prepare: func() { *ast_dump = true }, cleanup: func() { *ast_dump = false }, rc: 0},
-	}
-
-	for _, test := range tests {
-		if test.prepare != nil {
-			test.prepare()
-		}
-		rc := _main()
-		if rc != test.rc {
-			t.Errorf("return code want:%v get:%v case:%v\n", test.rc, rc, test)
-		}
-		if test.cleanup != nil {
-			test.cleanup()
-		}
-	}
 }
