@@ -68,6 +68,7 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{print 16/5}", ok: "3\n"},
 		{script: "BEGIN{print 3/1.5}", ok: "2\n"},
 		{script: "BEGIN{print 3/0}", ok: "error:devision by zero\n"},
+		{script: "BEGIN{}END{3/0}", ok: "error:devision by zero\n"},
 		{script: "BEGIN{print 15%5}", ok: "0\n"},
 		{script: "BEGIN{print 16%5}", ok: "1\n"},
 		{script: "BEGIN{print 15%4.1}", ok: "3\n"},
@@ -700,6 +701,8 @@ ZZZ 1
 		//{prepare: func() { *dbg = true }, cleanup: func() { *dbg = false }, rc: 0},
 		{prepare: func() { *ast_dump = true }, cleanup: func() { *ast_dump = false }, rc: 0},
 		{prepare: func() { *globalVar = true }, cleanup: func() { *globalVar = false }, rc: 0},
+		//{prepare: func() { *cpu_prof = true }, cleanup: func() { *cpu_prof = false }, rc: 0},
+		//{prepare: func() { *mem_prof = true }, cleanup: func() { *mem_prof = false }, rc: 0},
 		{prepare: func() { variables.Set("XX=xx") }, cleanup: func() { variables = hash{} }, rc: 0, script: "BEGIN{print XX}", ok: "xx\n"},
 		// test for script file
 		{
@@ -719,6 +722,12 @@ ZZZ 1
 			rc: 0,
 			ok: "Hello, World!\n",
 		},
+		{
+			prepare: func() { os.Args = []string{os.Args[0], "-f", "./xxaabbyyccccdd"} },
+			cleanup: func() { *program_file = "" },
+			rc:      1,
+			ok:      "script file open error: open ./xxaabbyyccccdd: no such file or directory\n",
+		},
 		// test for data file
 		{
 			prepare: func() {
@@ -736,6 +745,11 @@ ZZZ 1
 			},
 			rc: 0,
 			ok: "AAA\nDDD\n",
+		},
+		{
+			prepare: func() { os.Args = []string{os.Args[0], "{print $1}", "./xxaabbyyccccdd"} },
+			rc:      1,
+			ok:      "input file open error: open ./xxaabbyyccccdd: no such file or directory\n",
 		},
 	}
 
