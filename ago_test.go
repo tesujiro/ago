@@ -698,12 +698,14 @@ ZZZ 1
 		{prepare: func() {}, cleanup: func() {}, rc: 0},
 		{prepare: func() { os.Args = []string{os.Args[0], "-version"} }, cleanup: func() { *ver = false }, rc: 0, ok: "Version: 0.0.0\n"},
 		{prepare: func() { *ver = true }, cleanup: func() { *ver = false }, rc: 0, ok: "Version: 0.0.0\n"},
-		//{prepare: func() { *dbg = true }, cleanup: func() { *dbg = false }, rc: 0},
-		{prepare: func() { *ast_dump = true }, cleanup: func() { *ast_dump = false }, rc: 0},
+		{prepare: func() { *dbg = true }, cleanup: func() { *dbg = false }, script: "{}", in: "aaa\n", rc: 0},
+		{prepare: func() { *ast_dump = true }, cleanup: func() { *ast_dump = false }, script: "BEGIN{}{print 1}END{}", rc: 0},
 		{prepare: func() { *globalVar = true }, cleanup: func() { *globalVar = false }, rc: 0},
 		//{prepare: func() { *cpu_prof = true }, cleanup: func() { *cpu_prof = false }, rc: 0},
 		//{prepare: func() { *mem_prof = true }, cleanup: func() { *mem_prof = false }, rc: 0},
+		//{prepare: func() { os.Args = []string{os.Args[0], "-v", "XX"} }, cleanup: func() { variables = hash{} }, rc: 0, script: "BEGIN{print XX}", ok: "xx\n"},
 		{prepare: func() { variables.Set("XX=xx") }, cleanup: func() { variables = hash{} }, rc: 0, script: "BEGIN{print XX}", ok: "xx\n"},
+
 		// test for script file
 		{
 			prepare: func() {
@@ -867,7 +869,7 @@ ZZZ 1
 
 		// Result Check
 		//fmt.Fprintf(realStdout, "result:[%v]\ttest.ok:[%v]\n", resultOut, test.ok)
-		if resultOut != strings.Replace(test.ok, "\r", "", -1) { //replace for Windows
+		if test.ok != "" && resultOut != strings.Replace(test.ok, "\r", "", -1) { //replace for Windows
 			t.Errorf("Case:[%v] received: %v - expected: %v - runSource: %v", case_number, resultOut, test.ok, test.script)
 		}
 

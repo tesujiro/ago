@@ -58,8 +58,11 @@ var variables hash = hash{}
 
 const version = "0.0.0"
 
-func main() {
+func init() {
 	flag.Var(&variables, "v", "followed by var=value, assign variable before execution")
+}
+
+func main() {
 	os.Exit(_main())
 }
 
@@ -86,6 +89,8 @@ func _main() int {
 
 	if *dbg {
 		debug.On()
+	} else {
+		debug.Off()
 	}
 	if *cpu_prof {
 		defer profile.Start().Stop()
