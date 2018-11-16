@@ -598,6 +598,10 @@ func TraceLexer() {
 	traceLexer = true
 }
 
+func TraceOffLexer() {
+	traceLexer = false
+}
+
 func initialize() {
 	EOF_FLAG = false
 }

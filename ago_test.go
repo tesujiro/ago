@@ -703,8 +703,10 @@ ZZZ 1
 		{prepare: func() { *globalVar = true }, cleanup: func() { *globalVar = false }, rc: 0},
 		//{prepare: func() { *cpu_prof = true }, cleanup: func() { *cpu_prof = false }, rc: 0},
 		//{prepare: func() { *mem_prof = true }, cleanup: func() { *mem_prof = false }, rc: 0},
+		{prepare: func() { *dbglexer = true }, cleanup: func() { *dbglexer = false }, rc: 0},
 		//{prepare: func() { os.Args = []string{os.Args[0], "-v", "XX"} }, cleanup: func() { variables = hash{} }, rc: 0, script: "BEGIN{print XX}", ok: "xx\n"},
 		{prepare: func() { variables.Set("XX=xx") }, cleanup: func() { variables = hash{} }, rc: 0, script: "BEGIN{print XX}", ok: "xx\n"},
+		{prepare: func() { variables.Set("XX") }, cleanup: func() { variables = hash{} }, rc: 0, script: "BEGIN{print XX}"},
 
 		// test for script file
 		{

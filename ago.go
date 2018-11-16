@@ -161,7 +161,10 @@ func runScript(script_reader io.Reader, file_reader io.Reader) int {
 
 	if *dbglexer {
 		parser.TraceLexer()
+	} else {
+		parser.TraceOffLexer()
 	}
+
 	ast, parseError := parser.ParseSrc(source)
 	if parseError != nil {
 		fmt.Printf("Syntax error: %v \n", parseError)
