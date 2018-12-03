@@ -2,8 +2,6 @@ package parser
 
 import (
 	"fmt"
-	"go/scanner"
-	"go/token"
 	"testing"
 )
 
@@ -26,13 +24,7 @@ func TestParser(t *testing.T) {
 	}
 	for _, test := range tests {
 		fmt.Println("*************************\nTEST SCRIPT:", test.script)
-		l := new(Lexer)
-
-		fset := token.NewFileSet()                              // positions are relative to fset
-		file := fset.AddFile("", fset.Base(), len(test.script)) // register input "file"
-		l.Init(file, []byte(test.script), nil /* no error handler */, scanner.ScanComments)
-
-		ast, parseError := Parse(l)
+		ast, parseError := ParseSrc(test.script)
 		if parseError != nil {
 			if test.errMessage == "" || parseError.Error() != test.errMessage {
 				t.Errorf("Run error:%#v want%#v - script:%v\n", parseError, test.errMessage, test.script)
