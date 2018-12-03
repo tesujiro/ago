@@ -10,10 +10,11 @@ ago : ago.go ./parser/*.y ./parser/*.go ./ast/*.go ./vm/*.go ./lib/*.go ./parser
 # make case=xxx test  ## test specific case
 .PHONY: test
 test: ./*_test.go ./vm/*_test.go ./parser/grammar.go
+	go vet ./...
 ifdef case
 	TESTCASE=${case} go test -v -count=1 .
 else
-	go test -v -count=1 ./vm . -coverpkg ./...
+	go test -v -count=1 ./parser ./vm . -coverpkg ./...
 endif
 
 .PHONY: cover
