@@ -555,5 +555,5 @@ func evalAssExpr(lexp ast.Expr, val interface{}, env *Env) (interface{}, error) 
 		// TODO:?
 		return nil, errors.New("invalid operation")
 	}
-	return val, nil
+	//return val, nil
 }
