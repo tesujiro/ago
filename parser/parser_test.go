@@ -1,7 +1,6 @@
 package parser
 
 import (
-	"fmt"
 	"testing"
 )
 
@@ -23,16 +22,15 @@ func TestParser(t *testing.T) {
 		{script: "$(NF+1)==1{x}", result: nil},
 	}
 	for _, test := range tests {
-		fmt.Println("*************************\nTEST SCRIPT:", test.script)
-		ast, parseError := ParseSrc(test.script)
+		//fmt.Println("*************************\nTEST SCRIPT:", test.script)
+		_, parseError := ParseSrc(test.script)
 		if parseError != nil {
 			if test.errMessage == "" || parseError.Error() != test.errMessage {
 				t.Errorf("Run error:%#v want%#v - script:%v\n", parseError, test.errMessage, test.script)
 			}
 			continue
 		}
-		//fmt.Printf("script\t:%v\nast\t:%#v\n", test.script, ast)
-		Dump(ast)
+		//Dump(ast)
 	}
 
 }
