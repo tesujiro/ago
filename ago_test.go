@@ -153,7 +153,6 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{a=123;a*=4;print a}", ok: "492\n"},
 		{script: "BEGIN{a=123;a/=4;print a}", ok: "30\n"},
 		{script: "BEGIN{a=123;a%=4;print a}", ok: "3\n"},
-		//{script: "BEGIN{a=123;a%=4;print a}", ok: "30\n"}, //TODO
 		{script: "BEGIN{a+=1/0}", ok: "error:devision by zero\n"},
 
 		// Comment
