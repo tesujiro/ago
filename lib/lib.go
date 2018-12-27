@@ -351,6 +351,21 @@ func Import(env *vm.Env) *vm.Env {
 	}
 	env.Define("srand", reflect.ValueOf(srandom))
 
+	sqrt := func(arg reflect.Value) float64 {
+		return math.Sqrt(toFloat64(arg))
+	}
+	env.Define("sqrt", reflect.ValueOf(sqrt))
+
+	exp := func(arg reflect.Value) float64 {
+		return math.Exp(toFloat64(arg))
+	}
+	env.Define("exp", reflect.ValueOf(exp))
+
+	log := func(arg reflect.Value) float64 {
+		return math.Log(toFloat64(arg))
+	}
+	env.Define("log", reflect.ValueOf(log))
+
 	sin := func(arg reflect.Value) float64 {
 		return math.Sin(toFloat64(arg))
 	}

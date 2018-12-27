@@ -505,6 +505,11 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{print int(\"123\")}", ok: "123\n"},
 		{script: "BEGIN{print int(123.45)}", ok: "123\n"},
 		// lib: sqrt,exp,log
+		{script: "BEGIN{print sqrt(4)}", ok: "2\n"},
+		{script: "BEGIN{print sqrt(3)}", ok: "1.7320508075688772\n"},
+		{script: "BEGIN{print exp(2)}", ok: "7.38905609893065\n"},
+		{script: "BEGIN{print exp(0)}", ok: "1\n"},
+		{script: "BEGIN{print exp(1)}", ok: "2.718281828459045\n"},
 		// lib: sin,cos,atan2
 		{script: "BEGIN{print sin(0)}", ok: "0\n"},
 		{script: "BEGIN{print sin(3.141592650358979/2)}", ok: "1\n"},
