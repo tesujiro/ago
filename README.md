@@ -53,7 +53,6 @@ Please note that the language and API may change at any time.
 * number format: exponent format (ex.2e+3) and hexadecimal (ex.0x10) is supported, octal format (ex.0123) is NOT supported.
 
 # To be fixed
-* split(s,g,f): arg g must be initialized before calling the func
 * sub(), gsub(): arg string must be set to a global variable
 * error: S=="\n"
 * no bool literal (true/false->0/1)
