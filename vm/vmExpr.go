@@ -341,6 +341,8 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 				return toFloat64(left) + toFloat64(right), nil
 			case l_kind == reflect.Int || r_kind == reflect.Int:
 				return toString(left) + toString(right), nil
+			case l_kind == reflect.Map || r_kind == reflect.Map:
+				return nil, fmt.Errorf("can't read value of array")
 			default:
 				return toString(left) + toString(right), nil
 			}
@@ -348,6 +350,8 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 			l_kind := reflect.ValueOf(left).Kind()
 			r_kind := reflect.ValueOf(right).Kind()
 			switch {
+			case l_kind == reflect.Map || r_kind == reflect.Map:
+				return nil, fmt.Errorf("can't read value of array")
 			case l_kind == reflect.Float64 || r_kind == reflect.Float64:
 				return toFloat64(left) + toFloat64(right), nil
 			case l_kind == reflect.Int || r_kind == reflect.Int:
@@ -362,6 +366,8 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 			l_kind := reflect.ValueOf(left).Kind()
 			r_kind := reflect.ValueOf(right).Kind()
 			switch {
+			case l_kind == reflect.Map || r_kind == reflect.Map:
+				return nil, fmt.Errorf("can't read value of array")
 			case l_kind == reflect.Float64 || r_kind == reflect.Float64:
 				return toFloat64(left) - toFloat64(right), nil
 			case l_kind == reflect.Int && r_kind == reflect.Int:
@@ -373,6 +379,8 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 			l_kind := reflect.ValueOf(left).Kind()
 			r_kind := reflect.ValueOf(right).Kind()
 			switch {
+			case l_kind == reflect.Map || r_kind == reflect.Map:
+				return nil, fmt.Errorf("can't read value of array")
 			case l_kind == reflect.Int && r_kind == reflect.Int:
 				return toInt(left) * toInt(right), nil
 			default:
@@ -387,6 +395,8 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 			switch {
 			case l_kind == reflect.Int && r_kind == reflect.Int:
 				return toInt(left) / toInt(right), nil
+			case l_kind == reflect.Map || r_kind == reflect.Map:
+				return nil, fmt.Errorf("can't read value of array")
 			default:
 				return toFloat64(left) / toFloat64(right), nil
 			}
