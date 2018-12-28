@@ -160,6 +160,7 @@ func callArgs(f reflect.Value, callExpr *ast.CallExpr, env *Env) ([]reflect.Valu
 	}
 
 	for k, subExpr := range callExpr.SubExprs {
+		debug.Printf("k=%v subExpr=%#v\n", k, subExpr)
 		// User Defined Funcion
 		var arg interface{}
 		switch subExpr.(type) {
@@ -173,7 +174,10 @@ func callArgs(f reflect.Value, callExpr *ast.CallExpr, env *Env) ([]reflect.Valu
 				var err error
 				arg, err = env.Get(subExpr.(*ast.IdentExpr).Literal)
 				if err != nil {
-					return nil, err
+					arg, err = env.DefineDefaultMap(subExpr.(*ast.IdentExpr).Literal)
+					if err != nil {
+						return nil, err
+					}
 				}
 			case reflect.Ptr:
 				// set variable name to arg
