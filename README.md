@@ -55,3 +55,4 @@ Please note that the language and API may change at any time.
 # To be fixed
 * error: S=="\n"
 * no bool literal (true/false->0/1)
+* % operation with decimals (ex.3.6%1.1==0.3)
