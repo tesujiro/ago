@@ -66,6 +66,7 @@ var opName = map[string]int{
 	"exit":     EXIT,
 	"while":    WHILE,
 	"do":       DO,
+	"getline":  GETLINE,
 }
 
 // Scan analyses token, and decide identify or literals.
