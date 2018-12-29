@@ -92,3 +92,8 @@ type ContainKeyExpr struct {
 	KeyExpr Expr
 	MapId   string
 }
+
+type GetlineExpr struct {
+	Var   Expr
+	Redir Expr
+}

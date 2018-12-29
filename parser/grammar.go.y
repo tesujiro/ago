@@ -36,10 +36,12 @@ var IN_REGEXP bool
 %type <expr>		multi_val_expr
 %type <expr>		simp_expr
 %type <expr>		non_post_simp_expr
+%type <expr>		opt_variable
 %type <expr>		variable
 %type <expr>		simple_variable
 %type <expr>		opt_expr
 %type <expr>		regexpr
+%type <expr>		input_redir
 %type <exprs>		exprs
 %type <exprs>		variables
 %type <exprs>		opt_exprs
@@ -52,13 +54,14 @@ var IN_REGEXP bool
 %token <token> BEGIN END PRINT PRINTF REGEXP
 %token <token> IF ELSE FOR WHILE DO BREAK CONTINUE
 %token <token> FUNC RETURN EXIT NEXT
-%token <token> CONCAT_OP
+%token <token> CONCAT_OP GETLINE
 
 %right '=' PLUSEQ MINUSEQ MULEQ DIVEQ MODEQ
 %right '?' ':'
 %left IN
 %left OROR
 %left ANDAND
+%left GETLINE
 /*%left IDENT*/
 %nonassoc ',' vars
 %left '~' NOTTILDE
@@ -417,6 +420,11 @@ simp_expr
 	{
 		$$ = &ast.CompExpr{Left: $1, Operator: "--", After:true}
 	}
+	/* GETLINE */
+	| GETLINE opt_variable input_redir
+	{
+		$$ = &ast.GetlineExpr{Var: $2, Redir: $3}
+	}
 
 regexpr
 	: a_slash
@@ -428,6 +436,16 @@ regexpr
 	{
 		//fmt.Println("FINISH")
 		$$ = &ast.RegExpr{Literal: $3.Literal}
+	}
+
+input_redir
+	: /* empty */
+	{
+		$$ = nil
+	}
+	| '<' simp_expr
+	{
+		$$ = $2
 	}
 
 non_post_simp_expr
@@ -526,6 +544,17 @@ simple_variable
 	{
 		$$ = &ast.IdentExpr{Literal: $1.Literal}
 	}
+
+opt_variable
+	: /* empty */
+	{
+		$$ = nil
+	}
+	| variable
+	{
+		$$ = $1
+	}
+	;
 
 variable
 	: simple_variable
