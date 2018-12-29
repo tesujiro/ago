@@ -313,7 +313,7 @@ var yyR1 = [...]int{
 	13, 13, 13, 13, 13, 13, 13, 13, 13, 13,
 	13, 13, 13, 27, 18, 14, 14, 14, 14, 14,
 	14, 14, 14, 14, 14, 14, 14, 14, 14, 14,
-	14, 14, 20, 20, 16, 16, 15, 15, 22, 22,
+	14, 14, 20, 20, 15, 15, 16, 16, 22, 22,
 	22, 5, 5, 17, 17, 23, 23, 24, 24, 25,
 	26,
 }
@@ -328,7 +328,7 @@ var yyR2 = [...]int{
 	3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
 	1, 2, 2, 0, 3, 2, 1, 4, 4, 4,
 	7, 3, 2, 2, 1, 1, 1, 1, 1, 1,
-	2, 2, 1, 4, 4, 1, 1, 2, 0, 1,
+	2, 2, 1, 4, 1, 2, 4, 1, 0, 1,
 	4, 0, 1, 0, 1, 0, 1, 1, 2, 1,
 	1,
 }
@@ -361,12 +361,12 @@ var yyChk = [...]int{
 var yyDef = [...]int{
 
 	105, -2, 1, 106, 107, 109, 2, 0, 105, 0,
-	7, 8, 9, -2, -2, 89, 38, 52, 73, 96,
-	0, 53, 110, 55, 95, 0, 0, 0, 0, 84,
+	7, 8, 9, -2, -2, 89, 38, 52, 73, 94,
+	0, 53, 110, 55, 97, 0, 0, 0, 0, 84,
 	85, 86, 87, 88, 0, 0, 108, 105, 4, 5,
 	0, 98, 0, 0, 0, 0, 0, 105, 0, 0,
 	0, 0, 0, 0, 0, 51, 38, 39, 40, 70,
-	0, 54, 0, 89, 0, 97, 76, 0, 0, 0,
+	0, 54, 0, 89, 0, 95, 76, 0, 0, 0,
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	0, 71, 72, 38, 0, 38, 75, 0, 82, 83,
 	90, 91, 3, 98, 0, 99, 0, 49, 50, 10,
@@ -377,8 +377,8 @@ var yyDef = [...]int{
 	65, 66, 67, 68, 69, 0, 0, 0, 81, 0,
 	0, 105, 0, 0, 18, 20, 0, -2, 16, 0,
 	0, 102, -2, 0, -2, 32, 33, 104, 0, 105,
-	0, 78, 0, 79, 94, 77, 6, -2, 0, 48,
-	15, 0, -2, 0, -2, 103, 95, 0, -2, 0,
+	0, 78, 0, 79, 96, 77, 6, -2, 0, 48,
+	15, 0, -2, 0, -2, 103, 97, 0, -2, 0,
 	37, 0, -2, 41, 0, 100, 0, 0, 22, 0,
 	0, 0, 25, 0, 0, -2, 0, 0, 80, -2,
 	36, 23, 103, 0, 26, 0, 34, 0, 0, 0,
@@ -1320,28 +1320,28 @@ yydefault:
 			yyVAL.exprs = append(yyDollar[1].exprs, yyDollar[4].expr)
 		}
 	case 94:
-		yyDollar = yyS[yypt-4 : yypt+1]
+		yyDollar = yyS[yypt-1 : yypt+1]
 		//line ./parser/grammar.go.y:522
-		{
-			yyVAL.expr = &ast.ItemExpr{Expr: yyDollar[1].expr, Index: yyDollar[3].exprs}
-		}
-	case 95:
-		yyDollar = yyS[yypt-1 : yypt+1]
-		//line ./parser/grammar.go.y:526
-		{
-			yyVAL.expr = &ast.IdentExpr{Literal: yyDollar[1].token.Literal}
-		}
-	case 96:
-		yyDollar = yyS[yypt-1 : yypt+1]
-		//line ./parser/grammar.go.y:532
 		{
 			yyVAL.expr = yyDollar[1].expr
 		}
-	case 97:
+	case 95:
 		yyDollar = yyS[yypt-2 : yypt+1]
-		//line ./parser/grammar.go.y:536
+		//line ./parser/grammar.go.y:526
 		{
 			yyVAL.expr = &ast.FieldExpr{Expr: yyDollar[2].expr}
+		}
+	case 96:
+		yyDollar = yyS[yypt-4 : yypt+1]
+		//line ./parser/grammar.go.y:532
+		{
+			yyVAL.expr = &ast.ItemExpr{Expr: yyDollar[1].expr, Index: yyDollar[3].exprs}
+		}
+	case 97:
+		yyDollar = yyS[yypt-1 : yypt+1]
+		//line ./parser/grammar.go.y:536
+		{
+			yyVAL.expr = &ast.IdentExpr{Literal: yyDollar[1].token.Literal}
 		}
 	case 98:
 		yyDollar = yyS[yypt-0 : yypt+1]

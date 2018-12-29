@@ -517,16 +517,6 @@ variables
 		$$ = append($1,$4)
 	}
 
-simple_variable
-	: non_post_simp_expr '[' exprs ']'
-	{
-		$$ = &ast.ItemExpr{Expr: $1, Index:$3}
-	}
-	| IDENT
-	{
-		$$ = &ast.IdentExpr{Literal: $1.Literal}
-	}
-
 variable
 	: simple_variable
 	{
@@ -535,6 +525,16 @@ variable
 	| '$' non_post_simp_expr
 	{
 		$$ = &ast.FieldExpr{Expr: $2}
+	}
+
+simple_variable
+	: non_post_simp_expr '[' exprs ']'
+	{
+		$$ = &ast.ItemExpr{Expr: $1, Index:$3}
+	}
+	| IDENT
+	{
+		$$ = &ast.IdentExpr{Literal: $1.Literal}
 	}
 
 ident_args
