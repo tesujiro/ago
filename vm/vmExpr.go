@@ -1,8 +1,10 @@
 package vm
 
 import (
+	"bufio"
 	"errors"
 	"fmt"
+	"os"
 	"reflect"
 	"regexp"
 	"strconv"
@@ -422,6 +424,36 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 		s := toString(val)
 		re := expr.(*ast.MatchExpr).RegExpr.(*ast.RegExpr).Literal
 		return regexp.MatchString(re, s)
+	case *ast.GetlineExpr:
+		redir_interface, err := evalExpr(expr.(*ast.GetlineExpr).Redir, env)
+		redir := (redir_interface).(string)
+		if err != nil {
+			return nil, err
+		}
+
+		var scanner *bufio.Scanner
+		//var err error
+		scanner, err = env.GetScanner(redir)
+		if err == ErrUnknownSymbol {
+			// Open File if not opened yet.
+			if f, err := os.Open(redir); err != nil {
+				return 0, err
+			} else {
+				scanner, err = env.SetFile(redir, f)
+				if err != nil {
+					return 0, err
+				}
+			}
+		} else if err != nil {
+			return 0, err
+		}
+		b := scanner.Scan()
+		if !b {
+			return 0, nil
+		}
+		line := scanner.Text()
+		evalAssExpr(expr.(*ast.GetlineExpr).Var, (interface{})(line), env)
+		return 1, nil
 	}
 	return 0, nil
 }
