@@ -3,39 +3,44 @@ package vm
 import (
 	"errors"
 	"fmt"
+	"io"
 	"reflect"
 )
 
 const defaultValue = ""
 
 var ErrUnknownSymbol = errors.New("unknown symbol")
+var AlreadyKnownSymbol = errors.New("already known symbol")
 
 type Env struct {
-	env        map[string]interface{}
-	parent     *Env
-	builtin    *builtin
-	global     map[string]interface{}
-	importFunc map[string]func(*Env) (reflect.Value, error)
+	env     map[string]interface{}
+	parent  *Env
+	builtin *builtin
+	global  map[string]interface{}
+	//importFunc map[string]func(*Env) (reflect.Value, error)
+	reader map[string]io.Reader
 }
 
 // Global Scope
 func NewEnv() *Env {
 	return &Env{
-		env:        make(map[string]interface{}),
-		parent:     nil,
-		builtin:    NewBuiltIn(),
-		global:     make(map[string]interface{}),
-		importFunc: make(map[string]func(*Env) (reflect.Value, error)),
+		env:     make(map[string]interface{}),
+		parent:  nil,
+		builtin: NewBuiltIn(),
+		global:  make(map[string]interface{}),
+		//importFunc: make(map[string]func(*Env) (reflect.Value, error)),
+		reader: make(map[string]io.Reader),
 	}
 }
 
 func (e *Env) NewEnv() *Env {
 	return &Env{
-		env:        make(map[string]interface{}),
-		parent:     e,
-		builtin:    e.builtin,
-		global:     e.global,
-		importFunc: e.importFunc,
+		env:     make(map[string]interface{}),
+		parent:  e,
+		builtin: e.builtin,
+		global:  e.global,
+		//importFunc: e.importFunc,
+		reader: e.reader,
 	}
 }
 
@@ -169,6 +174,23 @@ func (e *Env) getLocalVar(k string) (interface{}, error) {
 		return nil, ErrUnknownSymbol
 	}
 	return e.parent.getLocalVar(k)
+}
+
+func (e *Env) SetReader(k string, r io.Reader) error {
+	r, ok := e.reader[k]
+	if ok {
+		return AlreadyKnownSymbol
+	}
+	e.reader[k] = r
+	return nil
+}
+
+func (e *Env) GetReader(k string) (io.Reader, error) {
+	r, ok := e.reader[k]
+	if !ok {
+		return nil, ErrUnknownSymbol
+	}
+	return r, nil
 }
 
 /*
