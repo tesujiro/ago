@@ -636,6 +636,20 @@ func TestGoa(t *testing.T) {
 		{script: "NR==3{exit 1+1}1", in: "AAA\nBBB\nCCC\nDDD\n", ok: "AAA\nBBB\n", rc: 2},
 		{script: "{if $0==\"BBB\" {exit 1}}1", in: "AAA\nBBB\nCCC\nDDD\n", ok: "AAA\n", rc: 1},
 
+		// getline
+		{script: `
+		BEGIN{
+			getline
+			print "BEGIN",$0
+		}
+		{
+			print "MAIN",$0
+		}
+		END{
+			getline
+			print "END",$0
+		}`, in: "AAA\nBBB\nCCC\nDDD\n", ok: "BEGIN AAA\nMAIN BBB\nMAIN CCC\nMAIN DDD\nEND DDD\n"},
+
 		// One Liner
 		{script: "1", in: "AAA\n", ok: "AAA\n"},
 		{script: "1;{print \"\"}", in: "AAA\nBBB\n", ok: "AAA\n\nBBB\n\n"},

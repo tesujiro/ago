@@ -144,7 +144,7 @@ func initEnv() *vm.Env {
 	return env
 }
 
-func runScript(script_reader io.Reader, file_reader io.Reader) int {
+func runScript(script_reader io.Reader, file_reader *os.File) int {
 
 	env := initEnv()
 	if *dbg {
@@ -172,6 +172,14 @@ func runScript(script_reader io.Reader, file_reader io.Reader) int {
 	}
 	if *ast_dump {
 		parser.Dump(ast)
+	}
+
+	var file_scanner *bufio.Scanner
+	redir := "-" // a kind of stdin
+	file_scanner, err = env.SetFile(redir, file_reader)
+	if err != nil {
+		fmt.Printf("env error: %v \n", err)
+		return 1
 	}
 
 	var result interface{}
@@ -212,7 +220,7 @@ func runScript(script_reader io.Reader, file_reader io.Reader) int {
 	}
 
 	// MAIN
-	file_scanner := bufio.NewScanner(file_reader)
+	//file_scanner := bufio.NewScanner(file_reader)
 	var number int
 	for file_scanner.Scan() {
 		number++

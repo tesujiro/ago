@@ -425,13 +425,19 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 		re := expr.(*ast.MatchExpr).RegExpr.(*ast.RegExpr).Literal
 		return regexp.MatchString(re, s)
 	case *ast.GetlineExpr:
-		redir_interface, err := evalExpr(expr.(*ast.GetlineExpr).Redir, env)
-		redir := (redir_interface).(string)
-		if err != nil {
-			return nil, err
+		var redir string
+		if expr.(*ast.GetlineExpr).Redir != nil {
+			redir_interface, err := evalExpr(expr.(*ast.GetlineExpr).Redir, env)
+			if err != nil {
+				return nil, err
+			}
+			redir = (redir_interface).(string)
+		} else {
+			redir = "-" // Stdin
 		}
 
 		var scanner *bufio.Scanner
+		var err error
 		//var err error
 		scanner, err = env.GetScanner(redir)
 		if err == ErrUnknownSymbol {
