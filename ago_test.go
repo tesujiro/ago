@@ -639,6 +639,16 @@ func TestGoa(t *testing.T) {
 		// getline
 		{script: `
 		BEGIN{
+			getline AA
+			print AA
+		}`, in: "AAA BBB\n", ok: "AAA BBB\n"},
+		{script: `
+		BEGIN{
+			getline
+			print $2
+		}`, in: "AAA BBB\n", ok: "BBB\n"},
+		{script: `
+		BEGIN{
 			getline
 			print "BEGIN",$0
 		}
