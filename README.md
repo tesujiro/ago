@@ -33,7 +33,6 @@ Please note that the language and API may change at any time.
 
 # Still not implemented
 * nextfile
-* getline
 * var: FNR, OFMT, RS, ENVIRON, CONVFMT
 * print error with line number
 * asort(),asorti()
@@ -56,3 +55,4 @@ Please note that the language and API may change at any time.
 * error: S=="\n"
 * no bool literal (true/false->0/1)
 * % operation with decimals (ex.3.6%1.1==0.3)
+* getline from stdio
