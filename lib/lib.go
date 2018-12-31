@@ -86,6 +86,17 @@ func Import(env *vm.Env) *vm.Env {
 	env.Define("printf", reflect.ValueOf(fmt.Printf))
 	env.Define("sprintf", reflect.ValueOf(fmt.Sprintf))
 
+	close := func(file string) int {
+
+		err := env.CloseFile(file)
+		if err != nil {
+			fmt.Printf("error:%v\n", err)
+			return 1
+		}
+		return 0
+	}
+	env.Define("close", reflect.ValueOf(close))
+
 	sum := func(args ...int) int {
 		var result int
 		for _, v := range args {

@@ -659,6 +659,7 @@ func TestGoa(t *testing.T) {
 			getline
 			print "END",$0
 		}`, in: "AAA\nBBB\nCCC\nDDD\n", ok: "BEGIN AAA\nMAIN BBB\nMAIN CCC\nMAIN DDD\nEND DDD\n"},
+		{script: "BEGIN{close('aaa')}", in: "AAA\nBBB\n", ok: "error:unknown symbol\n"},
 
 		// One Liner
 		{script: "1", in: "AAA\n", ok: "AAA\n"},
