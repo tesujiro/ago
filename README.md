@@ -32,6 +32,7 @@ Please note that the language and API may change at any time.
 
 
 # Still not implemented
+* pipeline ( command | getline var )
 * nextfile
 * var: FNR, OFMT, RS, ENVIRON, CONVFMT
 * print error with line number
