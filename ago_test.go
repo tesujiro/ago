@@ -11,6 +11,11 @@ import (
 	"testing"
 )
 
+type file struct {
+	path string
+	data string
+}
+
 type test struct {
 	script  string
 	in      string
@@ -18,6 +23,7 @@ type test struct {
 	prepare func()
 	cleanup func()
 	rc      int
+	files   []file
 }
 
 func TestGoa(t *testing.T) {
@@ -637,6 +643,13 @@ func TestGoa(t *testing.T) {
 		{script: "{if $0==\"BBB\" {exit 1}}1", in: "AAA\nBBB\nCCC\nDDD\n", ok: "AAA\n", rc: 1},
 
 		// getline
+		{files: []file{file{"aaa.txt", "aaa aaa\n"}}, script: `
+		BEGIN{
+			while( (getline str < "aaa.txt")>0){
+				print str
+			}
+			close('aaa.txt')
+		}`, ok: "aaa aaa\n"},
 		{script: `
 		BEGIN{
 			getline AA
@@ -852,12 +865,19 @@ ZZZ 1
 			if test.prepare != nil {
 				test.prepare()
 			}
+			var dir string
+			if len(test.files) > 0 {
+				dir, err = create_files(test.files)
+			}
 			if test.script != "" {
 				os.Args = append(os.Args, test.script)
 			}
 			rc := _main()
 			if rc != test.rc && !strings.Contains(test.ok, "error") {
 				t.Errorf("return code want:%v get:%v case:%v\n", test.rc, rc, test)
+			}
+			if len(test.files) > 0 {
+				delete_files(dir)
 			}
 			if test.cleanup != nil {
 				test.cleanup()
@@ -915,4 +935,48 @@ ZZZ 1
 	os.Stdin = realStdin
 	os.Stderr = realStderr
 	os.Stdout = realStdout
+}
+
+func create_files(files []file) (string, error) {
+	dir, err := ioutil.TempDir("", "")
+	if err != nil {
+		return dir, err
+	}
+	err = os.Chdir(dir)
+	if err != nil {
+		os.RemoveAll(dir)
+		return dir, err
+	}
+	//fmt.Println("TempDir=", dir)
+	for _, file := range files {
+		f, err := os.OpenFile(file.path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0600)
+		if err != nil {
+			os.Chdir("..")
+			os.RemoveAll(dir)
+			return dir, err
+		}
+		if _, err := f.Write([]byte(file.data)); err != nil {
+			os.Chdir("..")
+			os.RemoveAll(dir)
+			return dir, err
+		}
+		if err := f.Close(); err != nil {
+			os.Chdir("..")
+			os.RemoveAll(dir)
+			return dir, err
+		}
+	}
+	return dir, nil
+}
+
+func delete_files(dir string) error {
+	err := os.Chdir("..")
+	if err != nil {
+		return err
+	}
+	err = os.RemoveAll(dir)
+	if err != nil {
+		return err
+	}
+	return nil
 }
