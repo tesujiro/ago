@@ -331,6 +331,15 @@ expr
 	{
 		$$ = $1
 	}
+	/* GETLINE */
+	| common_expr '|' GETLINE opt_variable
+	{
+		$$ = &ast.GetlineExpr{Command: $1, Var: $4}
+	}
+	| GETLINE opt_variable input_redir
+	{
+		$$ = &ast.GetlineExpr{Var: $2, Redir: $3}
+	}
 
 common_expr
 	: simp_expr
@@ -419,11 +428,6 @@ simp_expr
 	| simp_expr MINUSMINUS
 	{
 		$$ = &ast.CompExpr{Left: $1, Operator: "--", After:true}
-	}
-	/* GETLINE */
-	| GETLINE opt_variable input_redir
-	{
-		$$ = &ast.GetlineExpr{Var: $2, Redir: $3}
 	}
 
 regexpr

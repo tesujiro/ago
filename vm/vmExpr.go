@@ -426,14 +426,23 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 		return regexp.MatchString(re, s)
 	case *ast.GetlineExpr:
 		var redir string
-		if expr.(*ast.GetlineExpr).Redir != nil {
-			redir_interface, err := evalExpr(expr.(*ast.GetlineExpr).Redir, env)
+		if expr.(*ast.GetlineExpr).Command != nil {
+			command_interface, err := evalExpr(expr.(*ast.GetlineExpr).Command, env)
 			if err != nil {
 				return nil, err
 			}
-			redir = (redir_interface).(string)
+			command := command_interface.(string)
+			fmt.Println("command=", command)
 		} else {
-			redir = "-" // Stdin
+			if expr.(*ast.GetlineExpr).Redir != nil {
+				redir_interface, err := evalExpr(expr.(*ast.GetlineExpr).Redir, env)
+				if err != nil {
+					return nil, err
+				}
+				redir = (redir_interface).(string)
+			} else {
+				redir = "-" // Stdin
+			}
 		}
 
 		var scanner *bufio.Scanner

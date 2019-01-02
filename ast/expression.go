@@ -94,6 +94,7 @@ type ContainKeyExpr struct {
 }
 
 type GetlineExpr struct {
-	Var   Expr
-	Redir Expr
+	Command Expr
+	Var     Expr
+	Redir   Expr
 }

@@ -36,7 +36,7 @@ Please note that the language and API may change at any time.
 * nextfile
 * var: FNR, OFMT, RS, ENVIRON, CONVFMT
 * print error with line number
-* asort(),asorti()
+* asort(),asort()
 * import & call go library
 * goroutine
 * define variadic functions
