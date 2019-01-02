@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"reflect"
 )
@@ -19,8 +20,8 @@ type Env struct {
 	builtin *builtin
 	global  map[string]interface{}
 	//importFunc map[string]func(*Env) (reflect.Value, error)
-	file    map[string]*os.File
-	scanner map[string]*bufio.Scanner
+	readCloser map[string]*io.ReadCloser
+	scanner    map[string]*bufio.Scanner
 }
 
 // Global Scope
@@ -31,8 +32,8 @@ func NewEnv() *Env {
 		builtin: NewBuiltIn(),
 		global:  make(map[string]interface{}),
 		//importFunc: make(map[string]func(*Env) (reflect.Value, error)),
-		file:    make(map[string]*os.File),
-		scanner: make(map[string]*bufio.Scanner),
+		readCloser: make(map[string]*io.ReadCloser),
+		scanner:    make(map[string]*bufio.Scanner),
 	}
 }
 
@@ -43,8 +44,8 @@ func (e *Env) NewEnv() *Env {
 		builtin: e.builtin,
 		global:  e.global,
 		//importFunc: e.importFunc,
-		file:    e.file,
-		scanner: e.scanner,
+		readCloser: e.readCloser,
+		scanner:    e.scanner,
 	}
 }
 
@@ -180,13 +181,13 @@ func (e *Env) getLocalVar(k string) (interface{}, error) {
 	return e.parent.getLocalVar(k)
 }
 
-func (e *Env) SetFile(k string, f *os.File) (*bufio.Scanner, error) {
-	_, ok := e.file[k]
+func (e *Env) SetFile(k string, f *io.ReadCloser) (*bufio.Scanner, error) {
+	_, ok := e.readCloser[k]
 	if ok {
 		return nil, AlreadyKnownSymbol
 	}
-	scanner := bufio.NewScanner(f)
-	e.file[k] = f
+	scanner := bufio.NewScanner(io.Reader(*f))
+	e.readCloser[k] = f
 	e.scanner[k] = scanner
 	return scanner, nil
 }
@@ -200,16 +201,17 @@ func (e *Env) GetScanner(k string) (*bufio.Scanner, error) {
 }
 
 func (e *Env) CloseFile(k string) error {
-	f, ok := e.file[k]
+	f, ok := e.readCloser[k]
 	if !ok {
 		return ErrUnknownSymbol
 	}
-	if f != os.Stdin {
-		if e := f.Close(); e != nil {
+	stdin := io.ReadCloser(os.Stdin)
+	if f != &stdin {
+		if e := (*f).Close(); e != nil {
 			return e
 		}
 	}
-	delete(e.file, k)
+	delete(e.readCloser, k)
 	delete(e.scanner, k)
 	return nil
 }

@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"reflect"
 	"regexp"
@@ -447,14 +448,14 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 
 		var scanner *bufio.Scanner
 		var err error
-		//var err error
 		scanner, err = env.GetScanner(redir)
 		if err == ErrUnknownSymbol {
 			// Open File if not opened yet.
 			if f, err := os.Open(redir); err != nil {
 				return 0, err
 			} else {
-				scanner, err = env.SetFile(redir, f)
+				rc := io.ReadCloser(f)
+				scanner, err = env.SetFile(redir, &rc)
 				if err != nil {
 					return 0, err
 				}

@@ -176,7 +176,8 @@ func runScript(script_reader io.Reader, file_reader *os.File) int {
 
 	var file_scanner *bufio.Scanner
 	redir := "-" // a kind of stdin
-	file_scanner, err = env.SetFile(redir, file_reader)
+	rc := io.ReadCloser(file_reader)
+	file_scanner, err = env.SetFile(redir, &rc)
 	if err != nil {
 		fmt.Printf("env error: %v \n", err)
 		return 1
