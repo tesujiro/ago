@@ -672,6 +672,8 @@ func TestGoa(t *testing.T) {
 			getline
 			print "END",$0
 		}`, in: "AAA\nBBB\nCCC\nDDD\n", ok: "BEGIN AAA\nMAIN BBB\nMAIN CCC\nMAIN DDD\nEND DDD\n"},
+		{script: `BEGIN{ "echo ABC DEF" | getline msg;print msg;}`, ok: "ABC DEF\n"},
+		{script: `BEGIN{ "NOT_A_COMMAND_XX" | getline msg;print msg;}`, rc: 1},
 		{script: "BEGIN{close('aaa')}", in: "AAA\nBBB\n", ok: "error:unknown symbol\n"},
 
 		// One Liner

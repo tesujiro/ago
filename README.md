@@ -32,7 +32,6 @@ Please note that the language and API may change at any time.
 
 
 # Still not implemented
-* pipeline ( command | getline var )
 * nextfile
 * var: FNR, OFMT, RS, ENVIRON, CONVFMT
 * print error with line number
@@ -51,6 +50,7 @@ Please note that the language and API may change at any time.
 * if, for, while conditions do not need parentheses, statements need curly braces. (ex. for a<10 {a=a+1}) 
 * atan2(0,-0)=0 (not Pi)
 * number format: exponent format (ex.2e+3) and hexadecimal (ex.0x10) is supported, octal format (ex.0123) is NOT supported.
+* A command can be piped to getline (ex. "date" | getline DATE), but the command is not invoked from shell, cannot use shell functions in the command.
 
 # To be fixed
 * system function

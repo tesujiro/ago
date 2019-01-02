@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"os/exec"
 	"reflect"
 	"regexp"
 	"strconv"
@@ -432,8 +433,28 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-			command := command_interface.(string)
-			fmt.Println("command=", command)
+			commandLine := command_interface.(string)
+			redir = commandLine
+			//fmt.Println("command=", commandLine)
+			_, err = env.GetScanner(redir)
+			if err == ErrUnknownSymbol {
+				re := regexp.MustCompile("[ \t]+")
+				cmd_array := re.Split(commandLine, -1)
+				cmd := exec.Command(cmd_array[0], cmd_array[1:]...)
+				if stdout, err := cmd.StdoutPipe(); err != nil {
+					return nil, err
+				} else {
+					_, err = env.SetFile(redir, &stdout)
+					if err != nil {
+						return 0, err
+					}
+				}
+				if err := cmd.Start(); err != nil {
+					return nil, err
+				}
+			} else if err != nil {
+				return nil, err
+			}
 		} else {
 			if expr.(*ast.GetlineExpr).Redir != nil {
 				redir_interface, err := evalExpr(expr.(*ast.GetlineExpr).Redir, env)
