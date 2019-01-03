@@ -590,7 +590,7 @@ func TestGoa(t *testing.T) {
 		// lib: systime
 		{script: "BEGIN{systime()}", ok: ""},
 		// lib: system
-		{script: "BEGIN{print system(\"echo aaa\")}", ok: "0\n"},
+		{script: "BEGIN{print system(\"echo aaa\")}", ok: "aaa\n0\n"},
 
 		// field
 		{script: "{print $1}", in: "Hello World!\n", ok: "Hello\n"},

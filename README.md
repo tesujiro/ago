@@ -53,7 +53,6 @@ Please note that the language and API may change at any time.
 * A command can be piped to getline (ex. "date" | getline DATE), but the command is not invoked from shell, cannot use shell functions in the command.
 
 # To be fixed
-* system function
 * error: S=="\n"
 * no bool literal (true/false->0/1)
 * % operation with decimals (ex.3.6%1.1==0.3)

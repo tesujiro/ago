@@ -1,6 +1,7 @@
 package lib
 
 import (
+	"bufio"
 	"fmt"
 	"math"
 	"math/rand"
@@ -119,9 +120,18 @@ func Import(env *vm.Env) *vm.Env {
 		re := regexp.MustCompile("[ \t]+")
 		cmd_array := re.Split(command, -1)
 		cmd := exec.Command(cmd_array[0], cmd_array[1:]...)
+		stdout, err := cmd.StdoutPipe()
+		if err != nil {
+			fmt.Printf("%v", err)
+			return 1
+		}
 		if err := cmd.Start(); err != nil {
 			fmt.Printf("%v", err)
 			return 1
+		}
+		scanner := bufio.NewScanner(stdout)
+		for scanner.Scan() {
+			fmt.Println(scanner.Text())
 		}
 		if err := cmd.Wait(); err != nil {
 			if exiterr, ok := err.(*exec.ExitError); ok {
