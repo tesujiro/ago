@@ -13,7 +13,7 @@ type builtin struct {
 	SUBSEP  string
 	//OFMT,FNR,
 	RLENGTH, RSTART int
-	//RS
+	RS              string
 	//ENVIRON
 	//CONVFMT
 	field           []string
@@ -145,7 +145,9 @@ func (e *Env) SetFieldFromLine(line string) error {
 		}
 	case " ":
 		//THIS IS SPECIAL CASE FOR ORIGINAL AWK
+		//fmt.Printf("line[%v]", line)
 		line = re_org_awk_truncate.ReplaceAllString(line, "$1")
+		//fmt.Printf("==>[%v]\n", line)
 		split("[ \t]+", line)
 	default:
 		//fmt.Printf("line %v:FS[%v]\n", e.builtin.NR, e.builtin.FS)

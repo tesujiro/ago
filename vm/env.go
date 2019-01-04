@@ -84,6 +84,12 @@ func (e *Env) Set(k string, v interface{}) error {
 			return fmt.Errorf("cannot update %v", f.Name)
 		}
 		fv.Set(reflect.ValueOf(v))
+		if k == "RS" {
+			err := e.SetScannerSplit()
+			if err != nil {
+				return err
+			}
+		}
 		return nil
 	}
 
@@ -189,7 +195,58 @@ func (e *Env) SetFile(k string, f *io.ReadCloser) (*bufio.Scanner, error) {
 	scanner := bufio.NewScanner(io.Reader(*f))
 	e.readCloser[k] = f
 	e.scanner[k] = scanner
+	err := e.SetScannerSplit()
+	if err != nil {
+		return nil, err
+	}
 	return scanner, nil
+}
+
+func (e *Env) SetScannerSplit() error {
+	rs, err := e.Get("RS") // Record Separater
+	if err == ErrUnknownSymbol {
+		return nil
+	} else if err != nil {
+		return err
+	}
+	if rs == "" {
+		rs = "\n"
+	}
+
+	var split_helper func(int, []byte, []byte, []byte) (int, []byte, error)
+	split_helper = func(advance int, token []byte, data []byte, pat []byte) (int, []byte, error) {
+		if len(pat) == 0 {
+			return advance, token, nil
+		}
+		if len(data) == 0 {
+			return advance, token, bufio.ErrFinalToken
+		}
+		/*
+			if len(pat) == 0 || len(data) == 0 {
+				return advance, token, nil
+			}
+		*/
+		if data[0] == pat[0] {
+			return split_helper(advance+1, append(token, data[0]), data[1:], pat[1:])
+		} else {
+			return split_helper(advance+1, append(token, data[0]), data[1:], pat)
+		}
+	}
+	split := func(data []byte, atEOF bool) (int, []byte, error) {
+		i, bs, err := split_helper(0, []byte{}, data, []byte(rs.(string)))
+		if err != nil {
+			return i, bs, err
+		} else if len(data) == len(bs) {
+			return i, bs[:len(bs)-len(rs.(string))], bufio.ErrFinalToken
+		} else {
+			//fmt.Printf("data=%s\tbs=[%s]\n", data, bs[:len(bs)-len(rs.(string))])
+			return i, bs[:len(bs)-len(rs.(string))], nil
+		}
+	}
+	for _, scanner := range e.scanner {
+		scanner.Split(split)
+	}
+	return nil
 }
 
 func (e *Env) GetScanner(k string) (*bufio.Scanner, error) {

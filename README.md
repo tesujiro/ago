@@ -53,6 +53,8 @@ Please note that the language and API may change at any time.
 * A command can be piped to getline (ex. "date" | getline DATE), but the command is not invoked from shell, cannot use shell functions in the command.
 
 # To be fixed
+* When FS is not set, spaces in head of input records is truncated ( ex. " this is a file" -> {print $1} -> "this" not " this")
 * error: S=="\n"
 * no bool literal (true/false->0/1)
-* % operation with decimals (ex.3.6%1.1==0.3)
+* % operation with decimals (should 3.6%1.1==0.3)
+* panic if set RS variable after scanning file (ex. {print;RS="EndOfRec"})
