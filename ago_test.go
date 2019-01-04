@@ -906,7 +906,7 @@ ZZZ 1
 			for scanner.Scan() {
 				_, err = writeToIn.WriteString(scanner.Text() + "\n")
 				if err != nil {
-					t.Fatal("Stdin WriteString(%v) error:", scanner.Text(), err)
+					t.Fatalf("Stdin WriteString(%v) error:%v", scanner.Text(), err)
 				}
 			}
 			//readFromIn.Close() //NG
