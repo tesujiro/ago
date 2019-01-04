@@ -33,7 +33,7 @@ Please note that the language and API may change at any time.
 
 # Still not implemented
 * nextfile
-* var: FNR, OFMT, RS, ENVIRON, CONVFMT
+* var: FNR, OFMT, ENVIRON, CONVFMT
 * print error with line number
 * asort(),asort()
 * import & call go library
