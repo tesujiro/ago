@@ -244,7 +244,11 @@ func (e *Env) SetScannerSplit() error {
 		}
 	}
 	for _, scanner := range e.scanner {
-		scanner.Split(split)
+		// scanner.Split() panics when used after Scan()
+		// No interface to check Scan() is called .
+		if len(scanner.Text()) == 0 {
+			scanner.Split(split)
+		}
 	}
 	return nil
 }

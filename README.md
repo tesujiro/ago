@@ -52,9 +52,9 @@ Please note that the language and API may change at any time.
 * number format: exponent format (ex.2e+3) and hexadecimal (ex.0x10) is supported, octal format (ex.0123) is NOT supported.
 * A command can be piped to getline (ex. "date" | getline DATE), but the command is not invoked from shell, cannot use shell functions in the command.
 * can set multi chars to RS (same as GAWK)
+* Changing RS variable is valid only before scanning files. (Can change RS in BEGIN{} rule.)
 
 # To be fixed
 * error: S=="\n"
 * no bool literal (true/false->0/1)
 * % operation with decimals (should 3.6%1.1==0.3)
-* panic if set RS variable after scanning file (ex. {print;RS="EndOfRec"})

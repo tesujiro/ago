@@ -192,7 +192,7 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{FS=123}END{print FS}", ok: "error:type of FS must be string ,not int.\n"},
 		{script: "BEGIN{print RS}", ok: "\n"},
 		{script: `BEGIN{RS="is"}{print NR,"["$0"]"}`, in: "this_is_a_file", ok: "1 [th]\n2 [_]\n3 [_a_file\n]\n"},
-		//{script: `{print NR,"["$0"]";RS="is"}`, in: "this is a file\nthis\n", ok: "1 [this a file]\n2 [th]\n"}, // panic scan after Split()
+		{script: `{print NR,"["$0"]";RS="is"}`, in: "this is a file\nthis\n", ok: "1 [this is a file]\n2 [this]\n"}, // panic scan after Split()
 		// global
 		{script: "BEGIN{A=1}END{print A}", ok: "1\n"},
 		{script: "BEGIN{Abc=1}END{print Abc}", ok: "1\n"},
