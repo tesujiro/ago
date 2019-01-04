@@ -185,7 +185,8 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{NF=\"aaa\"}", ok: "error:type of NF must be int ,not string.\n"},
 		{script: "BEGIN{$0=\"aaa\";print}", ok: "aaa\n"},
 		{script: "BEGIN{$1=\"aaa\";print}", ok: "aaa\n"},
-		//{script: `{print "[" $1 "]"}`, in: " this is a file\n", ok: "[ this]\n"}, //TODO:FIX
+		{script: `{print "[" $0 "]"}`, in: " this is a file\n", ok: "[ this is a file]\n"},
+		{script: `{print "[" $1 "]"}`, in: " this is a file\n", ok: "[this]\n"},
 		{script: "BEGIN{print FS}", ok: "\n"},
 		{script: "BEGIN{FS=\"X\"}END{print FS}", ok: "X\n"},
 		{script: "BEGIN{FS=123}END{print FS}", ok: "error:type of FS must be string ,not int.\n"},
