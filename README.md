@@ -51,6 +51,7 @@ Please note that the language and API may change at any time.
 * atan2(0,-0)=0 (not Pi)
 * number format: exponent format (ex.2e+3) and hexadecimal (ex.0x10) is supported, octal format (ex.0123) is NOT supported.
 * A command can be piped to getline (ex. "date" | getline DATE), but the command is not invoked from shell, cannot use shell functions in the command.
+* cat set multi chars to RS (same as GAWK)
 
 # To be fixed
 * When FS is not set, spaces in head of input records is truncated ( ex. " this is a file" -> {print $1} -> "this" not " this")
