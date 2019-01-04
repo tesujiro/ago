@@ -33,7 +33,12 @@ func (e *Env) SetNR(i int) {
 }
 
 func (e *Env) SetNF() {
-	e.builtin.NF = len(e.builtin.field) - 1
+	l := len(e.builtin.field)
+	if l > 0 {
+		e.builtin.NF = len(e.builtin.field) - 1
+	} else {
+		e.builtin.NF = 0
+	}
 }
 
 func (e *Env) SetFS(fs string) {

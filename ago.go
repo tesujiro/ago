@@ -220,6 +220,9 @@ func runScript(script_reader io.Reader, file_reader *os.File) int {
 		return 0
 	}
 
+	// reset variable
+	env.SetNF()
+
 	// MAIN
 	//file_scanner := bufio.NewScanner(file_reader)
 	var number int

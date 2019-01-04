@@ -210,7 +210,7 @@ func (e *Env) SetScannerSplit() error {
 		return err
 	}
 	if rs == "" {
-		rs = "\n"
+		return nil
 	}
 
 	var split_helper func(int, []byte, []byte, []byte) (int, []byte, error)
