@@ -680,6 +680,14 @@ func TestGoa(t *testing.T) {
 		{script: `BEGIN{ "echo ABC DEF" | getline msg;print msg;}`, ok: "ABC DEF\n"},
 		{script: `BEGIN{ "NOT_A_COMMAND_XX" | getline msg;print msg;}`, rc: 1},
 		{script: "BEGIN{close('aaa')}", in: "AAA\nBBB\n", ok: "error:unknown symbol\n"},
+		{files: []file{file{"aaa.txt", "aaaXbbb"}}, script: `
+		BEGIN{
+			RS="X"
+			while( (getline str < "aaa.txt")>0){
+				print str
+			}
+			close('aaa.txt')
+		}`, ok: "aaa\nbbb\n"},
 
 		// One Liner
 		{script: "1", in: "AAA\n", ok: "AAA\n"},

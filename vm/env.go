@@ -85,7 +85,7 @@ func (e *Env) Set(k string, v interface{}) error {
 		}
 		fv.Set(reflect.ValueOf(v))
 		if k == "RS" {
-			err := e.SetScannerSplit()
+			err := e.SetScannerSplit("")
 			if err != nil {
 				return err
 			}
@@ -195,14 +195,14 @@ func (e *Env) SetFile(k string, f *io.ReadCloser) (*bufio.Scanner, error) {
 	scanner := bufio.NewScanner(io.Reader(*f))
 	e.readCloser[k] = f
 	e.scanner[k] = scanner
-	err := e.SetScannerSplit()
+	err := e.SetScannerSplit(k)
 	if err != nil {
 		return nil, err
 	}
 	return scanner, nil
 }
 
-func (e *Env) SetScannerSplit() error {
+func (e *Env) SetScannerSplit(key string) error {
 	rs, err := e.Get("RS") // Record Separater
 	if err == ErrUnknownSymbol {
 		return nil
@@ -243,12 +243,22 @@ func (e *Env) SetScannerSplit() error {
 			return i, bs[:len(bs)-len(rs.(string))], nil
 		}
 	}
-	for _, scanner := range e.scanner {
-		// scanner.Split() panics when used after Scan()
-		// No interface to check Scan() is called .
-		if len(scanner.Text()) == 0 {
-			scanner.Split(split)
+	if key == "" {
+		// set split func to all the scanners
+		for _, scanner := range e.scanner {
+			// scanner.Split() panics when used after Scan()
+			// No interface to check Scan() is called .
+			if len(scanner.Text()) == 0 {
+				scanner.Split(split)
+			}
 		}
+	} else {
+		// set split func to speified  scanner
+		scanner, ok := e.scanner[key]
+		if !ok {
+			return fmt.Errorf("file key %v not found.", key)
+		}
+		scanner.Split(split)
 	}
 	return nil
 }
