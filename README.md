@@ -58,6 +58,5 @@ Please note that the language and API may change at any time.
 * Changing RS variable is valid only before scanning files. (Can change RS in BEGIN{} rule.)
 
 # To be fixed
-* error: S=="\n"
 * no bool literal (true/false->0/1)
 * % operation with decimals (should 3.6%1.1==0.3)
