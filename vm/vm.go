@@ -3,6 +3,7 @@ package vm
 import (
 	"fmt"
 	"reflect"
+	"regexp"
 	"strconv"
 
 	"github.com/tesujiro/ago/ast"
@@ -21,6 +22,33 @@ func toInt(val interface{}) int {
 	}
 	i, _ := val.(int)
 	return i
+}
+
+func strictToInt(val interface{}) (int, error) {
+	switch reflect.ValueOf(val).Kind() {
+	case reflect.Int64, reflect.Int32, reflect.Int16, reflect.Int8, reflect.Int:
+		return val.(int), nil
+	case reflect.Float64, reflect.Float32:
+		return int(val.(float64)), nil
+	case reflect.String:
+		// "1.1" -> 1
+		// "1.xx" -> 1
+		// "1e1.xx" -> 10 //TODO
+		// "011.xx" -> 9  //TODO
+		re := regexp.MustCompile(`\d+`)
+		num := re.FindString(val.(string))
+		if len(num) == 0 {
+			return 0, fmt.Errorf("cannot convert to int:%v", reflect.ValueOf(val).Kind())
+		}
+
+		if i, err := strconv.Atoi(num); err != nil {
+			return 0, err
+		} else {
+			return i, err
+		}
+	default:
+		return 0, fmt.Errorf("cannot convert to int:%v", reflect.ValueOf(val).Kind())
+	}
 }
 
 func toFloat64(val interface{}) float64 {

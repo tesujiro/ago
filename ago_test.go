@@ -605,9 +605,11 @@ func TestGoa(t *testing.T) {
 		{script: "{$1=2;b=$1;print b}", in: "Hello World!\n", ok: "2\n"},
 		{script: "{print $'a'}", in: "Hello World!\n", ok: "error:field index not int :string\n"},
 		{script: "{print $''}", in: "Hello World!\n", ok: "error:field index not int :string\n"},
-		//{script: "{print $'1'}", in: "Hello World!\n", ok: "Hello\n"}, //TODO
-		//{script: "{print $'1.1'}", in: "Hello World!\n", ok: "Hello\n"}, //TODO
-		//{script: "{print $'1.xx'}", in: "Hello World!\n", ok: "Hello\n"}, //TODO
+		{script: "{print $'1'}", in: "Hello World!\n", ok: "Hello\n"},
+		{script: "{print $'1.1'}", in: "Hello World!\n", ok: "Hello\n"},
+		{script: "{print $'1.xx'}", in: "Hello World!\n", ok: "Hello\n"},
+		{script: "{print $'xx'}", in: "Hello World!\n", ok: "error:field index not int :string\n"},
+		{script: "{a[1]=2;print $a}", in: "Hello World!\n", ok: "error:field index not int :map[interface {}]interface {}\n"},
 		{script: "{a=1.1;$a=1;print $a}", in: "Hello World!\n", ok: "error:field index not int :float64\n"},
 		{script: "{$(1/0)=1;print $a}", in: "Hello World!\n", ok: "error:devision by zero\n"},
 		{script: "{$(-1)='xx';}", in: "Hello World!\n", ok: "error:Field Index Out of Range:-1\n"},

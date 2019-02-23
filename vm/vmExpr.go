@@ -36,16 +36,14 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 		if err != nil {
 			return nil, err
 		}
-		switch index.(type) {
-		case int:
-			i, _ := index.(int)
-			if field, err := env.GetField(i); err != nil {
-				return nil, err
-			} else {
-				return field, nil
-			}
-		default:
+		findex, err := strictToInt(index)
+		if err != nil {
 			return nil, fmt.Errorf("field index not int :%v", reflect.TypeOf(index))
+		}
+		if field, err := env.GetField(findex); err != nil {
+			return nil, err
+		} else {
+			return field, nil
 		}
 	case *ast.NumExpr:
 		lit := expr.(*ast.NumExpr).Literal
