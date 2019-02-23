@@ -21,7 +21,10 @@ AAA 3
 BBB 1
 CCC 2
 ZZZ 1
-> 
+> printf 'aaa,bbb,"ccc,ddd\neeee"\n' | ago -F , '{ret=split($0,a,"\"");if(ret%2==0){pLine=$0;pNF=NF;getline;NF=pNF+NF-1;$0=pLine $0};print NF;print}'
+4
+aaa,bbb,"ccc,dddeeee"
+>
 
 ```
 
