@@ -10,60 +10,57 @@ import (
 )
 
 func toInt(val interface{}) int {
-	switch reflect.ValueOf(val).Kind() {
-	case reflect.Float64, reflect.Float32:
-		return int(val.(float64))
-	case reflect.String:
-		if i, err := strconv.Atoi(val.(string)); err != nil {
-			return 0
-		} else {
-			return i
-		}
+	i, err := strictToInt(val)
+	if err != nil {
+		return 0
+	} else {
+		return i
 	}
-	i, _ := val.(int)
-	return i
 }
 
 func strictToInt(val interface{}) (int, error) {
+	f, err := strictToFloat(val)
+	if err != nil {
+		return 0, err
+	} else {
+		return int(f), nil
+	}
+}
+
+func toFloat64(val interface{}) float64 {
+	f, err := strictToFloat(val)
+	if err != nil {
+		return 0
+	} else {
+		return f
+	}
+}
+
+func strictToFloat(val interface{}) (float64, error) {
 	switch reflect.ValueOf(val).Kind() {
 	case reflect.Int64, reflect.Int32, reflect.Int16, reflect.Int8, reflect.Int:
-		return val.(int), nil
+		return float64(val.(int)), nil
 	case reflect.Float64, reflect.Float32:
-		return int(val.(float64)), nil
+		return val.(float64), nil
 	case reflect.String:
 		// "1.1" -> 1
 		// "1.xx" -> 1
 		// "1e1.xx" -> 10 //TODO
 		// "011.xx" -> 9  //TODO
-		re := regexp.MustCompile(`\d+`)
-		num := re.FindString(val.(string))
-		if len(num) == 0 {
-			return 0, fmt.Errorf("cannot convert to int:%v", reflect.ValueOf(val).Kind())
+		re := regexp.MustCompile(`(\-|\+)?\d+(.\d*)?`)
+		num_str := re.FindString(val.(string))
+		if len(num_str) == 0 {
+			return 0, fmt.Errorf("cannot convert to float:%v", reflect.ValueOf(val).Kind())
 		}
 
-		if i, err := strconv.Atoi(num); err != nil {
+		if num, err := strconv.ParseFloat(num_str, 64); err != nil {
 			return 0, err
 		} else {
-			return i, err
+			return num, err
 		}
 	default:
 		return 0, fmt.Errorf("cannot convert to int:%v", reflect.ValueOf(val).Kind())
 	}
-}
-
-func toFloat64(val interface{}) float64 {
-	switch reflect.ValueOf(val).Kind() {
-	case reflect.Int64, reflect.Int32, reflect.Int16, reflect.Int8, reflect.Int:
-		return float64(val.(int))
-	case reflect.String:
-		if f, err := strconv.ParseFloat(val.(string), 64); err != nil {
-			return 0
-		} else {
-			return f
-		}
-	}
-	f, _ := val.(float64)
-	return f
 }
 
 func toBool(val interface{}) bool {

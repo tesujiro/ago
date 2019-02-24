@@ -606,6 +606,7 @@ func TestGoa(t *testing.T) {
 		{script: "{print $'a'}", in: "Hello World!\n", ok: "error:field index not int :string\n"},
 		{script: "{print $''}", in: "Hello World!\n", ok: "error:field index not int :string\n"},
 		{script: "{print $'1'}", in: "Hello World!\n", ok: "Hello\n"},
+		{script: "{print $'+1'}", in: "Hello World!\n", ok: "Hello\n"},
 		{script: "{print $'1.1'}", in: "Hello World!\n", ok: "Hello\n"},
 		{script: "{print $'1.xx'}", in: "Hello World!\n", ok: "Hello\n"},
 		{script: "{print $'xx'}", in: "Hello World!\n", ok: "error:field index not int :string\n"},
