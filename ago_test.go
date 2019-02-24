@@ -917,8 +917,13 @@ ZZZ 1
 			for scanner.Scan() {
 				_, err = writeToIn.WriteString(scanner.Text() + "\n")
 				if err != nil {
+					t.Errorf("Case:[%v] script: %v", case_number, test.script)
 					t.Fatalf("Stdin WriteString(%v) error:%v", scanner.Text(), err)
 				}
+			}
+			if err := scanner.Err(); err != nil {
+				t.Errorf("Case:[%v] script: %v", case_number, test.script)
+				t.Fatalf("Scan error:%v", err)
 			}
 			//readFromIn.Close() //NG
 			writeToIn.Close()
