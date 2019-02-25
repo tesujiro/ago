@@ -141,7 +141,7 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{a=\"a\";print a==\"a\"?a+\"1\":a+\"2\"}", ok: "a1\n"},
 		{script: "BEGIN{a=\"b\";print a==\"a\"?a+\"1\":a+\"2\"}", ok: "b2\n"},
 		{script: "BEGIN{print 1/0?a+1:a+2}", ok: "error:devision by zero\n"},
-		{script: "BEGIN{a[1]=1;print a?a+1:a+2}", ok: "error:convert to bool failed in ternary operator\n"},
+		{script: "BEGIN{a[1]=1;print a?a+1:a+2}", ok: "error:convert ternary operator:convert interface{} to bool failed\n"},
 		// composite expression
 		{script: "BEGIN{a=123;print ++a;print a}", ok: "124\n124\n"},
 		{script: "BEGIN{print ++1}", ok: "error:invalid operation\n"},
@@ -249,14 +249,14 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{print 0||0}", ok: "false\n"},
 		{script: "BEGIN{print 1/0||1}", ok: "error:devision by zero\n"},
 		{script: "BEGIN{print 1||1/0}", ok: "error:devision by zero\n"},
-		{script: "BEGIN{a[1]=1;print a||0}", ok: "error:convert to bool failed in left expression of OR operator\n"},
-		{script: "BEGIN{a[1]=1;print 0||a}", ok: "error:convert to bool failed in right expression of OR operator\n"},
+		{script: "BEGIN{a[1]=1;print a||0}", ok: "error:convert left expression of OR perator:convert interface{} to bool failed\n"},
+		{script: "BEGIN{a[1]=1;print 0||a}", ok: "error:convert right expression of OR perator:convert interface{} to bool failed\n"},
 		{script: "BEGIN{print 0&&1}", ok: "false\n"},
 		{script: "BEGIN{print 1&&0}", ok: "false\n"},
 		{script: "BEGIN{print 1/0&&1}", ok: "error:devision by zero\n"},
 		{script: "BEGIN{print 1&&1/0}", ok: "error:devision by zero\n"},
-		{script: "BEGIN{a[1]=1;print a&&1}", ok: "error:convert to bool failed in left expression of AND operator\n"},
-		{script: "BEGIN{a[1]=1;print 1&&a}", ok: "error:convert to bool failed in right expression of AND operator\n"},
+		{script: "BEGIN{a[1]=1;print a&&1}", ok: "error:convert left expression of AND perator:convert interface{} to bool failed\n"},
+		{script: "BEGIN{a[1]=1;print 1&&a}", ok: "error:convert right expression of AND perator:convert interface{} to bool failed\n"},
 
 		// regular expression
 		{script: "BEGIN{print \"aaa\"~/aaa/}", ok: "true\n"},
@@ -334,9 +334,9 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{a=2;if a==1 { env_test=11 } else if a==2 { env_test=12 } else { env_test=13 };print env_test}", ok: "\n"},
 		{script: "BEGIN{a=3;if a==1 { env_test=11 } else if a==2 { env_test=12 } else { env_test=13 };print env_test}", ok: "\n"},
 		{script: "BEGIN{if a==1/0 { print a;}}", ok: "error:devision by zero\n"},
-		{script: "BEGIN{a[1]=1;if a { print a;}}", ok: "error:convert to bool failed in if condition\n"},
+		{script: "BEGIN{a[1]=1;if a { print a;}}", ok: "error:convert if condition:convert interface{} to bool failed\n"},
 		{script: "BEGIN{a=1;if a==0 { print a}else if a/0 { print a}}", ok: "error:devision by zero\n"},
-		{script: "BEGIN{a[1]=1;if a[1]==0 { print a}else if a { print a}}", ok: "error:convert to bool failed in else if condition\n"},
+		{script: "BEGIN{a[1]=1;if a[1]==0 { print a}else if a { print a}}", ok: "error:convert else if condition:convert interface{} to bool failed\n"},
 		{script: "BEGIN{a=1;if a==0 { print a}else if a==1 { print a/0}}", ok: "error:devision by zero\n"},
 
 		// for statement
@@ -345,7 +345,7 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{a=0;for a<=10 { a= a+1 };print a}", ok: "11\n"},
 		{script: "BEGIN{a=0;for a { a= a+1 };print a}", ok: "0\n"},
 		{script: "BEGIN{a=1;for a { a= a-1 };print a}", ok: "0\n"},
-		{script: "BEGIN{s[1]=1;for s { a= a-1 };print a}", ok: "error:convert to bool failed in while condition\n"},
+		{script: "BEGIN{s[1]=1;for s { a= a-1 };print a}", ok: "error:convert while condition:convert interface{} to bool failed\n"},
 		{script: "BEGIN{s=\"\";for s { s= s+1 };print s}", ok: "\n"},
 		{script: "BEGIN{s=\"str\";for s { s= \"\" };print s}", ok: "\n"},
 		// while statement == for statement
@@ -371,12 +371,12 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{for i=1;i<=3/0;++i{print i}}", ok: "error:devision by zero\n"},
 		{script: "BEGIN{for i=1;i<=3;i/0{i++}}", ok: "error:devision by zero\n"},
 		{script: "BEGIN{for i=1;i<=3;++i{i/0}}", ok: "error:devision by zero\n"},
-		{script: "BEGIN{a[1]=1;for i=1;a;++i{print i}}", ok: "error:convert to bool failed in for loop condition\n"},
+		{script: "BEGIN{a[1]=1;for i=1;a;++i{print i}}", ok: "error:convert for loop condition:convert interface{} to bool failed\n"},
 		// do while statement
 		{script: "BEGIN{a=0;do{a=a+1} while(a<10);print a}", ok: "10\n"},
 		{script: "BEGIN{a=0;do{a=a+1;if a==5{break}} while(a<10);print a}", ok: "5\n"},
 		{script: "BEGIN{a=-10;do{a=a+1} while(a);print a}", ok: "0\n"},
-		{script: "BEGIN{a[1]=1;do{a[1]=a[1]+1} while(a);print a[1]}", ok: "error:convert to bool failed in do loop condition\n"},
+		{script: "BEGIN{a[1]=1;do{a[1]=a[1]+1} while(a);print a[1]}", ok: "error:convert do loop condition:convert interface{} to bool failed\n"},
 		{script: "BEGIN{a=0;do{a=a+1;if a<10 {continue}else{break}} while(1);print a}", ok: "10\n"},
 		{script: "BEGIN{a=0;do{a=a/0} while(a<10);print a}", ok: "error:devision by zero\n"},
 		{script: "BEGIN{a=0;do{a=a+1} while(a<10/0);print a}", ok: "error:devision by zero\n"},
@@ -695,7 +695,7 @@ func TestGoa(t *testing.T) {
 		// One Liner
 		{script: "1", in: "AAA\n", ok: "AAA\n"},
 		{script: "1;{print \"\"}", in: "AAA\nBBB\n", ok: "AAA\n\nBBB\n\n"},
-		{script: "BEGIN{A[1]=1}A", in: "AAA\n", ok: "error:convert to bool failed in rule expression\n"},
+		{script: "BEGIN{A[1]=1}A", in: "AAA\n", ok: "error:convert rule expression:convert interface{} to bool failed\n"},
 		{script: "END{print}", in: "AAA\nBBB\nAAA\nDDD\n", ok: "DDD\n"},
 		{script: "NF", in: "\n\nAAA\nBBB\n\n\nAAA\nDDD\n", ok: "AAA\nBBB\nAAA\nDDD\n"},
 		{script: "$0", in: "\n\nAAA\nBBB\n\n\nAAA\nDDD\n", ok: "AAA\nBBB\nAAA\nDDD\n"},

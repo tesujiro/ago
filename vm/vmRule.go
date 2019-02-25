@@ -60,9 +60,9 @@ func RunMainRules(rules []ast.Rule, env *Env) (result interface{}, err error) {
 				if result, err := evalExpr(expr, childEnv); err != nil {
 					return result, err
 				} else {
-					b, err := strictToBool(result, "rule expression")
+					b, err := strictToBool(result)
 					if err != nil {
-						return nil, err
+						return nil, fmt.Errorf("convert rule expression:%v", err)
 					}
 					//fmt.Printf("vmRule ExprPattern result:%#v bool:%v\n", result, b)
 					if !b {

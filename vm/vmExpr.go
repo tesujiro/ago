@@ -248,9 +248,9 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 		if err != nil {
 			return nil, err
 		}
-		cond_b, err := strictToBool(cond, "ternary operator")
+		cond_b, err := strictToBool(cond)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("convert ternary operator:%v", err)
 		}
 		if cond_b {
 			return evalExpr(thenExpr, env)
@@ -290,32 +290,32 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 		}
 		switch expr.(*ast.BinOpExpr).Operator {
 		case "||":
-			left_b, err := strictToBool(left, "left expression of OR operator")
+			left_b, err := strictToBool(left)
 			if err != nil {
-				return nil, err
+				return nil, fmt.Errorf("convert left expression of OR perator:%v", err)
 			}
 			if left_b {
 				return true, nil
 			}
-			right_b, err := strictToBool(right, "right expression of OR operator")
+			right_b, err := strictToBool(right)
 			if err != nil {
-				return nil, err
+				return nil, fmt.Errorf("convert right expression of OR perator:%v", err)
 			}
 			if right_b {
 				return true, nil
 			}
 			return false, nil
 		case "&&":
-			left_b, err := strictToBool(left, "left expression of AND operator")
+			left_b, err := strictToBool(left)
 			if err != nil {
-				return nil, err
+				return nil, fmt.Errorf("convert left expression of AND perator:%v", err)
 			}
 			if !left_b {
 				return false, nil
 			}
-			right_b, err := strictToBool(right, "right expression of AND operator")
+			right_b, err := strictToBool(right)
 			if err != nil {
-				return nil, err
+				return nil, fmt.Errorf("convert right expression of AND perator:%v", err)
 			}
 			if right_b {
 				return true, nil

@@ -218,9 +218,9 @@ func runSingleStmt(stmt ast.Stmt, env *Env) (interface{}, error) {
 		if err != nil {
 			return nil, err
 		}
-		b, err := strictToBool(result, "if condition")
+		b, err := strictToBool(result)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("convert if condition:%v", err)
 		}
 		if b {
 			//fmt.Println("If then -> env.Dump()")
@@ -236,9 +236,9 @@ func runSingleStmt(stmt ast.Stmt, env *Env) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-			b, err := strictToBool(result, "else if condition")
+			b, err := strictToBool(result)
 			if err != nil {
-				return nil, err
+				return nil, fmt.Errorf("convert else if condition:%v", err)
 			}
 			if b {
 				result, err = run(stmt.(*ast.IfStmt).Then, child)
@@ -295,9 +295,9 @@ func runSingleStmt(stmt ast.Stmt, env *Env) (interface{}, error) {
 				if err != nil {
 					return nil, err
 				}
-				b, err := strictToBool(result, "while condition")
+				b, err := strictToBool(result)
 				if err != nil {
-					return nil, err
+					return nil, fmt.Errorf("convert while condition:%v", err)
 				}
 				if !b {
 					break
@@ -337,9 +337,9 @@ func runSingleStmt(stmt ast.Stmt, env *Env) (interface{}, error) {
 				if err != nil {
 					return nil, err
 				}
-				b, err := strictToBool(result, "for loop condition")
+				b, err := strictToBool(result)
 				if err != nil {
-					return nil, err
+					return nil, fmt.Errorf("convert for loop condition:%v", err)
 				}
 				if !b {
 					break
@@ -389,9 +389,9 @@ func runSingleStmt(stmt ast.Stmt, env *Env) (interface{}, error) {
 				if err != nil {
 					return nil, err
 				}
-				b, err := strictToBool(result, "do loop condition")
+				b, err := strictToBool(result)
 				if err != nil {
-					return nil, err
+					return nil, fmt.Errorf("convert do loop condition:%v", err)
 				}
 				if !b {
 					break
