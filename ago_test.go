@@ -950,7 +950,7 @@ ZZZ 1
 		}
 
 		readFromIn.Close()
-		writeToIn.Close()
+		//writeToIn.Close()
 		readFromOut.Close()
 		writeToOut.Close()
 	}
