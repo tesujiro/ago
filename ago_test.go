@@ -8,6 +8,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"sync"
 	"testing"
 )
 
@@ -826,6 +827,8 @@ ZZZ 1
 
 	for _, test := range tests {
 		case_number++
+		wg := &sync.WaitGroup{}
+
 		//t.Logf("script:%v\n", test.script)
 		switch os.Getenv("TESTCASE") {
 		case "":
@@ -868,15 +871,18 @@ ZZZ 1
 		// Read Stdout goroutine
 		readerOut := bufio.NewScanner(readFromOut)
 		chanOut := make(chan string)
+		wg.Add(1)
 		go func() {
 			for readerOut.Scan() {
 				chanOut <- readerOut.Text()
 			}
 			close(chanOut)
+			wg.Done()
 			return
 		}()
 
 		// Run Script goroutine
+		wg.Add(1)
 		go func() {
 
 			os.Args = []string{"ago"}
@@ -909,9 +915,11 @@ ZZZ 1
 			*/
 			//close(chanDone) //NG
 			writeToOut.Close()
+			wg.Done()
 		}()
 
 		// Write to Stdin goroutine
+		wg.Add(1)
 		go func() {
 			scanner := bufio.NewScanner(strings.NewReader(test.in))
 			for scanner.Scan() {
@@ -927,6 +935,7 @@ ZZZ 1
 			}
 			//readFromIn.Close() //NG
 			writeToIn.Close()
+			wg.Done()
 		}()
 
 		// Get Result
@@ -949,8 +958,9 @@ ZZZ 1
 			t.Errorf("Case:[%v] received: %v - expected: %v - runSource: %v", case_number, resultOut, test.ok, test.script)
 		}
 
+		wg.Wait()
 		readFromIn.Close()
-		//writeToIn.Close()
+		writeToIn.Close()
 		readFromOut.Close()
 		writeToOut.Close()
 	}
