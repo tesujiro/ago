@@ -82,7 +82,7 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{3%0}", ok: "error:devision by zero\n"},
 		{script: "BEGIN{a[1]=1;print 3%a}", ok: "error:can't read value of array\n"},
 		{script: "BEGIN{print \"a b c\"+1234}", ok: "1234\n"},
-		{script: "BEGIN{print \"a b c\"+\" d e f\"}", ok: "a b c d e f\n"},
+		{script: "BEGIN{print \"a b c\"+\" d e f\"}", ok: "0\n"},
 		{script: "BEGIN{print \"a b c\"-\" d e f\"}", ok: "0\n"},
 		{script: "BEGIN{print \"a b c\" \" d e f\"}", ok: "a b c d e f\n"},
 		{script: "BEGIN{print \"a\" \"b\"}", ok: "ab\n"},
@@ -139,8 +139,8 @@ func TestGoa(t *testing.T) {
 		// ternary operator
 		{script: "BEGIN{a=1;print a==1?a+1:a+2}", ok: "2\n"},
 		{script: "BEGIN{a=2;print a==1?a+1:a+2}", ok: "4\n"},
-		{script: "BEGIN{a=\"a\";print a==\"a\"?a+\"1\":a+\"2\"}", ok: "a1\n"},
-		{script: "BEGIN{a=\"b\";print a==\"a\"?a+\"1\":a+\"2\"}", ok: "b2\n"},
+		{script: "BEGIN{a=\"a\";print a==\"a\"?a+\"1\":a+\"2\"}", ok: "1\n"},
+		{script: "BEGIN{a=\"b\";print a==\"a\"?a+\"1\":a+\"2\"}", ok: "2\n"},
 		{script: "BEGIN{print 1/0?a+1:a+2}", ok: "error:devision by zero\n"},
 		{script: "BEGIN{a[1]=1;print a?a+1:a+2}", ok: "error:convert ternary operator:convert interface{} to bool failed\n"},
 		// composite expression
@@ -174,7 +174,7 @@ func TestGoa(t *testing.T) {
 
 		// JAPANESE
 		{script: "BEGIN{print \"あいう\"}", ok: "あいう\n"},
-		{script: "BEGIN{a=\"あいう\";b=\"えお\";print a+b}", ok: "あいうえお\n"},
+		{script: "BEGIN{a=\"あいう\";b=\"えお\";print a+b}", ok: "0\n"},
 		{script: "BEGIN{a[\"あ\"]=1;a[\"い\"]=2;a[\"う\"]=3;for(key in a){print key,a[key]}}", ok: "あ 1\nい 2\nう 3\n"},
 
 		// variable and scope
@@ -300,7 +300,7 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{a=10;a-=2;print a}", ok: "8\n"},
 		{script: "BEGIN{a=10;a*=2;print a}", ok: "20\n"},
 		{script: "BEGIN{a=10;a/=2;print a}", ok: "5\n"},
-		{script: "BEGIN{a=\"abc\";a+=\"xyz\";print a}", ok: "abcxyz\n"},
+		{script: "BEGIN{a=\"abc\";a+=\"xyz\";print a}", ok: "0\n"},
 		// TODO & TOFIX
 		//{script: "BEGIN{a=\"abc\";a-=\"xyz\";print a}", ok: "abcxyz\n"},
 		//{script: "BEGIN{a=\"1\";a+=\"2\";print a}", ok: "3\n"}, //TOFIX
@@ -404,7 +404,7 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{a[1]=1;a[2]=2;print a[1],a[2]}", ok: "1 2\n"},
 		{script: "BEGIN{a[1]=1;a[1]=2;print a[1]}", ok: "2\n"},
 		{script: "BEGIN{a[1]=\"a\";print a[1]}", ok: "a\n"},
-		{script: "BEGIN{a[1]=\"a\";print a[1]+a[2]}", ok: "a\n"},
+		{script: "BEGIN{a[1]=\"a\";print a[1]+a[2]}", ok: "0\n"},
 		{script: "BEGIN{a[\"a\"]=1;print a[\"a\"]}", ok: "1\n"},
 		{script: "BEGIN{a[1,2]=1;print a[1,2]}", ok: "1\n"},
 		{script: "BEGIN{a[1]=1;a=2}", ok: "error:can't assign to a; it's an associated array name.\n"},
@@ -447,7 +447,7 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{A[1]=10;add=func(a,b){return a+b}; x=add(A,5);print x}", ok: "error:can't read value of array\n"},
 		{script: "BEGIN{add=func(a,b){return a+b}; print add(10,5)}", ok: "15\n"},
 		{script: "BEGIN{add=func(a,b){return a+b}; print add(1.1,2.1)}", ok: "3.2\n"},
-		{script: "BEGIN{add=func(a,b){return a+b}; print add(\"あ\",\"いう\")}", ok: "あいう\n"},
+		{script: "BEGIN{add=func(a,b){return a+b}; print add(\"あ\",\"いう\")}", ok: "0\n"},
 		{script: "BEGIN{print func(a,b){return a+b}(10,5)}", ok: "15\n"},
 		{script: "BEGIN{a=123;add=func(a,b){return a+b}; add(10,5);print a}", ok: "123\n"},
 		{script: "BEGIN{c=100;add=func(a,b){return a+b+c}; print add(10,5)}", ok: "115\n"},

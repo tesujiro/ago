@@ -358,13 +358,10 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 				return toFloat64(left) + toFloat64(right), nil
 			case l_kind == reflect.Int || r_kind == reflect.Int:
 				return toInt(left) + toInt(right), nil
-			case l_kind == reflect.String || r_kind == reflect.String:
-				return toString(left) + toString(right), nil
 			default:
 				return toFloat64(left) + toFloat64(right), nil
 			}
 		case "-":
-			//TODO difference from "+"
 			l_kind := reflect.ValueOf(left).Kind()
 			r_kind := reflect.ValueOf(right).Kind()
 			switch {
