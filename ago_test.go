@@ -301,10 +301,6 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{a=10;a*=2;print a}", ok: "20\n"},
 		{script: "BEGIN{a=10;a/=2;print a}", ok: "5\n"},
 		{script: "BEGIN{a=\"abc\";a+=\"xyz\";print a}", ok: "0\n"},
-		// TODO & TOFIX
-		//{script: "BEGIN{a=\"abc\";a-=\"xyz\";print a}", ok: "abcxyz\n"},
-		//{script: "BEGIN{a=\"1\";a+=\"2\";print a}", ok: "3\n"}, //TOFIX
-		//{script: "BEGIN{a=\"abc\";a-=\"xyz\";print a}", ok: "abcxyz\n"},
 
 		// multi expressions
 		{script: "BEGIN{a,b=1,2;print a}", ok: "1\n"},
