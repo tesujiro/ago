@@ -394,8 +394,6 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 			switch {
 			case l_kind == reflect.Map || r_kind == reflect.Map:
 				return nil, fmt.Errorf("can't read value of array")
-			case l_kind == reflect.Int && r_kind == reflect.Int:
-				return toInt(left) / toInt(right), nil
 			default:
 				return toFloat64(left) / toFloat64(right), nil
 			}
