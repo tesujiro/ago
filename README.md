@@ -1,6 +1,13 @@
 # ago
-awk goes on
-- awk implementation on go
+If you were a gopher, you wrote a awk script for some task.
+```
+> awk '{if $1>10 {print}}' some.txt
+awk: syntax error at source line 1
+ context is
+	{if >>>  $ <<< 1>10 {print}}
+>
+```
+Ago is an alternative awk for gophers.
 
 # Installation
 ```
@@ -9,7 +16,7 @@ $ go get -u github.com/tesujiro/ago
 
 # Examples
 ```
-> echo Once Time Ago | ago '{print "Hello",$NF,"!"}'
+> echo Long Time Ago | ago '{print "Hello",$NF,"!"}'
 Hello Ago !
 > printf "AAA\nBBB\nAAA\DDD" | ago '/A+/{++N};END{print N+0}'
 2
