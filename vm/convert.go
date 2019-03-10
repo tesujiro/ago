@@ -38,7 +38,15 @@ func toFloat64(val interface{}) float64 {
 
 func strictToFloat(val interface{}) (float64, error) {
 	switch reflect.ValueOf(val).Kind() {
-	case reflect.Int64, reflect.Int32, reflect.Int16, reflect.Int8, reflect.Int:
+	case reflect.Int64:
+		return float64(val.(int64)), nil
+	case reflect.Int32:
+		return float64(val.(int32)), nil
+	case reflect.Int16:
+		return float64(val.(int16)), nil
+	case reflect.Int8:
+		return float64(val.(int8)), nil
+	case reflect.Int:
 		return float64(val.(int)), nil
 	case reflect.Float64, reflect.Float32:
 		return val.(float64), nil
@@ -46,10 +54,12 @@ func strictToFloat(val interface{}) (float64, error) {
 		// "1.1" -> 1
 		// "1.xx" -> 1
 		// "1e1.xx" -> 10 //TODO
-		// "011.xx" -> 9  //TODO
-		re := regexp.MustCompile(`(\-|\+)?\d+(.\d*)?`)
+		// "0x11.xx" -> 17  //TODO
+		digit := `(\-|\+)?\d+(\.\d*)?`
+		re := regexp.MustCompile(`^` + digit)
 		num_str := re.FindString(val.(string))
 		if len(num_str) == 0 {
+			re = regexp.MustCompile(`^` + digit + `(e|E)` + digit)
 			return 0, fmt.Errorf("cannot convert to float:%v", reflect.ValueOf(val).Kind())
 		}
 
@@ -59,7 +69,7 @@ func strictToFloat(val interface{}) (float64, error) {
 			return num, err
 		}
 	default:
-		return 0, fmt.Errorf("cannot convert to int:%v", reflect.ValueOf(val).Kind())
+		return 0, fmt.Errorf("cannot convert to float:%v", reflect.ValueOf(val).Kind())
 	}
 }
 

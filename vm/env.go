@@ -76,7 +76,17 @@ func (e *Env) Set(k string, v interface{}) error {
 	bv := reflect.ValueOf(e.builtin).Elem()
 	bt := reflect.TypeOf(e.builtin).Elem()
 	if f, ok := bt.FieldByName(k); ok {
-		if f.Type != reflect.TypeOf(v) {
+		/*
+			if f.Type != reflect.TypeOf(v) {
+				return fmt.Errorf("type of %v must be %v ,not %v.", f.Name, f.Type, reflect.TypeOf(v))
+			}
+		*/
+		switch reflect.TypeOf(v).Kind() {
+		case f.Type.Kind():
+			break
+		case reflect.Float64:
+			v = int(v.(float64))
+		default:
 			return fmt.Errorf("type of %v must be %v ,not %v.", f.Name, f.Type, reflect.TypeOf(v))
 		}
 		fv := bv.FieldByName(k)

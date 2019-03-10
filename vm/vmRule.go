@@ -31,10 +31,10 @@ func RunFuncRules(rules []ast.Rule, env *Env) (result interface{}, err error) {
 		funcExpr := &ast.FuncExpr{Name: rule.Pattern.(*ast.FuncPattern).Name, Args: rule.Pattern.(*ast.FuncPattern).Args, Stmts: rule.Action}
 		result, err = evalExpr(funcExpr, env)
 		if err != nil {
-			return
+			return toInt(result), err
 		}
 	}
-	return
+	return toInt(result), nil
 }
 
 func RunBeginRules(rules []ast.Rule, env *Env) (result interface{}, err error) {
@@ -43,10 +43,10 @@ func RunBeginRules(rules []ast.Rule, env *Env) (result interface{}, err error) {
 		childEnv := env.NewEnv()
 		result, err = runStmts(rule.Action, childEnv)
 		if err != nil {
-			return
+			return toInt(result), err
 		}
 	}
-	return
+	return toInt(result), err
 }
 
 func RunMainRules(rules []ast.Rule, env *Env) (result interface{}, err error) {
@@ -58,7 +58,7 @@ func RunMainRules(rules []ast.Rule, env *Env) (result interface{}, err error) {
 			expr := rule.Pattern.(*ast.ExprPattern).Expr
 			if expr != nil {
 				if result, err := evalExpr(expr, childEnv); err != nil {
-					return result, err
+					return toInt(result), err
 				} else {
 					b, err := strictToBool(result)
 					if err != nil {
@@ -74,7 +74,7 @@ func RunMainRules(rules []ast.Rule, env *Env) (result interface{}, err error) {
 
 			result, err = runStmts(rule.Action, childEnv)
 			if err != nil {
-				return
+				return toInt(result), err
 			}
 		case *ast.StartStopPattern:
 			pattern := rule.Pattern.(*ast.StartStopPattern)
@@ -117,7 +117,7 @@ func RunMainRules(rules []ast.Rule, env *Env) (result interface{}, err error) {
 			}
 		}
 	}
-	return
+	return toInt(result), err
 }
 
 func RunEndRules(rules []ast.Rule, env *Env) (result interface{}, err error) {

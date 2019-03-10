@@ -38,7 +38,7 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 		}
 		findex, err := strictToInt(index)
 		if err != nil {
-			return nil, fmt.Errorf("field index not int :%v", reflect.TypeOf(index))
+			return nil, fmt.Errorf("field index can not convert to int :%v", err)
 		}
 		if field, err := env.GetField(findex); err != nil {
 			return nil, err
@@ -162,7 +162,7 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 			kind := reflect.ValueOf(val).Kind()
 			switch kind {
 			case reflect.Int64, reflect.Int32, reflect.Int16, reflect.Int8, reflect.Int:
-				return -1 * toInt(val), nil
+				return -1 * toFloat64(val), nil
 			case reflect.Float64, reflect.Float32:
 				return -1 * toFloat64(val), nil
 			}
@@ -322,9 +322,36 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 			}
 			return false, nil
 		case "==":
-			return left == right, nil
+			l_kind := reflect.ValueOf(left).Kind()
+			r_kind := reflect.ValueOf(right).Kind()
+			switch {
+			case l_kind == reflect.String && r_kind == reflect.String:
+				return left == right, nil
+			case l_kind == reflect.Float64 || r_kind == reflect.Float64:
+				return toFloat64(left) == toFloat64(right), nil
+			case l_kind == reflect.Int || r_kind == reflect.Int:
+				return toString(left) == toString(right), nil
+			case l_kind == reflect.Map || r_kind == reflect.Map:
+				return nil, fmt.Errorf("can't read value of array")
+			default:
+				return toString(left) == toString(right), nil
+			}
 		case "!=":
-			return left != right, nil
+			//return left != right, nil
+			l_kind := reflect.ValueOf(left).Kind()
+			r_kind := reflect.ValueOf(right).Kind()
+			switch {
+			case l_kind == reflect.String && r_kind == reflect.String:
+				return left != right, nil
+			case l_kind == reflect.Float64 || r_kind == reflect.Float64:
+				return toFloat64(left) != toFloat64(right), nil
+			case l_kind == reflect.Int || r_kind == reflect.Int:
+				return toString(left) != toString(right), nil
+			case l_kind == reflect.Map || r_kind == reflect.Map:
+				return nil, fmt.Errorf("can't read value of array")
+			default:
+				return toString(left) != toString(right), nil
+			}
 		case ">":
 			return toFloat64(left) > toFloat64(right), nil
 		case ">=":
@@ -339,10 +366,10 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 			switch {
 			case l_kind == reflect.String || r_kind == reflect.String:
 				return toString(left) + toString(right), nil
-			case l_kind == reflect.Float64 || r_kind == reflect.Float64:
-				return toFloat64(left) + toFloat64(right), nil
 			case l_kind == reflect.Int || r_kind == reflect.Int:
 				return toString(left) + toString(right), nil
+			case l_kind == reflect.Float64 || r_kind == reflect.Float64:
+				return toFloat64(left) + toFloat64(right), nil
 			case l_kind == reflect.Map || r_kind == reflect.Map:
 				return nil, fmt.Errorf("can't read value of array")
 			default:
@@ -354,10 +381,6 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 			switch {
 			case l_kind == reflect.Map || r_kind == reflect.Map:
 				return nil, fmt.Errorf("can't read value of array")
-			case l_kind == reflect.Float64 || r_kind == reflect.Float64:
-				return toFloat64(left) + toFloat64(right), nil
-			case l_kind == reflect.Int || r_kind == reflect.Int:
-				return toInt(left) + toInt(right), nil
 			default:
 				return toFloat64(left) + toFloat64(right), nil
 			}
@@ -367,10 +390,6 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 			switch {
 			case l_kind == reflect.Map || r_kind == reflect.Map:
 				return nil, fmt.Errorf("can't read value of array")
-			case l_kind == reflect.Float64 || r_kind == reflect.Float64:
-				return toFloat64(left) - toFloat64(right), nil
-			case l_kind == reflect.Int && r_kind == reflect.Int:
-				return toInt(left) - toInt(right), nil
 			default:
 				return toFloat64(left) - toFloat64(right), nil
 			}
@@ -380,8 +399,6 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 			switch {
 			case l_kind == reflect.Map || r_kind == reflect.Map:
 				return nil, fmt.Errorf("can't read value of array")
-			case l_kind == reflect.Int && r_kind == reflect.Int:
-				return toInt(left) * toInt(right), nil
 			default:
 				return toFloat64(left) * toFloat64(right), nil
 			}
@@ -409,6 +426,8 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 				return nil, fmt.Errorf("can't read value of array")
 			default:
 				return toInt(left) % toInt(right), nil
+				// TODO: awk 'BEGIN{print 5 %1.2}'
+				// TODO: awk 'BEGIN{print 5.1 %2}'
 			}
 		}
 	case *ast.MatchExpr:
@@ -520,10 +539,18 @@ func evalAssExpr(lexp ast.Expr, val interface{}, env *Env) (interface{}, error) 
 			//fmt.Println("fieldExpr index error") //TODO
 			return nil, err
 		}
-		index, ok := i_val.(int)
-		if !ok {
-			return nil, fmt.Errorf("field index not int :%v", reflect.TypeOf(i_val))
+		/*
+			index, ok := i_val.(int)
+			if !ok {
+				return nil, fmt.Errorf("field index not int :%v", reflect.TypeOf(i_val))
+			}
+		*/
+		index_f, err := strictToFloat(i_val)
+		if err != nil {
+			return nil, fmt.Errorf("field index cannot convert to int :%v", err)
 		}
+		index := int(index_f)
+
 		switch val.(type) {
 		case string:
 			break

@@ -36,6 +36,11 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{print 1+1}#comment", ok: "2\n"},
 		{script: "BEGIN{print 1+2}", ok: "3\n"},
 		{script: "BEGIN{print 1+'2'}", ok: "3\n"},
+		{script: "BEGIN{print 1+'x2'}", ok: "1\n"},
+		{script: "BEGIN{print 1+'2x'}", ok: "3\n"},
+		{script: "BEGIN{print 1+'2.1'}", ok: "3.1\n"},
+		{script: "BEGIN{print 2-1}", ok: "1\n"},
+		{script: "BEGIN{print 2-'1.2'}", ok: "0.8\n"},
 		{script: "BEGIN{print 1e3}", ok: "1000\n"},
 		{script: "BEGIN{print 1e10}", ok: "1e+10\n"},
 		{script: "BEGIN{print 0x0a}", ok: "10\n"},
@@ -182,7 +187,8 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{++NF;print NF}", ok: "1\n"},
 		{script: "BEGIN{++NF}END{print NF}", ok: "0\n"},
 		{script: "BEGIN{NF=1}END{print NF}", ok: "0\n"},
-		{script: "BEGIN{NF=1.1}END{print NF}", ok: "error:type of NF must be int ,not float64.\n"},
+		{script: "BEGIN{NF=1.1}END{print NF}", ok: "0\n"},
+		//{script: "BEGIN{NF=1.1;print NF}", ok: "1.1\n"},  ??TODO
 		{script: "BEGIN{NF=\"aaa\"}", ok: "error:type of NF must be int ,not string.\n"},
 		{script: "BEGIN{$0=\"aaa\";print}", ok: "aaa\n"},
 		{script: "BEGIN{$1=\"aaa\";print}", ok: "aaa\n"},
@@ -474,7 +480,7 @@ func TestGoa(t *testing.T) {
 		// anonymous func
 		{script: "BEGIN{print func (x){return x+100;}(10)}", ok: "110\n"},
 		{script: "BEGIN{print func (x){return x+100;}()}", ok: "error:function wants 1 arguments but received 0\n"},
-		{script: "BEGIN{print (1+1)(10)}", ok: "error:cannot call type int\n"},
+		{script: "BEGIN{print (1+1)(10)}", ok: "error:cannot call type float64\n"},
 		{script: "BEGIN{Fn=func (x){return func(y) {return x*10+y};};Fn2=Fn(10);print Fn2(2)}", ok: "102\n"},
 		// recursive call
 		{script: "BEGIN{Factorial=func(x){if x==1 {1} else { x*Factorial(x-1)}};print Factorial(3)}", ok: "6\n"},
@@ -600,15 +606,15 @@ func TestGoa(t *testing.T) {
 		{script: "{print $(1/0)}", in: "Hello World!\n", ok: "error:devision by zero\n"},
 		{script: "{b=$1;print b}", in: "Hello World!\n", ok: "Hello\n"},
 		{script: "{$1=2;b=$1;print b}", in: "Hello World!\n", ok: "2\n"},
-		{script: "{print $'a'}", in: "Hello World!\n", ok: "error:field index not int :string\n"},
-		{script: "{print $''}", in: "Hello World!\n", ok: "error:field index not int :string\n"},
+		{script: "{print $'a'}", in: "Hello World!\n", ok: "error:field index can not convert to int :cannot convert to float:string\n"},
+		{script: "{print $''}", in: "Hello World!\n", ok: "error:field index can not convert to int :cannot convert to float:string\n"},
 		{script: "{print $'1'}", in: "Hello World!\n", ok: "Hello\n"},
 		{script: "{print $'+1'}", in: "Hello World!\n", ok: "Hello\n"},
 		{script: "{print $'1.1'}", in: "Hello World!\n", ok: "Hello\n"},
 		{script: "{print $'1.xx'}", in: "Hello World!\n", ok: "Hello\n"},
-		{script: "{print $'xx'}", in: "Hello World!\n", ok: "error:field index not int :string\n"},
-		{script: "{a[1]=2;print $a}", in: "Hello World!\n", ok: "error:field index not int :map[interface {}]interface {}\n"},
-		{script: "{a=1.1;$a=1;print $a}", in: "Hello World!\n", ok: "error:field index not int :float64\n"},
+		{script: "{print $'xx'}", in: "Hello World!\n", ok: "error:field index can not convert to int :cannot convert to float:string\n"},
+		{script: "{a[1]=2;print $a}", in: "Hello World!\n", ok: "error:field index can not convert to int :cannot convert to float:map\n"},
+		{script: "{a=1.1;$a=1;print $a}", in: "Hello World!\n", ok: "1\n"},
 		{script: "{$(1/0)=1;print $a}", in: "Hello World!\n", ok: "error:devision by zero\n"},
 		{script: "{$(-1)='xx';}", in: "Hello World!\n", ok: "error:Field Index Out of Range:-1\n"},
 		{script: "{a[1]=2;$1=a;print $1}", in: "Hello World!\n", ok: "error:field value is not string :map[interface {}]interface {}\n"},
@@ -826,6 +832,7 @@ ZZZ 1
 		wg := &sync.WaitGroup{}
 
 		//t.Logf("script:%v\n", test.script)
+		//fmt.Fprintf(realStdout, "case:%v script:%v\n", case_number, test.script)
 		switch os.Getenv("TESTCASE") {
 		case "":
 		case "0":
@@ -959,11 +966,11 @@ ZZZ 1
 		writeToIn.Close()
 		readFromOut.Close()
 		writeToOut.Close()
+		os.Stdin = realStdin
+		os.Stderr = realStderr
+		os.Stdout = realStdout
 	}
 
-	os.Stdin = realStdin
-	os.Stderr = realStderr
-	os.Stdout = realStdout
 }
 
 func create_files(files []file) (string, error) {
