@@ -425,9 +425,8 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 			case l_kind == reflect.Map || r_kind == reflect.Map:
 				return nil, fmt.Errorf("can't read value of array")
 			default:
-				return toInt(left) % toInt(right), nil
-				// TODO: awk 'BEGIN{print 5 %1.2}'
-				// TODO: awk 'BEGIN{print 5.1 %2}'
+				q := int(toFloat64(left) / toFloat64(right))
+				return toFloat64(left) - toFloat64(right)*float64(q), nil
 			}
 		}
 	case *ast.MatchExpr:
