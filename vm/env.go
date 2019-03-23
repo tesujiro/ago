@@ -73,34 +73,36 @@ func (e *Env) GetDefaultValue() interface{} {
 func (e *Env) Set(k string, v interface{}) error {
 	//fmt.Printf("Set(%v,%v)\n", k, v)
 	// BuiltIn variable
-	bv := reflect.ValueOf(e.builtin).Elem()
-	bt := reflect.TypeOf(e.builtin).Elem()
-	if f, ok := bt.FieldByName(k); ok {
-		/*
-			if f.Type != reflect.TypeOf(v) {
+	if e.isBuiltin(k) {
+		bv := reflect.ValueOf(e.builtin).Elem()
+		bt := reflect.TypeOf(e.builtin).Elem()
+		if f, ok := bt.FieldByName(k); ok {
+			/*
+				if f.Type != reflect.TypeOf(v) {
+					return fmt.Errorf("type of %v must be %v ,not %v.", f.Name, f.Type, reflect.TypeOf(v))
+				}
+			*/
+			switch reflect.TypeOf(v).Kind() {
+			case f.Type.Kind():
+				break
+			case reflect.Float64:
+				v = int(v.(float64))
+			default:
 				return fmt.Errorf("type of %v must be %v ,not %v.", f.Name, f.Type, reflect.TypeOf(v))
 			}
-		*/
-		switch reflect.TypeOf(v).Kind() {
-		case f.Type.Kind():
-			break
-		case reflect.Float64:
-			v = int(v.(float64))
-		default:
-			return fmt.Errorf("type of %v must be %v ,not %v.", f.Name, f.Type, reflect.TypeOf(v))
-		}
-		fv := bv.FieldByName(k)
-		if !fv.CanSet() {
-			return fmt.Errorf("cannot update %v", f.Name)
-		}
-		fv.Set(reflect.ValueOf(v))
-		if k == "RS" {
-			err := e.SetScannerSplit("")
-			if err != nil {
-				return err
+			fv := bv.FieldByName(k)
+			if !fv.CanSet() {
+				return fmt.Errorf("cannot update %v", f.Name)
 			}
+			fv.Set(reflect.ValueOf(v))
+			if k == "RS" {
+				err := e.SetScannerSplit("")
+				if err != nil {
+					return err
+				}
+			}
+			return nil
 		}
-		return nil
 	}
 
 	// global variable
@@ -176,8 +178,10 @@ func (e *Env) Get(k string) (interface{}, error) {
 	}
 
 	// global variable
-	if v, ok := e.global[k]; ok {
-		return v, nil
+	if isGlobalVarName(k) {
+		if v, ok := e.global[k]; ok {
+			return v, nil
+		}
 	}
 
 	// local variable
