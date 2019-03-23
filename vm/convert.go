@@ -28,12 +28,8 @@ func strictToInt(val interface{}) (int, error) {
 }
 
 func toFloat64(val interface{}) float64 {
-	f, err := strictToFloat(val)
-	if err != nil {
-		return 0
-	} else {
-		return f
-	}
+	f, _ := strictToFloat(val)
+	return f
 }
 
 func strictToFloat(val interface{}) (float64, error) {
