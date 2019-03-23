@@ -166,11 +166,13 @@ func (e *Env) Define(k string, v interface{}) error {
 
 func (e *Env) Get(k string) (interface{}, error) {
 	// Builtin
-	bv := reflect.ValueOf(e.builtin).Elem()
-	bt := reflect.TypeOf(e.builtin).Elem()
-	if _, ok := bt.FieldByName(k); ok {
-		fv := bv.FieldByName(k)
-		return fv.Interface(), nil
+	if e.isBuiltin(k) {
+		bv := reflect.ValueOf(e.builtin).Elem()
+		bt := reflect.TypeOf(e.builtin).Elem()
+		if _, ok := bt.FieldByName(k); ok {
+			fv := bv.FieldByName(k)
+			return fv.Interface(), nil
+		}
 	}
 
 	// global variable

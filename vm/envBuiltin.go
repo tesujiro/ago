@@ -28,6 +28,15 @@ func NewBuiltIn() *builtin {
 	}
 }
 
+func (e *Env) isBuiltin(k string) bool {
+	switch k {
+	case "NF", "NR", "FS", "ORS", "SUBSEP", "RLENGTH", "RSTART", "RS":
+		return true
+	default:
+		return false
+	}
+}
+
 func (e *Env) SetNR(i int) {
 	e.builtin.NR = i
 }
