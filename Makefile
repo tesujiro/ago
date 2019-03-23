@@ -29,3 +29,7 @@ testcase: ./*_test.go ./vm/*_test.go ./parser/grammar.go
 prof:
 	# make prof ARG=[PPROF PATH]
 	go tool pprof --pdf ./ago ${ARG} > ./prof.pdf
+
+.PHONY: bench
+bench:
+	go test -bench . -benchmem
