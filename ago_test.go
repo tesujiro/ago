@@ -765,17 +765,15 @@ ZZZ 1
 
 		// Command argment test
 		{prepare: func() {}, cleanup: func() {}, rc: 0},
-		{prepare: func() { os.Args = []string{os.Args[0], "-version"} }, cleanup: func() { *ver = false }, rc: 0, ok: "Version: 0.0.0\n"},
-		{prepare: func() { *ver = true }, cleanup: func() { *ver = false }, rc: 0, ok: "Version: 0.0.0\n"},
-		{prepare: func() { *dbg = true }, cleanup: func() { *dbg = false }, script: "{}", in: "aaa\n", rc: 0},
-		{prepare: func() { *ast_dump = true }, cleanup: func() { *ast_dump = false }, script: "BEGIN{}{print 1}END{}", rc: 0},
-		{prepare: func() { *globalVar = true }, cleanup: func() { *globalVar = false }, rc: 0},
-		//{prepare: func() { *cpu_prof = true }, cleanup: func() { *cpu_prof = false }, rc: 0},
-		//{prepare: func() { *mem_prof = true }, cleanup: func() { *mem_prof = false }, rc: 0},
-		{prepare: func() { *dbglexer = true }, cleanup: func() { *dbglexer = false }, rc: 0},
-		//{prepare: func() { os.Args = []string{os.Args[0], "-v", "XX"} }, cleanup: func() { variables = hash{} }, rc: 0, script: "BEGIN{print XX}", ok: "xx\n"},
-		{prepare: func() { variables.Set("XX=xx") }, cleanup: func() { variables = hash{} }, rc: 0, script: "BEGIN{print XX}", ok: "xx\n"},
-		{prepare: func() { variables.Set("XX") }, cleanup: func() { variables = hash{} }, rc: 0, script: "BEGIN{print XX}"},
+		{prepare: func() { os.Args = []string{os.Args[0], "-version"} }, rc: 0, ok: "Version: 0.0.0\n"},
+		{prepare: func() { os.Args = []string{os.Args[0], "-d"} }, script: "{}", in: "aaa\n", rc: 0},
+		{prepare: func() { os.Args = []string{os.Args[0], "-a"} }, script: "BEGIN{}{print 1}END{}", rc: 0},
+		{prepare: func() { os.Args = []string{os.Args[0], "-g"} }, rc: 0},
+		//{prepare: func() { os.Args = []string{os.Args[0], "-c"} }, rc: 0},
+		//{prepare: func() { os.Args = []string{os.Args[0], "-m"} }, rc: 0},
+		{prepare: func() { os.Args = []string{os.Args[0], "-l"} }, rc: 0},
+		//{prepare: func() { os.Args = []string{os.Args[0], "-v", "XX"} }, rc: 1, script: "BEGIN{print XX}", ok: "\n"}, // flag exit when error
+		{prepare: func() { os.Args = []string{os.Args[0], "-v", "XX=xx"} }, rc: 0, script: "BEGIN{print XX}", ok: "xx\n"},
 
 		// test for script file
 		{
@@ -790,14 +788,14 @@ ZZZ 1
 			},
 			cleanup: func() {
 				os.Remove(tempScriptPath)
-				*program_file = ""
+				program_file = ""
 			},
 			rc: 0,
 			ok: "Hello, World!\n",
 		},
 		{
 			prepare: func() { os.Args = []string{os.Args[0], "-f", "./xxaabbyyccccdd"} },
-			cleanup: func() { *program_file = "" },
+			cleanup: func() { program_file = "" },
 			rc:      1,
 			ok:      "script file open error: open ./xxaabbyyccccdd: no such file or directory\n",
 		},

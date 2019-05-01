@@ -29,37 +29,25 @@ func (kvs hash) String() string {
 func (kvs hash) Set(s string) error {
 	z := strings.SplitN(s, "=", 2)
 	if len(z) < 2 {
-		return fmt.Errorf("parameter must be KEY=VALUE format :%v", s)
+		return fmt.Errorf("parameter must be KEY=VALUE format")
 	}
 	key := z[0]
 	value := z[1]
-	/*
-		_, ok := kvs[key]
-		if ok {
-			kvs[key] = value
-		} else {
-			kvs[key] = value
-		}
-	*/
 	kvs[key] = value
 	return nil
 }
 
-var FS = flag.String("F", " ", "Field separator")
-var program_file = flag.String("f", "", "Program file")
-var dbg = flag.Bool("d", false, "debug option")
-var globalVar = flag.Bool("g", false, "global variable option")
-var dbglexer = flag.Bool("l", false, "debug lexer option")
-var ast_dump = flag.Bool("a", false, "AST dump option")
-var mem_prof = flag.Bool("m", false, "Memory Profile")
-var cpu_prof = flag.Bool("c", false, "CPU Profile")
-var ver = flag.Bool("version", false, "version")
+var (
+	FS, program_file                   string
+	dbg, globalVar, dbglexer, ast_dump bool
+	mem_prof, cpu_prof, ver            bool
+)
 var variables hash = hash{}
 
 const version = "0.0.0"
 
 func init() {
-	flag.Var(&variables, "v", "followed by var=value, assign variable before execution")
+	//flag.Var(&variables, "v", "followed by var=value, assign variable before execution")
 }
 
 func main() {
@@ -67,12 +55,30 @@ func main() {
 }
 
 func _main() int {
-	flag.Parse()
-	args := flag.Args()
+	//flag.Parse()
+	//args := flag.Args()
+	f := flag.NewFlagSet(os.Args[0], flag.ExitOnError)
+	f.StringVar(&FS, "F", " ", "Field separator")
+	f.StringVar(&program_file, "f", "", "Program file")
+	f.BoolVar(&dbg, "d", false, "debug option")
+	f.BoolVar(&globalVar, "g", false, "global variable option")
+	f.BoolVar(&dbglexer, "l", false, "debug lexer option")
+	f.BoolVar(&ast_dump, "a", false, "AST dump option")
+	f.BoolVar(&mem_prof, "m", false, "Memory Profile")
+	f.BoolVar(&cpu_prof, "c", false, "CPU Profile")
+	f.BoolVar(&ver, "version", false, "version")
+	f.Var(&variables, "v", "followed by var=value, assign variable before execution")
+	err := f.Parse(os.Args[1:])
+	if err != nil {
+		fmt.Printf("argument parse err:%v\n", err)
+		return 1
+	}
+	args := f.Args()
+
 	var file, script string
 	switch len(args) {
 	case 1:
-		if *program_file != "" {
+		if program_file != "" {
 			file = args[0]
 		} else {
 			script = args[0]
@@ -82,26 +88,26 @@ func _main() int {
 		file = args[1]
 	}
 
-	if *ver {
+	if ver {
 		fmt.Println("Version:", version)
 		return 0
 	}
 
-	if *dbg {
+	if dbg {
 		debug.On()
 	} else {
 		debug.Off()
 	}
-	if *cpu_prof {
+	if cpu_prof {
 		defer profile.Start().Stop()
 	}
-	if *mem_prof {
+	if mem_prof {
 		defer profile.Start(profile.MemProfile).Stop()
 	}
 
 	var script_reader io.Reader
-	if *program_file != "" {
-		fp, err := os.Open(*program_file)
+	if program_file != "" {
+		fp, err := os.Open(program_file)
 		if err != nil {
 			fmt.Println("script file open error:", err)
 			return 1
@@ -113,7 +119,6 @@ func _main() int {
 	}
 
 	var file_reader *os.File
-	var err error
 	if file != "" {
 		file_reader, err = os.Open(file)
 		if err != nil {
@@ -131,9 +136,9 @@ func _main() int {
 func initEnv() *vm.Env {
 	env := vm.NewEnv()
 	env = lib.Import(env)
-	env.SetFS(*FS)
+	env.SetFS(FS)
 
-	if *globalVar {
+	if globalVar {
 		vm.SetGlobalVariables()
 	}
 
@@ -147,7 +152,7 @@ func initEnv() *vm.Env {
 func runScript(script_reader io.Reader, file_reader *os.File) int {
 
 	env := initEnv()
-	if *dbg {
+	if dbg {
 		env.Dump()
 	}
 
@@ -159,7 +164,7 @@ func runScript(script_reader io.Reader, file_reader *os.File) int {
 	source := string(bytes)
 	debug.Println("script:", source)
 
-	if *dbglexer {
+	if dbglexer {
 		parser.TraceLexer()
 	} else {
 		parser.TraceOffLexer()
@@ -170,7 +175,7 @@ func runScript(script_reader io.Reader, file_reader *os.File) int {
 		fmt.Printf("Syntax error: %v \n", parseError)
 		return 1
 	}
-	if *ast_dump {
+	if ast_dump {
 		parser.Dump(ast)
 	}
 
@@ -212,7 +217,7 @@ func runScript(script_reader io.Reader, file_reader *os.File) int {
 		fmt.Printf("error:%v\n", err)
 		return 1
 	}
-	if *dbg {
+	if dbg {
 		env.Dump()
 	}
 
@@ -248,7 +253,7 @@ func runScript(script_reader io.Reader, file_reader *os.File) int {
 			}
 			//debug.Printf("ENV=%#v\n", env)
 			//debug.Printf("%#v\n", res)
-			if *dbg {
+			if dbg {
 				env.Dump()
 			}
 			debug.Printf("%#v\n", result)
