@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"regexp"
 	"strconv"
 	"strings"
 	"sync"
@@ -21,6 +22,7 @@ type test struct {
 	script  string
 	in      string
 	ok      string
+	okRegex string
 	prepare func()
 	cleanup func()
 	rc      int
@@ -766,13 +768,13 @@ ZZZ 1
 		// Command argment test
 		{prepare: func() {}, cleanup: func() {}, rc: 0},
 		{prepare: func() { os.Args = []string{os.Args[0], "-version"} }, rc: 0, ok: "Version: 0.0.0\n"},
-		{prepare: func() { os.Args = []string{os.Args[0], "-d"} }, script: "{}", in: "aaa\n", rc: 0},
-		{prepare: func() { os.Args = []string{os.Args[0], "-a"} }, script: "BEGIN{}{print 1}END{}", rc: 0},
-		{prepare: func() { os.Args = []string{os.Args[0], "-g"} }, rc: 0},
+		{prepare: func() { os.Args = []string{os.Args[0], "-d"} }, script: "{}", in: "aaa\n", rc: 0, okRegex: "Start debug mode."},
+		{prepare: func() { os.Args = []string{os.Args[0], "-a"} }, script: "BEGIN{}{print 1}END{}", rc: 0, okRegex: `ast.NumExpr{Literal:"1"}`},
+		{prepare: func() { os.Args = []string{os.Args[0], "-g"} }, script: "BEGIN{a=1}END{print a}", in: "\n", rc: 0, ok: "1\n"},
 		//{prepare: func() { os.Args = []string{os.Args[0], "-c"} }, rc: 0},
 		//{prepare: func() { os.Args = []string{os.Args[0], "-m"} }, rc: 0},
-		{prepare: func() { os.Args = []string{os.Args[0], "-l"} }, rc: 0},
-		//{prepare: func() { os.Args = []string{os.Args[0], "-v", "XX"} }, rc: 1, script: "BEGIN{print XX}", ok: "\n"}, // flag exit when error
+		{prepare: func() { os.Args = []string{os.Args[0], "-l"} }, script: "BEGIN{}", rc: 0, okRegex: "Start lexer debug mode"},
+		//{prepare: func() { os.Args = []string{os.Args[0], "-v", "XX"} }, rc: 1, script: "BEGIN{print XX}", ok: "\n"}, // flag exits when error
 		{prepare: func() { os.Args = []string{os.Args[0], "-v", "XX=xx"} }, rc: 0, script: "BEGIN{print XX}", ok: "xx\n"},
 
 		// test for script file
@@ -961,6 +963,12 @@ ZZZ 1
 		//fmt.Fprintf(realStdout, "result:[%v]\ttest.ok:[%v]\n", resultOut, test.ok)
 		if test.ok != "" && resultOut != strings.Replace(test.ok, "\r", "", -1) { //replace for Windows
 			t.Errorf("Case:[%v] received: %v - expected: %v - runSource: %v", case_number, resultOut, test.ok, test.script)
+		}
+		if test.okRegex != "" {
+			r := regexp.MustCompile(strings.Replace(test.okRegex, "\r", "", -1))
+			if !r.MatchString(resultOut) {
+				t.Errorf("Case:[%v] received: %v - expected(regexp): %v - runSource: %v", case_number, resultOut, test.okRegex, test.script)
+			}
 		}
 
 		wg.Wait()

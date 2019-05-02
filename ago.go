@@ -94,6 +94,7 @@ func _main() int {
 	}
 
 	if dbg {
+		fmt.Println("Start debug mode.")
 		debug.On()
 	} else {
 		debug.Off()
@@ -165,6 +166,7 @@ func runScript(script_reader io.Reader, file_reader *os.File) int {
 	debug.Println("script:", source)
 
 	if dbglexer {
+		fmt.Println("Start lexer debug mode.")
 		parser.TraceLexer()
 	} else {
 		parser.TraceOffLexer()
