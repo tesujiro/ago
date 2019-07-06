@@ -175,6 +175,16 @@ func runScript(script_reader io.Reader, file_reader *os.File) int {
 	ast, parseError := parser.ParseSrc(source)
 	if parseError != nil {
 		fmt.Printf("Syntax error: %v \n", parseError)
+		if e, ok := parseError.(*parser.Error); ok {
+			fmt.Printf("at Line %v Column %v\n", e.Pos.Line, e.Pos.Column)
+			line := strings.Split(source, "\n")[e.Pos.Line-1]
+			fmt.Println(line)
+			for i := 1; i < e.Pos.Column; i++ {
+				fmt.Printf(" ")
+			}
+			fmt.Println("^")
+		}
+		//e := parseError.Error()
 		return 1
 	}
 	if ast_dump {
