@@ -1,0 +1,6 @@
+bob	math	55
+alice	physics	82
+tom	math	72
+maria	math	43
+tom	physics	73
+bob	physics	49

@@ -1,0 +1,9 @@
+{
+	score[$2]+=$3
+	count[$2]++
+}
+END {
+	for(sub in score){
+		print sub,int(score[sub]/count[sub])
+	}
+}
