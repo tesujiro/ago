@@ -1,5 +1,5 @@
 # ago
-If you were a gopher, you wrote a awk script for some task.
+If you were a gopher, you wrote a AWK script for some task.
 ```
 > awk '{if $1>10 {print}}' some.txt
 awk: syntax error at source line 1
@@ -7,7 +7,7 @@ awk: syntax error at source line 1
 	{if >>>  $ <<< 1>10 {print}}
 >
 ```
-Ago is an alternative awk for gophers.
+Ago is an alternative AWK for gophers.
 
 # Installation
 ```
@@ -16,8 +16,8 @@ $ go get -u github.com/tesujiro/ago
 
 # Examples
 ```
-> echo Long Time Ago | ago '{print "Hello",$NF,"!"}'
-Hello Ago !
+> echo A Long Time Ago | ago '{print "Hello, ",$NF,"!"}'
+Hello, Ago !
 > printf "AAA\nBBB\nAAA\DDD" | ago '/A+/{++N};END{print N+0}'
 2
 > printf "AAA\nAAA\nDDD\nDDD\n" | ago '!A[$0]++'
@@ -38,7 +38,7 @@ aaa,bbb,"ccc,dddeeee"
 # Version
 under development
 
-Please note that the language and API may change at any time.
+Please note that the language and command args may change at any time.
 
 
 # Still not implemented
@@ -53,7 +53,7 @@ Please note that the language and API may change at any time.
 
 # Difference from AWK
 * {} block has a local scope. variables name beginning with uppercase are global, others are local.
-* with "-g" option all variables have global scopes.
+* with "-g" option all variables have global scopes (same as AWK).
 * multiple value assignment (ex. BEGIN{a,b=1,2})
 * define func in action (ex. { swap=func(a,b){return b,a}; print swap("a","b"); } // b a )
 * anonymous func (ex. { print func(a,b){return b,a}("a","b"); } // b a )
@@ -61,7 +61,7 @@ Please note that the language and API may change at any time.
 * atan2(0,-0)=0 (not Pi)
 * number format: exponent format (ex.2e+3) and hexadecimal (ex.0x10) is supported, octal format (ex.0123) is NOT supported.
 * A command can be piped to getline (ex. "date" | getline DATE), but the command is not invoked from shell, cannot use shell functions in the command.
-* can set multi chars to RS. (same as GAWK)
+* can set multiple chars to RS. (same as GAWK)
 * Changing RS variable is valid only before scanning files. (Can change RS only in "BEGIN{}" rule.)
 
 # To be fixed
