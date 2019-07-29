@@ -33,6 +33,8 @@ ZZZ 1
 aaa,bbb,"ccc,dddeeee"
 > echo 123 | ago 'BEGIN{Factorial=func(x){if x==1 {1} else { x*Factorial(x-1)}}}{print Factorial($1)}'
 1.21463e+205
+> echo 12 34|./ago '{print func(a,b){return b,a}($1,$2)}'
+34 12
 >
 
 ```
