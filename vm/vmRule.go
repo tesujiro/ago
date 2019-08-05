@@ -53,9 +53,9 @@ func RunMainRules(rules []ast.Rule, env *Env) (result interface{}, err error) {
 	for _, rule := range rules {
 		debug.Println(env.builtin.NR, ":MAIN")
 		childEnv := env.NewEnv()
-		switch rule.Pattern.(type) {
+		switch pattern := rule.Pattern.(type) {
 		case *ast.ExprPattern:
-			expr := rule.Pattern.(*ast.ExprPattern).Expr
+			expr := pattern.Expr
 			if expr != nil {
 				if result, err := evalExpr(expr, childEnv); err != nil {
 					return toInt(result), err
@@ -77,7 +77,6 @@ func RunMainRules(rules []ast.Rule, env *Env) (result interface{}, err error) {
 				return toInt(result), err
 			}
 		case *ast.StartStopPattern:
-			pattern := rule.Pattern.(*ast.StartStopPattern)
 			var b interface{}
 			isMatch := func() (bool, error) {
 				if !env.GetLoop() {

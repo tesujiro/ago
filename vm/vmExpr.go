@@ -16,12 +16,11 @@ import (
 )
 
 func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
-	switch expr.(type) {
+	switch expr := expr.(type) {
 	case *ast.IdentExpr:
-		id := expr.(*ast.IdentExpr).Literal
-		v, err := env.Get(id)
+		v, err := env.Get(expr.Literal)
 		if err == ErrUnknownSymbol {
-			val, err := env.DefineDefaultValue(id)
+			val, err := env.DefineDefaultValue(expr.Literal)
 			if err != nil {
 				return nil, err
 			}
@@ -31,8 +30,7 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 		}
 		return v, nil
 	case *ast.FieldExpr:
-		expr := expr.(*ast.FieldExpr).Expr
-		index, err := evalExpr(expr, env)
+		index, err := evalExpr(expr.Expr, env)
 		if err != nil {
 			return nil, err
 		}
@@ -46,7 +44,7 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 			return field, nil
 		}
 	case *ast.NumExpr:
-		lit := expr.(*ast.NumExpr).Literal
+		lit := expr.Literal
 		if strings.Contains(lit, ".") || strings.Contains(lit, "e") {
 			if f, err := strconv.ParseFloat(lit, 64); err != nil {
 				return 0.0, err
@@ -67,10 +65,9 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 		return int(i), nil
 
 	case *ast.StringExpr:
-		str := expr.(*ast.StringExpr).Literal
-		return str, nil
+		return expr.Literal, nil
 	case *ast.ConstExpr:
-		switch expr.(*ast.ConstExpr).Literal {
+		switch expr.Literal {
 		case "true":
 			return true, nil
 		case "false":
@@ -79,26 +76,24 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 			return nil, nil
 		}
 	case *ast.FuncExpr:
-		return (defineFunc(expr.(*ast.FuncExpr), env))
+		return (defineFunc(expr, env))
 	case *ast.CallExpr:
 		//fmt.Printf("CallExpr env:%v builtin.field:%#v\n", env, env.builtin.field)
-		return (callFunc(expr.(*ast.CallExpr), env))
+		return (callFunc(expr, env))
 	case *ast.AnonymousCallExpr:
-		return (callAnonymousFunc(expr.(*ast.AnonymousCallExpr), env))
+		return (callAnonymousFunc(expr, env))
 	case *ast.ParentExpr:
-		sub := expr.(*ast.ParentExpr).SubExpr
-		return evalExpr(sub, env)
+		return evalExpr(expr.SubExpr, env)
 	case *ast.ItemExpr:
 		var value, index interface{}
 		var err error
 		// index
-		index, err = getHashIndex(env, expr.(*ast.ItemExpr).Index)
+		index, err = getHashIndex(env, expr.Index)
 		if err != nil {
 			return nil, err
 		}
 		// value
-		e := expr.(*ast.ItemExpr).Expr
-		ie, ok := e.(*ast.IdentExpr)
+		ie, ok := expr.Expr.(*ast.IdentExpr)
 		if ok {
 			id := ie.Literal
 			value, err = env.Get(id)
@@ -112,7 +107,7 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 				return nil, err
 			}
 		} else {
-			value, err = evalExpr(e, env)
+			value, err = evalExpr(expr.Expr, env)
 			if err != nil {
 				return nil, err
 			}
@@ -152,10 +147,10 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 	case *ast.UnaryExpr:
 		var val interface{}
 		var err error
-		if val, err = evalExpr(expr.(*ast.UnaryExpr).Expr, env); err != nil {
+		if val, err = evalExpr(expr.Expr, env); err != nil {
 			return nil, err
 		}
-		switch expr.(*ast.UnaryExpr).Operator {
+		switch expr.Operator {
 		case "+":
 			return val, nil
 		case "-":
@@ -170,8 +165,7 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 			return !toBool(val), nil
 		}
 	case *ast.AssExpr:
-		assExpr := expr.(*ast.AssExpr)
-		left, right := assExpr.Left, assExpr.Right
+		left, right := expr.Left, expr.Right
 
 		// evaluate right expressions
 		right_values := make([]interface{}, len(right))
@@ -214,9 +208,9 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 			return right_values[len(left)-1], nil
 		}
 	case *ast.CompExpr:
-		left := expr.(*ast.CompExpr).Left
-		right := expr.(*ast.CompExpr).Right
-		operator := expr.(*ast.CompExpr).Operator
+		left := expr.Left
+		right := expr.Right
+		operator := expr.Operator
 		before_val, err := evalExpr(left, env)
 		if err != nil {
 			return nil, err
@@ -234,17 +228,14 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 		if err != nil {
 			return nil, err
 		}
-		if expr.(*ast.CompExpr).After {
+		if expr.After {
 			return before_val, nil
 		} else {
 			return after_val, nil
 		}
 
 	case *ast.TriOpExpr:
-		condExpr := expr.(*ast.TriOpExpr).Cond
-		thenExpr := expr.(*ast.TriOpExpr).Then
-		elseExpr := expr.(*ast.TriOpExpr).Else
-		cond, err := evalExpr(condExpr, env)
+		cond, err := evalExpr(expr.Cond, env)
 		if err != nil {
 			return nil, err
 		}
@@ -253,18 +244,18 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 			return nil, fmt.Errorf("convert ternary operator:%v", err)
 		}
 		if cond_b {
-			return evalExpr(thenExpr, env)
+			return evalExpr(expr.Then, env)
 		} else {
-			return evalExpr(elseExpr, env)
+			return evalExpr(expr.Else, env)
 		}
 	case *ast.ContainKeyExpr:
-		key, err := evalExpr(expr.(*ast.ContainKeyExpr).KeyExpr, env)
+		key, err := evalExpr(expr.KeyExpr, env)
 		if err != nil {
 			return nil, err
 		}
 		k := toString(key)
 
-		mapId := expr.(*ast.ContainKeyExpr).MapId
+		mapId := expr.MapId
 		mapInterface, err := env.Get(mapId)
 		if err == ErrUnknownSymbol {
 			v, err := env.DefineDefaultMap(mapId)
@@ -282,13 +273,13 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 	case *ast.BinOpExpr:
 		var left, right interface{}
 		var err error
-		if left, err = evalExpr(expr.(*ast.BinOpExpr).Left, env); err != nil {
+		if left, err = evalExpr(expr.Left, env); err != nil {
 			return nil, err
 		}
-		if right, err = evalExpr(expr.(*ast.BinOpExpr).Right, env); err != nil {
+		if right, err = evalExpr(expr.Right, env); err != nil {
 			return nil, err
 		}
-		switch expr.(*ast.BinOpExpr).Operator {
+		switch expr.Operator {
 		case "||":
 			left_b, err := strictToBool(left)
 			if err != nil {
@@ -430,17 +421,17 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 			}
 		}
 	case *ast.MatchExpr:
-		val, err := evalExpr(expr.(*ast.MatchExpr).Expr, env)
+		val, err := evalExpr(expr.Expr, env)
 		if err != nil {
 			return nil, err
 		}
 		s := toString(val)
-		re := expr.(*ast.MatchExpr).RegExpr.(*ast.RegExpr).Literal
+		re := expr.RegExpr.(*ast.RegExpr).Literal
 		return regexp.MatchString(re, s)
 	case *ast.GetlineExpr:
 		var redir string
-		if expr.(*ast.GetlineExpr).Command != nil {
-			command_interface, err := evalExpr(expr.(*ast.GetlineExpr).Command, env)
+		if expr.Command != nil {
+			command_interface, err := evalExpr(expr.Command, env)
 			if err != nil {
 				return nil, err
 			}
@@ -467,8 +458,8 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 				return nil, err
 			}
 		} else {
-			if expr.(*ast.GetlineExpr).Redir != nil {
-				redir_interface, err := evalExpr(expr.(*ast.GetlineExpr).Redir, env)
+			if expr.Redir != nil {
+				redir_interface, err := evalExpr(expr.Redir, env)
 				if err != nil {
 					return nil, err
 				}
@@ -500,13 +491,13 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 			return 0, nil
 		}
 		line := scanner.Text()
-		if expr.(*ast.GetlineExpr).Var == nil {
+		if expr.Var == nil {
 			if err := env.SetFieldFromLine(line); err != nil {
 				fmt.Printf("error:%v\n", err)
 				return 0, err
 			}
 		} else {
-			evalAssExpr(expr.(*ast.GetlineExpr).Var, (interface{})(line), env)
+			evalAssExpr(expr.Var, (interface{})(line), env)
 		}
 		return 1, nil
 	}
@@ -514,9 +505,9 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 }
 
 func evalAssExpr(lexp ast.Expr, val interface{}, env *Env) (interface{}, error) {
-	switch lexp.(type) {
+	switch lexp := lexp.(type) {
 	case *ast.IdentExpr:
-		id := lexp.(*ast.IdentExpr).Literal
+		id := lexp.Literal
 		// Check the type of id in env for Safety
 		if env_val, err := env.Get(id); err == nil {
 			if reflect.TypeOf(env_val).Kind() == reflect.Map {
@@ -532,8 +523,7 @@ func evalAssExpr(lexp ast.Expr, val interface{}, env *Env) (interface{}, error) 
 		}
 		return val, nil
 	case *ast.FieldExpr:
-		expr := lexp.(*ast.FieldExpr).Expr
-		i_val, err := evalExpr(expr, env)
+		i_val, err := evalExpr(lexp.Expr, env)
 		if err != nil {
 			//fmt.Println("fieldExpr index error") //TODO
 			return nil, err
@@ -550,13 +540,8 @@ func evalAssExpr(lexp ast.Expr, val interface{}, env *Env) (interface{}, error) 
 		}
 		index := int(index_f)
 
-		switch val.(type) {
-		case string:
-			break
-		//case []interface{}:
-		//val = reflect.ValueOf(val).Index(0).Interface()
-		case int:
-			val = fmt.Sprintf("%v", val.(int))
+		if val_int, ok := val.(int); ok {
+			val = fmt.Sprintf("%v", val_int)
 		}
 		//fmt.Printf("evalAssExpr FieldExpr: index:%v \tval:%v\n", index, val) //TODO
 		val_string, ok := val.(string)
@@ -571,14 +556,13 @@ func evalAssExpr(lexp ast.Expr, val interface{}, env *Env) (interface{}, error) 
 		}
 		return nil, nil
 	case *ast.ItemExpr:
-		e := lexp.(*ast.ItemExpr).Expr
-		ie, ok := e.(*ast.IdentExpr)
+		ie, ok := lexp.Expr.(*ast.IdentExpr)
 		if !ok {
 			return nil, errors.New("invalid assignment")
 		}
 		id := ie.Literal
 
-		index, err := getHashIndex(env, lexp.(*ast.ItemExpr).Index)
+		index, err := getHashIndex(env, lexp.Index)
 		if err != nil {
 			return nil, err
 		}
@@ -606,7 +590,7 @@ func evalAssExpr(lexp ast.Expr, val interface{}, env *Env) (interface{}, error) 
 					if i == reflect.ValueOf(value).Len() {
 						// append val to array
 						ar := reflect.Append(reflect.ValueOf(value), reflect.ValueOf(val)).Interface()
-						return evalAssExpr(lexp.(*ast.ItemExpr).Value, ar, env)
+						return evalAssExpr(lexp.Value, ar, env)
 					}
 
 					// Set Val To Array

@@ -84,11 +84,10 @@ func run(stmts []ast.Stmt, env *Env) (interface{}, error) {
 }
 
 func runSingleStmt(stmt ast.Stmt, env *Env) (interface{}, error) {
-	switch stmt.(type) {
+	switch stmt := stmt.(type) {
 	/*
 		case *ast.AssStmt:
-			assStmt := stmt.(*ast.AssStmt)
-			left, right := assStmt.Left, assStmt.Right
+			left, right := stmt.Left, stmt.Right
 
 			// evaluate right expressions
 			right_values := make([]interface{}, len(right))
@@ -132,24 +131,23 @@ func runSingleStmt(stmt ast.Stmt, env *Env) (interface{}, error) {
 			}
 	*/
 	case *ast.ExprStmt:
-		return evalExpr(stmt.(*ast.ExprStmt).Expr, env)
+		return evalExpr(stmt.Expr, env)
 	case *ast.DelStmt:
-		expr := stmt.(*ast.DelStmt).Expr
+		expr := stmt.Expr
 		//fmt.Println("TypeOf(Expr):", reflect.TypeOf(expr))
 		var id string
 		var index string
-		switch expr.(type) {
+		switch expr := expr.(type) {
 		case *ast.IdentExpr:
-			id = expr.(*ast.IdentExpr).Literal
+			id = expr.Literal
 		case *ast.ItemExpr:
-			e := expr.(*ast.ItemExpr).Expr
-			ie, ok := e.(*ast.IdentExpr)
+			ie, ok := expr.Expr.(*ast.IdentExpr)
 			if !ok {
 				return nil, errors.New("non variable does not support delete operation")
 			}
 			id = ie.Literal
 			var err error
-			index, err = getHashIndex(env, expr.(*ast.ItemExpr).Index)
+			index, err = getHashIndex(env, expr.Index)
 			if err != nil {
 				return nil, err
 			}
@@ -184,13 +182,12 @@ func runSingleStmt(stmt ast.Stmt, env *Env) (interface{}, error) {
 		}
 		return nil, nil
 	case *ast.PrintStmt:
-		printStmt := stmt.(*ast.PrintStmt)
-		for i, expr := range printStmt.Exprs {
+		for i, expr := range stmt.Exprs {
 			result, err := evalExpr(expr, env)
 			if err != nil {
 				return nil, err
 			}
-			if 0 < i && i < len(printStmt.Exprs) {
+			if 0 < i && i < len(stmt.Exprs) {
 				fmt.Printf("%v", env.builtin.OFS)
 			}
 			//fmt.Printf("%v", result)
@@ -216,7 +213,7 @@ func runSingleStmt(stmt ast.Stmt, env *Env) (interface{}, error) {
 		fmt.Printf("%v", env.builtin.ORS)
 	case *ast.IfStmt:
 		child := env.NewEnv()
-		result, err := evalExpr(stmt.(*ast.IfStmt).If, child)
+		result, err := evalExpr(stmt.If, child)
 		if err != nil {
 			return nil, err
 		}
@@ -227,13 +224,13 @@ func runSingleStmt(stmt ast.Stmt, env *Env) (interface{}, error) {
 		if b {
 			//fmt.Println("If then -> env.Dump()")
 			//child.Dump()
-			result, err = run(stmt.(*ast.IfStmt).Then, child)
+			result, err = run(stmt.Then, child)
 			if err != nil {
 				return result, err
 			}
 			return result, nil
 		}
-		for _, stmt := range stmt.(*ast.IfStmt).ElseIf {
+		for _, stmt := range stmt.ElseIf {
 			result, err := evalExpr(stmt.(*ast.IfStmt).If, child)
 			if err != nil {
 				return nil, err
@@ -251,8 +248,8 @@ func runSingleStmt(stmt ast.Stmt, env *Env) (interface{}, error) {
 			}
 		}
 
-		if len(stmt.(*ast.IfStmt).Else) > 0 {
-			result, err = run(stmt.(*ast.IfStmt).Else, child)
+		if len(stmt.Else) > 0 {
+			result, err = run(stmt.Else, child)
 			if err != nil {
 				return result, err
 			}
@@ -260,12 +257,11 @@ func runSingleStmt(stmt ast.Stmt, env *Env) (interface{}, error) {
 		return result, nil
 	case *ast.ReturnStmt:
 		//fmt.Println("Return2")
-		returnStmt := stmt.(*ast.ReturnStmt)
-		length := len(returnStmt.Exprs)
+		length := len(stmt.Exprs)
 
 		resultExpr := make([]interface{}, length)
 		var err error
-		for i, expr := range returnStmt.Exprs {
+		for i, expr := range stmt.Exprs {
 			resultExpr[i], err = evalExpr(expr, env)
 			if err != nil {
 				//fmt.Printf("Return2 error!  err;%v\n", err)
@@ -282,8 +278,7 @@ func runSingleStmt(stmt ast.Stmt, env *Env) (interface{}, error) {
 			return resultExpr, nil
 		}
 	case *ast.ExitStmt:
-		exitStmt := stmt.(*ast.ExitStmt)
-		result, err := evalExpr(exitStmt.Expr, env)
+		result, err := evalExpr(stmt.Expr, env)
 		if err != nil {
 			return nil, err
 		}
@@ -291,7 +286,7 @@ func runSingleStmt(stmt ast.Stmt, env *Env) (interface{}, error) {
 	case *ast.LoopStmt:
 		newEnv := env.NewEnv()
 		for {
-			exp := stmt.(*ast.LoopStmt).Expr
+			exp := stmt.Expr
 			if exp != nil {
 				result, err := evalExpr(exp, newEnv)
 				if err != nil {
@@ -306,7 +301,7 @@ func runSingleStmt(stmt ast.Stmt, env *Env) (interface{}, error) {
 				}
 			}
 
-			ret, err := run(stmt.(*ast.LoopStmt).Stmts, newEnv)
+			ret, err := run(stmt.Stmts, newEnv)
 			if err == ErrReturn {
 				return ret, nil
 			}
@@ -322,10 +317,10 @@ func runSingleStmt(stmt ast.Stmt, env *Env) (interface{}, error) {
 		}
 		return nil, nil
 	case *ast.CForLoopStmt:
-		stmt1 := stmt.(*ast.CForLoopStmt).Stmt1
-		expr2 := stmt.(*ast.CForLoopStmt).Expr2
-		expr3 := stmt.(*ast.CForLoopStmt).Expr3
-		stmts := stmt.(*ast.CForLoopStmt).Stmts
+		stmt1 := stmt.Stmt1
+		expr2 := stmt.Expr2
+		expr3 := stmt.Expr3
+		stmts := stmt.Stmts
 		newEnv := env.NewEnv()
 		if stmt1 != nil {
 			_, err := run([]ast.Stmt{stmt1}, newEnv)
@@ -372,7 +367,7 @@ func runSingleStmt(stmt ast.Stmt, env *Env) (interface{}, error) {
 	case *ast.DoLoopStmt:
 		newEnv := env.NewEnv()
 		for {
-			ret, err := run(stmt.(*ast.DoLoopStmt).Stmts, newEnv)
+			ret, err := run(stmt.Stmts, newEnv)
 			if err == ErrReturn {
 				return ret, nil
 			}
@@ -385,7 +380,7 @@ func runSingleStmt(stmt ast.Stmt, env *Env) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-			exp := stmt.(*ast.DoLoopStmt).Expr
+			exp := stmt.Expr
 			if exp != nil {
 				result, err := evalExpr(exp, newEnv)
 				if err != nil {
@@ -402,9 +397,9 @@ func runSingleStmt(stmt ast.Stmt, env *Env) (interface{}, error) {
 		}
 		return nil, nil
 	case *ast.MapLoopStmt:
-		keyId := stmt.(*ast.MapLoopStmt).KeyId
-		mapId := stmt.(*ast.MapLoopStmt).MapId
-		stmts := stmt.(*ast.MapLoopStmt).Stmts
+		keyId := stmt.KeyId
+		mapId := stmt.MapId
+		stmts := stmt.Stmts
 		v, err := env.Get(mapId)
 		if err == ErrUnknownSymbol {
 			val, err := env.DefineDefaultMap(mapId)
