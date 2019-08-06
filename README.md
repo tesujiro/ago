@@ -8,6 +8,9 @@ awk: syntax error at source line 1
 >
 ```
 Ago is an alternative AWK for gophers.
+> ago '{if $1>10 {print}}' some.txt
+15 You are a gopher!!
+>
 
 # Installation
 ```
