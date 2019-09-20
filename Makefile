@@ -14,7 +14,7 @@ test: ./*_test.go ./vm/*_test.go ./parser/grammar.go
 ifdef case
 	TESTCASE=${case} go test -v -count=1 .
 else
-	go test -v -count=1 ./parser ./vm . -coverpkg ./...
+	go test -v -count=1 github.com/tesujiro/ago/parser github.com/tesujiro/ago/vm . -coverpkg ./...
 endif
 
 .PHONY: cover
