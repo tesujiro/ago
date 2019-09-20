@@ -19,7 +19,7 @@ endif
 
 .PHONY: cover
 cover:
-	go test -v ./vm . -coverpkg ./... -coverprofile=cover.out && go tool cover -html=cover.out -o cover.html
+	go test -v github.com/tesujiro/ago/parser github.com/tesujiro/ago/vm . -coverpkg ./... -coverprofile=cover.out && go tool cover -html=cover.out -o cover.html
 
 .PHONY: testcase
 testcase: ./*_test.go ./vm/*_test.go ./parser/grammar.go
