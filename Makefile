@@ -1,6 +1,7 @@
 all : ago
 
 ago : ago.go ./parser/*.y ./parser/*.go ./ast/*.go ./vm/*.go ./lib/*.go ./parser/grammar.go
+	go get -u
 	go build -o ago .
 
 ./parser/grammar.go : ./parser/grammar.go.y ./ast/*.go
@@ -15,6 +16,7 @@ lint:
 .PHONY: test
 test: ./*_test.go ./vm/*_test.go ./parser/grammar.go
 	go vet ./...
+	go get -u
 ifdef case
 	TESTCASE=${case} go test -v -count=1 .
 else
