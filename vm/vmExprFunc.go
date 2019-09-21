@@ -24,7 +24,7 @@ func defineFunc(funcExpr *ast.FuncExpr, env *Env) (interface{}, error) {
 	//runVmFunction := func(in []interface{}) (interface{}, error) {
 	runVmFunction := func(in []reflect.Value) []reflect.Value {
 		newEnv := env.NewEnv()
-		//defer newEnv.Destroy()  // Do not delete this line because higer order function
+		//defer newEnv.Destroy()  // Do not delete this line because higher order function
 
 		for i, arg := range funcExpr.Args {
 			//val := reflect.ValueOf(in[i]).Interface().(reflect.Value).Interface().(reflect.Value).Interface()
