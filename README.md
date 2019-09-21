@@ -1,4 +1,9 @@
 # ago
+[![GoDoc Reference](https://godoc.org/github.com/tesujiro/ago/vm?status.svg)](http://godoc.org/github.com/tesujiro/ago/vm)
+[![Build Status](https://travis-ci.org/tesujiro/ago.svg?branch=master)](https://travis-ci.org/tesujiro/ago)
+<!-- [![Coverage](https://codecov.io/gh/tesujiro/ago/branch/master/graph/badge.svg)](https://codecov.io/gh/tesujiro/ago) -->
+<!-- [![Go Report Card](https://goreportcard.com/badge/github.com/tesujiro/ago)](https://goreportcard.com/report/github.com/tesujiro/ago) -->
+
 If you were a gopher, you wrote a AWK script for some task.
 ```
 > awk '{if $1>10 {print}}' some.txt
