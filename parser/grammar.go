@@ -11,7 +11,7 @@ import (
 
 var defaultExpr = ast.FieldExpr{Expr: &ast.NumExpr{Literal: "0"}}
 var defaultExprs = []ast.Expr{&defaultExpr}
-var IN_REGEXP bool
+var inRegExp bool
 
 //line ./parser/grammar.go.y:13
 type yySymType struct {
@@ -1228,7 +1228,7 @@ yydefault:
 		//line ./parser/grammar.go.y:435
 		{
 			//fmt.Println("YACC: want regexp!!")
-			IN_REGEXP = true
+			inRegExp = true
 		}
 	case 76:
 		yyDollar = yyS[yypt-3 : yypt+1]

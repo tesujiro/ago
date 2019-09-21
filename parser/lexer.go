@@ -25,10 +25,10 @@ type Error struct {
 	Fatal    bool
 }
 
-var EOF_FLAG bool
+var eofFlag bool
 var traceLexer bool
-var maybe_regexp int
-var regexp_str string
+var maybeRegexp int
+var regexpStr string
 
 // Error returns the error message.
 func (e *Error) Error() string {
@@ -73,35 +73,35 @@ var opName = map[string]int{
 func (s *Scanner) Scan() (tok int, lit string, pos ast.Position, err error) {
 retry:
 	//s.skipBlank()
-	if maybe_regexp == 0 {
+	if maybeRegexp == 0 {
 		s.skipBlank()
 		pos = s.pos()
 	} else {
-		//fmt.Println("maybe_regexp:", maybe_regexp, " IN_REGEXP:", IN_REGEXP)
-		maybe_regexp++
+		//fmt.Println("maybeRegexp:", maybeRegexp, " IN_REGEXP:", IN_REGEXP)
+		maybeRegexp++
 		blank := s.skipBlank()
-		regexp_str = blank
+		regexpStr = blank
 		pos = s.pos()
 		if IN_REGEXP {
 			for ch := s.peek(); !isEOL(ch) && ch != '/'; ch = s.peek() {
-				regexp_str = fmt.Sprintf("%s%c", regexp_str, ch)
+				regexpStr = fmt.Sprintf("%s%c", regexpStr, ch)
 				s.next()
 			}
 			tok = REGEXP
-			lit = regexp_str
-			regexp_str = ""
+			lit = regexpStr
+			regexpStr = ""
 			IN_REGEXP = false
 			s.next()
 			return
 		}
-		maybe_regexp = 0
-		regexp_str = ""
+		maybeRegexp = 0
+		regexpStr = ""
 	}
 	s.peek()
 	/*
 		ch := s.peek()
-			if maybe_regexp != 0 {
-				regexp_str = fmt.Sprintf("%s%c", regexp_str, ch)
+			if maybeRegexp != 0 {
+				regexpStr = fmt.Sprintf("%s%c", regexpStr, ch)
 			}
 	*/
 	switch ch := s.peek(); {
@@ -145,13 +145,13 @@ retry:
 	default:
 		switch ch {
 		case EOF:
-			if !EOF_FLAG {
+			if !eofFlag {
 				tok = int(';')
 				lit = string(';')
-				EOF_FLAG = true
+				eofFlag = true
 			} else {
 				tok = EOF
-				EOF_FLAG = true
+				eofFlag = true
 			}
 		case EOL:
 			tok = int(';')
@@ -227,7 +227,7 @@ retry:
 			}
 		case '/':
 			//fmt.Println("in lexer: QUO")
-			maybe_regexp = 1
+			maybeRegexp = 1
 			s.next()
 			switch s.peek() {
 			case '=': //TODO:  ??
@@ -595,16 +595,18 @@ func EnableErrorVerbose() {
 }
 */
 
+// TraceLexer set tracing lexer on.
 func TraceLexer() {
 	traceLexer = true
 }
 
+// TraceOffLexer set tracing lexer off.
 func TraceOffLexer() {
 	traceLexer = false
 }
 
 func initialize() {
-	EOF_FLAG = false
+	eofFlag = false
 }
 
 // ParseSrc provides way to parse the code from source.

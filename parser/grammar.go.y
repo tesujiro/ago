@@ -7,7 +7,7 @@
 
 var defaultExpr = ast.FieldExpr{Expr: &ast.NumExpr{Literal: "0"}}
 var defaultExprs = []ast.Expr{&defaultExpr}
-var IN_REGEXP bool
+var inRegExp bool
 %}
 
 %union{
@@ -434,7 +434,7 @@ regexpr
 	: a_slash
 	{
 		//fmt.Println("YACC: want regexp!!")
-		IN_REGEXP=true
+		inRegExp=true
 	}
 	REGEXP
 	{

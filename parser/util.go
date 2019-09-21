@@ -7,6 +7,7 @@ import (
 	"github.com/tesujiro/ago/debug"
 )
 
+// Dump provide dump function.
 func Dump(obj interface{}) {
 	p := func(indent string, obj interface{}) {
 		fmt.Printf("%s%T\t%#v\n", indent, obj, obj)
@@ -15,17 +16,17 @@ func Dump(obj interface{}) {
 		fmt.Printf("%s%s\t%T\t%#v\n", indent, name, obj, obj)
 	}
 
-	var dump_helper func(string, interface{})
-	dump_helper = func(indent string, obj interface{}) {
-		next_indent := indent + "\t"
+	var dumpHelper func(string, interface{})
+	dumpHelper = func(indent string, obj interface{}) {
+		nextIndent := indent + "\t"
 		t := reflect.TypeOf(obj)
 		v := reflect.ValueOf(obj)
 		switch t.Kind() {
 		case reflect.Ptr:
 			debug.Println(indent, "pointer!!")
-			dump_helper(indent, v.Elem().Interface())
+			dumpHelper(indent, v.Elem().Interface())
 			//p(indent, v.Elem().Interface()) //same
-			//dump_helper(next_indent, v.Elem().Interface())
+			//dumpHelper(nextIndent, v.Elem().Interface())
 		case reflect.Interface:
 			debug.Println(indent, "interface")
 			p(indent, v.Elem().Interface())
@@ -34,8 +35,8 @@ func Dump(obj interface{}) {
 			debug.Println(indent, "slice|array")
 			//p(indent, obj)
 			for i := 0; i < v.Len(); i++ {
-				//dump_helper(next_indent, v.Index(i).Interface())
-				dump_helper(indent, v.Index(i).Interface())
+				//dumpHelper(nextIndent, v.Index(i).Interface())
+				dumpHelper(indent, v.Index(i).Interface())
 			}
 		case reflect.Struct:
 			debug.Println(indent, "struct")
@@ -48,7 +49,7 @@ func Dump(obj interface{}) {
 					v.Field(i).Kind() != reflect.Struct &&
 					v.Field(i).Kind() != reflect.Bool &&
 					!v.Field(i).IsNil() {
-					dump_helper(next_indent, v.Field(i).Interface())
+					dumpHelper(nextIndent, v.Field(i).Interface())
 				}
 			}
 		default:
@@ -60,6 +61,6 @@ func Dump(obj interface{}) {
 	v := reflect.ValueOf(obj)
 	for i := 0; i < v.Len(); i++ {
 		p("", v.Index(i).Interface())
-		dump_helper("\t", v.Index(i).Interface())
+		dumpHelper("\t", v.Index(i).Interface())
 	}
 }
