@@ -9,4 +9,5 @@ require (
 	github.com/tesujiro/ago/lib v0.0.0-20190806063729-9be41eaa8cd4
 	github.com/tesujiro/ago/parser v0.0.0-20190806063729-9be41eaa8cd4
 	github.com/tesujiro/ago/vm v0.0.0-20190806063729-9be41eaa8cd4
+	golang.org/x/lint v0.0.0-20190909230951-414d861bb4ac // indirect
 )
