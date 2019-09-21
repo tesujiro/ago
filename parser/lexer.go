@@ -82,7 +82,7 @@ retry:
 		blank := s.skipBlank()
 		regexpStr = blank
 		pos = s.pos()
-		if IN_REGEXP {
+		if inRegExp {
 			for ch := s.peek(); !isEOL(ch) && ch != '/'; ch = s.peek() {
 				regexpStr = fmt.Sprintf("%s%c", regexpStr, ch)
 				s.next()
@@ -90,7 +90,7 @@ retry:
 			tok = REGEXP
 			lit = regexpStr
 			regexpStr = ""
-			IN_REGEXP = false
+			inRegExp = false
 			s.next()
 			return
 		}
