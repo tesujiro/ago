@@ -1,9 +1,9 @@
 %{
-	package parser
-	import (
-		//"fmt"
-		"github.com/tesujiro/ago/ast"
-	)
+package parser
+import (
+	//"fmt"
+	"github.com/tesujiro/ago/ast"
+)
 
 var defaultExpr = ast.FieldExpr{Expr: &ast.NumExpr{Literal: "0"}}
 var defaultExprs = []ast.Expr{&defaultExpr}
@@ -19,7 +19,7 @@ var inRegExp bool
 	stmts		[]ast.Stmt
 	expr		ast.Expr
 	exprs		[]ast.Expr
-	ident_args	[]string
+	identArgs	[]string
 }
 
 %type <rules>		program
@@ -45,7 +45,7 @@ var inRegExp bool
 %type <exprs>		exprs
 %type <exprs>		variables
 %type <exprs>		opt_exprs
-%type <ident_args>	ident_args
+%type <identArgs>	ident_args
 
 %token <token> IDENT NUMBER STRING TRUE FALSE NIL
 %token <token> EQEQ NEQ GE LE NOTTILDE ANDAND OROR LEN 
@@ -62,7 +62,6 @@ var inRegExp bool
 %left OROR
 %left ANDAND
 %left GETLINE
-/*%left IDENT*/
 %nonassoc ',' vars
 %left '~' NOTTILDE
 %left EQEQ NEQ
@@ -227,7 +226,7 @@ stmt
 	}
 	| FOR '(' IDENT IN IDENT ')' '{' opt_stmts '}'
 	{
-		$$ = &ast.MapLoopStmt{KeyId: $3.Literal, MapId: $5.Literal, Stmts:$8}
+		$$ = &ast.MapLoopStmt{KeyID: $3.Literal, MapID: $5.Literal, Stmts:$8}
 	}
 	| RETURN opt_exprs
 	{
@@ -405,7 +404,7 @@ simp_expr
 	}
 	| simp_expr IN IDENT
 	{
-		$$ = &ast.ContainKeyExpr{KeyExpr: $1, MapId: $3.Literal}
+		$$ = &ast.ContainKeyExpr{KeyExpr: $1, MapID: $3.Literal}
 	}
 	/* REGEXP */
 	| simp_expr '~' regexpr

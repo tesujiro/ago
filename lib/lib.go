@@ -17,6 +17,7 @@ import (
 	"github.com/tesujiro/ago/vm"
 )
 
+// Import imports standard library.
 func Import(env *vm.Env) *vm.Env {
 	toStr := func(v reflect.Value) string {
 		switch v.Type().Kind() {
@@ -51,9 +52,8 @@ func Import(env *vm.Env) *vm.Env {
 			i, err := strconv.Atoi(v.Interface().(string))
 			if err != nil {
 				return 0
-			} else {
-				return i
 			}
+			return i
 		case reflect.Int:
 			return v.Interface().(int)
 		case reflect.Float64, reflect.Float32:
@@ -118,8 +118,8 @@ func Import(env *vm.Env) *vm.Env {
 
 	system := func(command string) int {
 		re := regexp.MustCompile("[ \t]+")
-		cmd_array := re.Split(command, -1)
-		cmd := exec.Command(cmd_array[0], cmd_array[1:]...)
+		cmdArray := re.Split(command, -1)
+		cmd := exec.Command(cmdArray[0], cmdArray[1:]...)
 		stdout, err := cmd.StdoutPipe()
 		if err != nil {
 			fmt.Printf("%v", err)
@@ -156,8 +156,8 @@ func Import(env *vm.Env) *vm.Env {
 		if len(v_args) > 0 {
 			v = v_args[0] // arg[0] is a pointer to var name
 		} else {
-			v_string, _ := env.GetField(0)
-			v = reflect.ValueOf(v_string)
+			vString, _ := env.GetField(0)
+			v = reflect.ValueOf(vString)
 		}
 		switch v.Type().Kind() {
 		case reflect.Int:
@@ -240,14 +240,14 @@ func Import(env *vm.Env) *vm.Env {
 	*/
 	gsub := func(before reflect.Value, after string, args ...*string) int {
 		// PARSE ARGS
-		var v_name string
-		var v_val interface{}
+		var vName string
+		var vVal interface{}
 		var err error
 		if len(args) > 0 {
-			v_name = *args[0] // arg[0] is a pointer to var name
-			v_val, err = env.Get(v_name)
+			vName = *args[0] // arg[0] is a pointer to var name
+			vVal, err = env.Get(vName)
 			if err == vm.ErrUnknownSymbol {
-				v_val = ""
+				vVal = ""
 			} else if err != nil { // TODO: unknown symbol
 				fmt.Printf("err=%v\n", err)
 				return 0
@@ -255,15 +255,15 @@ func Import(env *vm.Env) *vm.Env {
 
 		} else {
 			//TODO: error
-			v_val, _ = env.GetField(0)
+			vVal, _ = env.GetField(0)
 		}
 		// MAIN
-		regex_str := regexpToStr(before)
-		re := regexp.MustCompile(regex_str)
-		result := re.ReplaceAllString(v_val.(string), after)
+		regexStr := regexpToStr(before)
+		re := regexp.MustCompile(regexStr)
+		result := re.ReplaceAllString(vVal.(string), after)
 		if len(args) > 0 {
-			v_name = *args[0]
-			err = env.Set(v_name, result)
+			vName = *args[0]
+			err = env.Set(vName, result)
 			if err != nil {
 				return 0
 			}
@@ -271,14 +271,14 @@ func Import(env *vm.Env) *vm.Env {
 			//TODO: error
 			_ = env.SetField(0, result)
 		}
-		return len(re.FindAllString(v_val.(string), -1))
+		return len(re.FindAllString(vVal.(string), -1))
 	}
 	env.Define("gsub", reflect.ValueOf(gsub))
 
 	sub := func(before reflect.Value, after string, args ...*string) int {
-		regex_str := regexpToStr(before)
-		regex_str = "^(.*?)" + regex_str + "(.*)$"
-		return gsub(reflect.ValueOf(regex_str), "${1}"+after+"${2}", args...)
+		regexStr := regexpToStr(before)
+		regexStr = "^(.*?)" + regexStr + "(.*)$"
+		return gsub(reflect.ValueOf(regexStr), "${1}"+after+"${2}", args...)
 	}
 	env.Define("sub", reflect.ValueOf(sub))
 

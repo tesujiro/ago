@@ -38,9 +38,9 @@ func (kvs hash) Set(s string) error {
 }
 
 var (
-	FS, program_file                   string
-	dbg, globalVar, dbglexer, ast_dump bool
-	mem_prof, cpu_prof, ver            bool
+	fs, programFile                   string
+	dbg, globalVar, dbglexer, astDump bool
+	memProf, cpuProf, ver             bool
 )
 var variables hash = hash{}
 
@@ -58,14 +58,14 @@ func _main() int {
 	//flag.Parse()
 	//args := flag.Args()
 	f := flag.NewFlagSet(os.Args[0], flag.ExitOnError)
-	f.StringVar(&FS, "F", " ", "Field separator")
-	f.StringVar(&program_file, "f", "", "Program file")
+	f.StringVar(&fs, "F", " ", "Field separator")
+	f.StringVar(&programFile, "f", "", "Program file")
 	f.BoolVar(&dbg, "d", false, "debug option")
 	f.BoolVar(&globalVar, "g", false, "global variable option")
 	f.BoolVar(&dbglexer, "l", false, "debug lexer option")
-	f.BoolVar(&ast_dump, "a", false, "AST dump option")
-	f.BoolVar(&mem_prof, "m", false, "Memory Profile")
-	f.BoolVar(&cpu_prof, "c", false, "CPU Profile")
+	f.BoolVar(&astDump, "a", false, "AST dump option")
+	f.BoolVar(&memProf, "m", false, "Memory Profile")
+	f.BoolVar(&cpuProf, "c", false, "CPU Profile")
 	f.BoolVar(&ver, "version", false, "version")
 	f.Var(&variables, "v", "followed by var=value, assign variable before execution")
 	err := f.Parse(os.Args[1:])
@@ -78,7 +78,7 @@ func _main() int {
 	var file, script string
 	switch len(args) {
 	case 1:
-		if program_file != "" {
+		if programFile != "" {
 			file = args[0]
 		} else {
 			script = args[0]
@@ -99,45 +99,45 @@ func _main() int {
 	} else {
 		debug.Off()
 	}
-	if cpu_prof {
+	if cpuProf {
 		defer profile.Start().Stop()
 	}
-	if mem_prof {
+	if memProf {
 		defer profile.Start(profile.MemProfile).Stop()
 	}
 
-	var script_reader io.Reader
-	if program_file != "" {
-		fp, err := os.Open(program_file)
+	var sriptReader io.Reader
+	if programFile != "" {
+		fp, err := os.Open(programFile)
 		if err != nil {
 			fmt.Println("script file open error:", err)
 			return 1
 		}
 		defer fp.Close()
-		script_reader = bufio.NewReader(fp)
+		sriptReader = bufio.NewReader(fp)
 	} else {
-		script_reader = strings.NewReader(script)
+		sriptReader = strings.NewReader(script)
 	}
 
-	var file_reader *os.File
+	var fileReader *os.File
 	if file != "" {
-		file_reader, err = os.Open(file)
+		fileReader, err = os.Open(file)
 		if err != nil {
 			fmt.Println("input file open error:", err)
 			return 1
 		}
-		defer file_reader.Close()
+		defer fileReader.Close()
 	} else {
-		file_reader = os.Stdin
+		fileReader = os.Stdin
 	}
 
-	return runScript(script_reader, file_reader)
+	return runScript(sriptReader, fileReader)
 }
 
 func initEnv() *vm.Env {
 	env := vm.NewEnv()
 	env = lib.Import(env)
-	env.SetFS(FS)
+	env.SetFS(fs)
 
 	if globalVar {
 		vm.SetGlobalVariables()
@@ -150,14 +150,14 @@ func initEnv() *vm.Env {
 	return env
 }
 
-func runScript(script_reader io.Reader, file_reader *os.File) int {
+func runScript(sriptReader io.Reader, fileReader *os.File) int {
 
 	env := initEnv()
 	if dbg {
 		env.Dump()
 	}
 
-	bytes, err := ioutil.ReadAll(script_reader)
+	bytes, err := ioutil.ReadAll(sriptReader)
 	if err != nil {
 		fmt.Printf("Read error: %v \n", err)
 		return 1
@@ -187,14 +187,14 @@ func runScript(script_reader io.Reader, file_reader *os.File) int {
 		//e := parseError.Error()
 		return 1
 	}
-	if ast_dump {
+	if astDump {
 		parser.Dump(ast)
 	}
 
-	var file_scanner *bufio.Scanner
+	var fileScanner *bufio.Scanner
 	redir := "-" // a kind of stdin
-	rc := io.ReadCloser(file_reader)
-	file_scanner, err = env.SetFile(redir, &rc)
+	rc := io.ReadCloser(fileReader)
+	fileScanner, err = env.SetFile(redir, &rc)
 	if err != nil {
 		fmt.Printf("env error: %v \n", err)
 		return 1
@@ -221,9 +221,8 @@ func runScript(script_reader io.Reader, file_reader *os.File) int {
 		v, ok := result.(int)
 		if ok {
 			return v
-		} else {
-			return 1
 		}
+		return 1
 	}
 	if err != nil {
 		fmt.Printf("error:%v\n", err)
@@ -241,13 +240,13 @@ func runScript(script_reader io.Reader, file_reader *os.File) int {
 	env.SetNF()
 
 	// MAIN
-	//file_scanner := bufio.NewScanner(file_reader)
+	//fileScanner := bufio.NewScanner(fileReader)
 	var number int
-	for file_scanner.Scan() {
+	for fileScanner.Scan() {
 		number++
-		file_line := file_scanner.Text()
+		fileLine := fileScanner.Text()
 		env.SetNR(number)
-		if err := env.SetFieldFromLine(file_line); err != nil {
+		if err := env.SetFieldFromLine(fileLine); err != nil {
 			fmt.Printf("error:%v\n", err)
 			return 1
 		}

@@ -52,8 +52,8 @@ type NextStmt struct {
 }
 
 type MapLoopStmt struct {
-	KeyId string
-	MapId string
+	KeyID string
+	MapID string
 	Stmts []Stmt
 }
 

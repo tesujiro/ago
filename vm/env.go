@@ -11,9 +11,13 @@ import (
 
 const defaultValue = ""
 
+// ErrUnknownSymbol provides unknown symbol error.
 var ErrUnknownSymbol = errors.New("unknown symbol")
-var AlreadyKnownSymbol = errors.New("already known symbol")
 
+// ErrAlreadyKnownSymbol provides already known symbol error.
+var ErrAlreadyKnownSymbol = errors.New("already known symbol")
+
+// Env provides an environment.
 type Env struct {
 	env     map[string]interface{}
 	parent  *Env
@@ -24,7 +28,7 @@ type Env struct {
 	scanner    map[string]*bufio.Scanner
 }
 
-// Global Scope
+// NewEnv is a Env constructor,
 func NewEnv() *Env {
 	return &Env{
 		env:     make(map[string]interface{}),
@@ -37,6 +41,7 @@ func NewEnv() *Env {
 	}
 }
 
+// NewEnv provides a new child Env,
 func (e *Env) NewEnv() *Env {
 	return &Env{
 		env:     make(map[string]interface{}),
@@ -51,6 +56,7 @@ func (e *Env) NewEnv() *Env {
 
 var globalVars bool
 
+// SetGlobalVariables set all variables to be global.
 func SetGlobalVariables() {
 	globalVars = true
 }
@@ -66,10 +72,12 @@ func isGlobalVarName(s string) bool {
 	return ('A' <= r && r <= 'Z')
 }
 
+// GetDefaultValue provides a default vavlue.
 func (e *Env) GetDefaultValue() interface{} {
 	return defaultValue
 }
 
+// Set provides a setter for an environment variable.
 func (e *Env) Set(k string, v interface{}) error {
 	//fmt.Printf("Set(%v,%v)\n", k, v)
 	// BuiltIn variable
@@ -88,7 +96,7 @@ func (e *Env) Set(k string, v interface{}) error {
 			case reflect.Float64:
 				v = int(v.(float64))
 			default:
-				return fmt.Errorf("type of %v must be %v ,not %v.", f.Name, f.Type, reflect.TypeOf(v))
+				return fmt.Errorf("type of %v must be %v ,not %v", f.Name, f.Type, reflect.TypeOf(v))
 			}
 			fv := bv.FieldByName(k)
 			if !fv.CanSet() {
@@ -206,7 +214,7 @@ func (e *Env) getLocalVar(k string) (interface{}, error) {
 func (e *Env) SetFile(k string, f *io.ReadCloser) (*bufio.Scanner, error) {
 	_, ok := e.readCloser[k]
 	if ok {
-		return nil, AlreadyKnownSymbol
+		return nil, ErrAlreadyKnownSymbol
 	}
 	scanner := bufio.NewScanner(io.Reader(*f))
 	e.readCloser[k] = f

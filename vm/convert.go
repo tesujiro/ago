@@ -13,18 +13,16 @@ func toInt(val interface{}) int {
 	i, err := strictToInt(val)
 	if err != nil {
 		return 0
-	} else {
-		return i
 	}
+	return i
 }
 
 func strictToInt(val interface{}) (int, error) {
 	f, err := strictToFloat(val)
 	if err != nil {
 		return 0, err
-	} else {
-		return int(f), nil
 	}
+	return int(f), nil
 }
 
 func toFloat64(val interface{}) float64 {
@@ -53,17 +51,18 @@ func strictToFloat(val interface{}) (float64, error) {
 		// "0x11.xx" -> 17  //TODO
 		digit := `(\-|\+)?\d+(\.\d*)?`
 		re := regexp.MustCompile(`^` + digit)
-		num_str := re.FindString(val.(string))
-		if len(num_str) == 0 {
+		numStr := re.FindString(val.(string))
+		if len(numStr) == 0 {
 			re = regexp.MustCompile(`^` + digit + `(e|E)` + digit)
 			return 0, fmt.Errorf("cannot convert to float:%v", reflect.ValueOf(val).Kind())
 		}
 
-		if num, err := strconv.ParseFloat(num_str, 64); err != nil {
+		var num float64
+		var err error
+		if num, err = strconv.ParseFloat(numStr, 64); err != nil {
 			return 0, err
-		} else {
-			return num, err
 		}
+		return num, err
 	default:
 		return 0, fmt.Errorf("cannot convert to float:%v", reflect.ValueOf(val).Kind())
 	}
@@ -73,9 +72,8 @@ func toBool(val interface{}) bool {
 	b, err := strictToBool(val)
 	if err != nil {
 		return false
-	} else {
-		return b
 	}
+	return b
 }
 
 func strictToBool(val interface{}) (bool, error) {

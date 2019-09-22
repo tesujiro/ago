@@ -397,12 +397,12 @@ func runSingleStmt(stmt ast.Stmt, env *Env) (interface{}, error) {
 		}
 		return nil, nil
 	case *ast.MapLoopStmt:
-		keyId := stmt.KeyId
-		mapId := stmt.MapId
+		keyID := stmt.KeyID
+		mapID := stmt.MapID
 		stmts := stmt.Stmts
-		v, err := env.Get(mapId)
+		v, err := env.Get(mapID)
 		if err == ErrUnknownSymbol {
-			val, err := env.DefineDefaultMap(mapId)
+			val, err := env.DefineDefaultMap(mapID)
 			if err != nil {
 				return nil, err
 			}
@@ -425,8 +425,8 @@ func runSingleStmt(stmt ast.Stmt, env *Env) (interface{}, error) {
 
 		newEnv := env.NewEnv()
 		for _, index := range indecies {
-			if err := newEnv.Set(keyId, index); err == ErrUnknownSymbol {
-				if err := newEnv.Define(keyId, index); err != nil {
+			if err := newEnv.Set(keyID, index); err == ErrUnknownSymbol {
+				if err := newEnv.Define(keyID, index); err != nil {
 					return nil, err
 				}
 			} else if err != nil {

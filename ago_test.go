@@ -195,14 +195,14 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{NF=1}END{print NF}", ok: "0\n"},
 		{script: "BEGIN{NF=1.1}END{print NF}", ok: "0\n"},
 		//{script: "BEGIN{NF=1.1;print NF}", ok: "1.1\n"},  ??TODO
-		{script: "BEGIN{NF=\"aaa\"}", ok: "error:type of NF must be int ,not string.\n"},
+		{script: "BEGIN{NF=\"aaa\"}", ok: "error:type of NF must be int ,not string\n"},
 		{script: "BEGIN{$0=\"aaa\";print}", ok: "aaa\n"},
 		{script: "BEGIN{$1=\"aaa\";print}", ok: "aaa\n"},
 		{script: `{print "[" $0 "]"}`, in: " this is a file\n", ok: "[ this is a file]\n"},
 		{script: `{print "[" $1 "]"}`, in: " this is a file\n", ok: "[this]\n"},
 		{script: "BEGIN{print FS}", ok: "\n"},
 		{script: "BEGIN{FS=\"X\"}END{print FS}", ok: "X\n"},
-		{script: "BEGIN{FS=123}END{print FS}", ok: "error:type of FS must be string ,not int.\n"},
+		{script: "BEGIN{FS=123}END{print FS}", ok: "error:type of FS must be string ,not int\n"},
 		{script: "BEGIN{print RS}", ok: "\n"},
 		{script: `BEGIN{RS="is"}{print NR,"["$0"]"}`, in: "this_is_a_file", ok: "1 [th]\n2 [_]\n3 [_a_file\n]\n"},
 		{script: `{print NR,"["$0"]";RS="is"}`, in: "this is a file\nthis\n", ok: "1 [this is a file]\n2 [this]\n"}, // panic scan after Split()
@@ -790,14 +790,14 @@ ZZZ 1
 			},
 			cleanup: func() {
 				os.Remove(tempScriptPath)
-				program_file = ""
+				programFile = ""
 			},
 			rc: 0,
 			ok: "Hello, World!\n",
 		},
 		{
 			prepare: func() { os.Args = []string{os.Args[0], "-f", "./xxaabbyyccccdd"} },
-			cleanup: func() { program_file = "" },
+			cleanup: func() { programFile = "" },
 			rc:      1,
 			ok:      "script file open error: open ./xxaabbyyccccdd: no such file or directory\n",
 		},
@@ -829,19 +829,19 @@ ZZZ 1
 	realStdin := os.Stdin
 	realStdout := os.Stdout
 	realStderr := os.Stderr
-	case_number := 0
+	caseNumber := 0
 
 	for _, test := range tests {
-		case_number++
+		caseNumber++
 		wg := &sync.WaitGroup{}
 
 		//t.Logf("script:%v\n", test.script)
-		//fmt.Fprintf(realStdout, "case:%v script:%v\n", case_number, test.script)
+		//fmt.Fprintf(realStdout, "case:%v script:%v\n", caseNumber, test.script)
 		switch os.Getenv("TESTCASE") {
 		case "":
 		case "0":
 			{
-				fmt.Fprintf(realStdout, "case:%v script:%v\n", case_number, test.script)
+				fmt.Fprintf(realStdout, "case:%v script:%v\n", caseNumber, test.script)
 			}
 		default:
 			{
@@ -849,10 +849,10 @@ ZZZ 1
 				if err != nil {
 					t.Fatal("Atoi error:", err)
 				}
-				if case_number != c {
+				if caseNumber != c {
 					continue
 				}
-				fmt.Fprintf(realStdout, "case:%v script:%v\n", case_number, test.script)
+				fmt.Fprintf(realStdout, "case:%v script:%v\n", caseNumber, test.script)
 			}
 		}
 
@@ -898,7 +898,7 @@ ZZZ 1
 			}
 			var dir string
 			if len(test.files) > 0 {
-				dir, err = create_files(test.files)
+				dir, err = createFiles(test.files)
 			}
 			if test.script != "" {
 				os.Args = append(os.Args, test.script)
@@ -908,7 +908,7 @@ ZZZ 1
 				t.Errorf("return code want:%v get:%v case:%v\n", test.rc, rc, test)
 			}
 			if len(test.files) > 0 {
-				delete_files(dir)
+				deleteFiles(dir)
 			}
 			if test.cleanup != nil {
 				test.cleanup()
@@ -932,12 +932,12 @@ ZZZ 1
 			for scanner.Scan() {
 				_, err = writeToIn.WriteString(scanner.Text() + "\n")
 				if err != nil {
-					t.Errorf("Case:[%v] script: %v", case_number, test.script)
+					t.Errorf("Case:[%v] script: %v", caseNumber, test.script)
 					t.Fatalf("Stdin WriteString(%v) error:%v", scanner.Text(), err)
 				}
 			}
 			if err := scanner.Err(); err != nil {
-				t.Errorf("Case:[%v] script: %v", case_number, test.script)
+				t.Errorf("Case:[%v] script: %v", caseNumber, test.script)
 				t.Fatalf("Scan error:%v", err)
 			}
 			//readFromIn.Close() //NG
@@ -962,12 +962,12 @@ ZZZ 1
 		// Result Check
 		//fmt.Fprintf(realStdout, "result:[%v]\ttest.ok:[%v]\n", resultOut, test.ok)
 		if test.ok != "" && resultOut != strings.Replace(test.ok, "\r", "", -1) { //replace for Windows
-			t.Errorf("Case:[%v] received: %v - expected: %v - runSource: %v", case_number, resultOut, test.ok, test.script)
+			t.Errorf("Case:[%v] received: %v - expected: %v - runSource: %v", caseNumber, resultOut, test.ok, test.script)
 		}
 		if test.okRegex != "" {
 			r := regexp.MustCompile(strings.Replace(test.okRegex, "\r", "", -1))
 			if !r.MatchString(resultOut) {
-				t.Errorf("Case:[%v] received: %v - expected(regexp): %v - runSource: %v", case_number, resultOut, test.okRegex, test.script)
+				t.Errorf("Case:[%v] received: %v - expected(regexp): %v - runSource: %v", caseNumber, resultOut, test.okRegex, test.script)
 			}
 		}
 
@@ -983,7 +983,7 @@ ZZZ 1
 
 }
 
-func create_files(files []file) (string, error) {
+func createFiles(files []file) (string, error) {
 	dir, err := ioutil.TempDir("", "")
 	if err != nil {
 		return dir, err
@@ -1015,7 +1015,7 @@ func create_files(files []file) (string, error) {
 	return dir, nil
 }
 
-func delete_files(dir string) error {
+func deleteFiles(dir string) error {
 	err := os.Chdir("..")
 	if err != nil {
 		return err

@@ -61,7 +61,7 @@ type AssExpr struct {
 	Right []Expr
 }
 
-// AssExpr provide composite expression. ex: --1, ++1, 1--, 1++
+// CompExpr provide composite expression. ex: --1, ++1, 1--, 1++
 type CompExpr struct {
 	Left     Expr
 	Operator string
@@ -109,7 +109,7 @@ type MatchExpr struct {
 // ContainKeyExpr provide contain key expression
 type ContainKeyExpr struct {
 	KeyExpr Expr
-	MapId   string
+	MapID   string
 }
 
 // GetlineExpr provide 'getline' expression

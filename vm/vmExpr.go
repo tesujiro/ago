@@ -255,10 +255,10 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 		}
 		k := toString(key)
 
-		mapId := expr.MapId
-		mapInterface, err := env.Get(mapId)
+		mapID := expr.MapID
+		mapInterface, err := env.Get(mapID)
 		if err == ErrUnknownSymbol {
-			v, err := env.DefineDefaultMap(mapId)
+			v, err := env.DefineDefaultMap(mapID)
 			if err != nil {
 				return nil, err
 			}
