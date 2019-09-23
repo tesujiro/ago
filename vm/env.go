@@ -1,3 +1,4 @@
+// Package vm implements virtual-machine for ago.
 package vm
 
 import (

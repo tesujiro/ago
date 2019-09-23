@@ -1,3 +1,4 @@
+// Package ast implements abstract syntax tree for ago.
 package ast
 
 // Rule provide an awk rule.Each rule specifies one pattern to search for, and one action to perform when that pattern is found.

@@ -1,3 +1,4 @@
+// Pacakge debug is a debug library for ago.
 package debug
 
 import "fmt"

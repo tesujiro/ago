@@ -1,3 +1,4 @@
+// Package lib is a standard library for ago.
 package lib
 
 import (
