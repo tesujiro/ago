@@ -660,7 +660,7 @@ func TestGoa(t *testing.T) {
 		{script: "{if $0==\"BBB\" {exit 1}}1", in: "AAA\nBBB\nCCC\nDDD\n", ok: "AAA\n", rc: 1},
 
 		// getline
-		{files: []file{file{"aaa.txt", "aaa aaa\n"}}, script: `
+		{files: []file{{"aaa.txt", "aaa aaa\n"}}, script: `
 		BEGIN{
 			while( (getline str < "aaa.txt")>0){
 				print str
@@ -692,7 +692,7 @@ func TestGoa(t *testing.T) {
 		{script: `BEGIN{ "echo ABC DEF" | getline msg;print msg;}`, ok: "ABC DEF\n"},
 		{script: `BEGIN{ "NOT_A_COMMAND_XX" | getline msg;print msg;}`, rc: 1},
 		{script: "BEGIN{close('aaa')}", in: "AAA\nBBB\n", ok: "error:unknown symbol\n"},
-		{files: []file{file{"aaa.txt", "aaaXbbb"}}, script: `
+		{files: []file{{"aaa.txt", "aaaXbbb"}}, script: `
 		BEGIN{
 			RS="X"
 			while( (getline str < "aaa.txt")>0){
