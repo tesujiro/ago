@@ -33,7 +33,7 @@ func NewEnv() *Env {
 	return &Env{
 		env:     make(map[string]interface{}),
 		parent:  nil,
-		builtin: NewBuiltIn(),
+		builtin: newBuiltIn(),
 		global:  make(map[string]interface{}),
 		//importFunc: make(map[string]func(*Env) (reflect.Value, error)),
 		readCloser: make(map[string]*io.ReadCloser),
@@ -104,7 +104,7 @@ func (e *Env) Set(k string, v interface{}) error {
 			}
 			fv.Set(reflect.ValueOf(v))
 			if k == "RS" {
-				err := e.SetScannerSplit("")
+				err := e.setScannerSplit("")
 				if err != nil {
 					return err
 				}
@@ -130,6 +130,7 @@ func (e *Env) Set(k string, v interface{}) error {
 	return nil
 }
 
+// setLocalVar sets a local variable.
 func (e *Env) setLocalVar(k string, v interface{}) error {
 	if _, ok := e.env[k]; ok {
 		e.env[k] = v
@@ -141,16 +142,19 @@ func (e *Env) setLocalVar(k string, v interface{}) error {
 	return e.parent.setLocalVar(k, v)
 }
 
+// DefineDefaultValue sets a single value variable with a default value.
 func (e *Env) DefineDefaultValue(k string) (interface{}, error) {
 	v := defaultValue
 	return v, e.Define(k, v)
 }
 
+// DefineDefaultMap sets a map variable with default values.
 func (e *Env) DefineDefaultMap(k string) (interface{}, error) {
 	v := make(map[interface{}]interface{})
 	return v, e.Define(k, v)
 }
 
+// DefineDefaultMapValue sets a map element with a default value.
 // TODO: DefineDefaultMapValue should be implemented in vmExpr using Env.GetDefaultValue()
 func (e *Env) DefineDefaultMapValue(k string, idx interface{}) (interface{}, error) {
 	v := make(map[interface{}]interface{})
@@ -158,6 +162,7 @@ func (e *Env) DefineDefaultMapValue(k string, idx interface{}) (interface{}, err
 	return v, e.Define(k, v)
 }
 
+// Define sets a variable to a value.
 func (e *Env) Define(k string, v interface{}) error {
 	// builtin
 	bt := reflect.TypeOf(e.builtin).Elem()
@@ -174,6 +179,7 @@ func (e *Env) Define(k string, v interface{}) error {
 	return nil
 }
 
+// Get gets a value of a variable.
 func (e *Env) Get(k string) (interface{}, error) {
 	// Builtin
 	if e.isBuiltin(k) {
@@ -193,11 +199,11 @@ func (e *Env) Get(k string) (interface{}, error) {
 	}
 
 	// local variable
-	if v, err := e.getLocalVar(k); err != nil {
+	v, err := e.getLocalVar(k)
+	if err != nil {
 		return nil, ErrUnknownSymbol
-	} else {
-		return v, nil
 	}
+	return v, nil
 }
 
 func (e *Env) getLocalVar(k string) (interface{}, error) {
@@ -211,6 +217,7 @@ func (e *Env) getLocalVar(k string) (interface{}, error) {
 	return e.parent.getLocalVar(k)
 }
 
+// SetFile defines a new file.
 func (e *Env) SetFile(k string, f *io.ReadCloser) (*bufio.Scanner, error) {
 	_, ok := e.readCloser[k]
 	if ok {
@@ -219,14 +226,14 @@ func (e *Env) SetFile(k string, f *io.ReadCloser) (*bufio.Scanner, error) {
 	scanner := bufio.NewScanner(io.Reader(*f))
 	e.readCloser[k] = f
 	e.scanner[k] = scanner
-	err := e.SetScannerSplit(k)
+	err := e.setScannerSplit(k)
 	if err != nil {
 		return nil, err
 	}
 	return scanner, nil
 }
 
-func (e *Env) SetScannerSplit(key string) error {
+func (e *Env) setScannerSplit(key string) error {
 	rs, err := e.Get("RS") // Record Separater
 	if err == ErrUnknownSymbol {
 		return nil
@@ -237,8 +244,8 @@ func (e *Env) SetScannerSplit(key string) error {
 		return nil
 	}
 
-	var split_helper func(int, []byte, []byte, []byte) (int, []byte, error)
-	split_helper = func(advance int, token []byte, data []byte, pat []byte) (int, []byte, error) {
+	var splitHelper func(int, []byte, []byte, []byte) (int, []byte, error)
+	splitHelper = func(advance int, token []byte, data []byte, pat []byte) (int, []byte, error) {
 		if len(pat) == 0 {
 			return advance, token, nil
 		}
@@ -251,13 +258,12 @@ func (e *Env) SetScannerSplit(key string) error {
 			}
 		*/
 		if data[0] == pat[0] {
-			return split_helper(advance+1, append(token, data[0]), data[1:], pat[1:])
-		} else {
-			return split_helper(advance+1, append(token, data[0]), data[1:], pat)
+			return splitHelper(advance+1, append(token, data[0]), data[1:], pat[1:])
 		}
+		return splitHelper(advance+1, append(token, data[0]), data[1:], pat)
 	}
 	split := func(data []byte, atEOF bool) (int, []byte, error) {
-		i, bs, err := split_helper(0, []byte{}, data, []byte(rs.(string)))
+		i, bs, err := splitHelper(0, []byte{}, data, []byte(rs.(string)))
 		if err != nil {
 			return i, bs, err
 		} else if len(data) == len(bs) {
@@ -280,13 +286,14 @@ func (e *Env) SetScannerSplit(key string) error {
 		// set split func to speified  scanner
 		scanner, ok := e.scanner[key]
 		if !ok {
-			return fmt.Errorf("file key %v not found.", key)
+			return fmt.Errorf("file key %v not found", key)
 		}
 		scanner.Split(split)
 	}
 	return nil
 }
 
+// GetScanner returns the scanner with a specified name.
 func (e *Env) GetScanner(k string) (*bufio.Scanner, error) {
 	s, ok := e.scanner[k]
 	if !ok {
@@ -295,6 +302,7 @@ func (e *Env) GetScanner(k string) (*bufio.Scanner, error) {
 	return s, nil
 }
 
+// CloseFile close a file.
 func (e *Env) CloseFile(k string) error {
 	f, ok := e.readCloser[k]
 	if !ok {
@@ -331,14 +339,15 @@ func (e *Env) GetDynamicFunc(k string) (interface{}, error) {
 }
 */
 
+// Dump dumps the environment.
 func (e *Env) Dump() {
-	var dump_helper func(*Env) string
-	dump_helper = func(e *Env) string {
+	var dumpHelper func(*Env) string
+	dumpHelper = func(e *Env) string {
 		var indent string
 		if e.parent == nil {
 			indent = ""
 		} else {
-			indent = dump_helper(e.parent)
+			indent = dumpHelper(e.parent)
 		}
 		for k, v := range e.env {
 			fmt.Println(indent, k, ":", v)
@@ -347,6 +356,6 @@ func (e *Env) Dump() {
 		fmt.Println("global:", e.global)
 		return indent + "\t"
 	}
-	dump_helper(e)
+	dumpHelper(e)
 	return
 }

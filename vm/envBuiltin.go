@@ -20,7 +20,8 @@ type builtin struct {
 	inStartStopLoop bool
 }
 
-func NewBuiltIn() *builtin {
+// newBuiltIn returns new builtin variables.
+func newBuiltIn() *builtin {
 	return &builtin{
 		SUBSEP: string([]byte{0x1c}),
 		ORS:    "\n",
@@ -38,10 +39,12 @@ func (e *Env) isBuiltin(k string) bool {
 	}
 }
 
+// SetNR sets built in variable NR, number of records.
 func (e *Env) SetNR(i int) {
 	e.builtin.NR = i
 }
 
+// SetNF sets built in variable NF, number of fields.
 func (e *Env) SetNF() {
 	l := len(e.builtin.field)
 	if l > 0 {
@@ -51,33 +54,40 @@ func (e *Env) SetNF() {
 	}
 }
 
+// SetFS sets built in variable FS, field separator.
 func (e *Env) SetFS(fs string) {
 	e.builtin.FS = fs
 	//e.Dump()
 }
 
+// SetOFS sets built in variable OFS, output field separator.
 func (e *Env) SetOFS(fs string) {
 	e.builtin.OFS = fs
 	//e.Dump()
 }
 
+// SetORS sets built in variable ORS.
 func (e *Env) SetORS(fs string) {
 	e.builtin.ORS = fs
 	//e.Dump()
 }
 
+// SetSUBSEP sets built in variable SUBSEP, sub separator.
 func (e *Env) SetSUBSEP(ss string) {
 	e.builtin.SUBSEP = ss
 }
 
+// SetRLENGTH sets built in variable RLENGTH, the length of the match.
 func (e *Env) SetRLENGTH(i int) {
 	e.builtin.RLENGTH = i
 }
 
+// SetRSTART sets built in variable RSTART, the location in the string of the search pattern.
 func (e *Env) SetRSTART(i int) {
 	e.builtin.RSTART = i
 }
 
+// GetField gets the field value with specified index. ex: $1, $NF, $i
 func (e *Env) GetField(i int) (string, error) {
 	// TODO: out of index
 	if i < 0 || i >= len(e.builtin.field) {
@@ -86,16 +96,7 @@ func (e *Env) GetField(i int) (string, error) {
 	return e.builtin.field[i], nil
 }
 
-/*
-func (e *Env) GetFieldPtr(i int) (*string, error) {
-	// TODO: out of index
-	if i < 0 || i >= len(e.builtin.field) {
-		return nil, nil
-	}
-	return &e.builtin.field[i], nil
-}
-*/
-
+// SetFieldZero sets the value of the field zero or $0.
 func (e *Env) SetFieldZero() error {
 	//fmt.Println("SetFieldZero:", e.builtin.field)
 	if len(e.builtin.field) <= 1 {
@@ -112,6 +113,7 @@ func (e *Env) SetFieldZero() error {
 	return nil
 }
 
+// SetField sets the value of the field with the specified index.
 func (e *Env) SetField(index int, str string) error {
 	if index < 0 {
 		return fmt.Errorf("Field Index Out of Range:%v", index)
@@ -133,8 +135,9 @@ func (e *Env) SetField(index int, str string) error {
 	return nil
 }
 
-var re_org_awk_truncate = regexp.MustCompile("^[ \t]*([^ \t].*[^ \t])[ \t]*$")
+var regexOrgAwkTruncate = regexp.MustCompile("^[ \t]*([^ \t].*[^ \t])[ \t]*$")
 
+// SetFieldFromLine split line string and sets the value of the fields.
 func (e *Env) SetFieldFromLine(line string) error {
 	split := func(regex, line string) {
 		re := regexp.MustCompile(regex) //TODO: STORE PRE COMPILED VALUE TO ENV FOR PERFORMANCE
@@ -159,8 +162,8 @@ func (e *Env) SetFieldFromLine(line string) error {
 			e.builtin.field[i+1] = string(r)
 		}
 	case " ":
-		//THIS IS SPECIAL CASE FOR ORIGINAL AWK
-		newline := re_org_awk_truncate.ReplaceAllString(line, "$1")
+		// SPECIAL CASE FOR ORIGINAL AWK
+		newline := regexOrgAwkTruncate.ReplaceAllString(line, "$1")
 		split("[ \t]+", newline)
 	default:
 		//fmt.Printf("line %v:FS[%v]\n", e.builtin.NR, e.builtin.FS)
@@ -173,10 +176,12 @@ func (e *Env) SetFieldFromLine(line string) error {
 	return nil
 }
 
+// GetLoop returns if current line is inside start and stop scope.
 func (e *Env) GetLoop() bool {
 	return e.builtin.inStartStopLoop
 }
 
+// SetLoop reverses the env flag represents inside start and stop scope.
 func (e *Env) SetLoop(b bool) {
 	e.builtin.inStartStopLoop = b
 	return

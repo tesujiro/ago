@@ -8,6 +8,7 @@ import (
 	"github.com/tesujiro/ago/debug"
 )
 
+// SeparateRules classifies rules to func, begin, main and end rules.
 func SeparateRules(rules []ast.Rule) (Func, Begin, Main, End []ast.Rule) {
 	for _, rule := range rules {
 		switch rule.Pattern.(type) {
@@ -24,6 +25,7 @@ func SeparateRules(rules []ast.Rule) (Func, Begin, Main, End []ast.Rule) {
 	return
 }
 
+// RunFuncRules executes func rules with a specified env.
 func RunFuncRules(rules []ast.Rule, env *Env) (result interface{}, err error) {
 	for _, rule := range rules {
 		debug.Println("FUNC")
@@ -37,6 +39,7 @@ func RunFuncRules(rules []ast.Rule, env *Env) (result interface{}, err error) {
 	return toInt(result), nil
 }
 
+// RunBeginRules executes begin rules with a specified env.
 func RunBeginRules(rules []ast.Rule, env *Env) (result interface{}, err error) {
 	for _, rule := range rules {
 		debug.Println("BEGIN")
@@ -49,6 +52,7 @@ func RunBeginRules(rules []ast.Rule, env *Env) (result interface{}, err error) {
 	return toInt(result), err
 }
 
+// RunMainRules executes main rules with a specified env.
 func RunMainRules(rules []ast.Rule, env *Env) (result interface{}, err error) {
 	for _, rule := range rules {
 		debug.Println(env.builtin.NR, ":MAIN")
@@ -57,18 +61,18 @@ func RunMainRules(rules []ast.Rule, env *Env) (result interface{}, err error) {
 		case *ast.ExprPattern:
 			expr := pattern.Expr
 			if expr != nil {
-				if result, err := evalExpr(expr, childEnv); err != nil {
+				result, err := evalExpr(expr, childEnv)
+				if err != nil {
 					return toInt(result), err
-				} else {
-					b, err := strictToBool(result)
-					if err != nil {
-						return nil, fmt.Errorf("convert rule expression:%v", err)
-					}
-					//fmt.Printf("vmRule ExprPattern result:%#v bool:%v\n", result, b)
-					if !b {
-						debug.Printf("Line: %v skipped\n", childEnv.builtin.NR)
-						continue
-					}
+				}
+				b, err := strictToBool(result)
+				if err != nil {
+					return nil, fmt.Errorf("convert rule expression:%v", err)
+				}
+				//fmt.Printf("vmRule ExprPattern result:%#v bool:%v\n", result, b)
+				if !b {
+					debug.Printf("Line: %v skipped\n", childEnv.builtin.NR)
+					continue
 				}
 			}
 
@@ -119,6 +123,7 @@ func RunMainRules(rules []ast.Rule, env *Env) (result interface{}, err error) {
 	return toInt(result), err
 }
 
+// RunEndRules executes end rules with a specified env.
 func RunEndRules(rules []ast.Rule, env *Env) (result interface{}, err error) {
 	for _, rule := range rules {
 		debug.Println("END")

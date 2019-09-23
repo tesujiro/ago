@@ -10,20 +10,25 @@ import (
 )
 
 var (
-	ErrBreak    = errors.New("unexpected break")
+	// ErrBreak provices a syntax error for unexpected break.
+	ErrBreak = errors.New("unexpected break")
+	// ErrContinue provices a syntax error for unexpected continue.
 	ErrContinue = errors.New("unexpected continue")
-	ErrNext     = errors.New("unexpected next")
-	ErrReturn   = errors.New("unexpected return")
-	ErrExit     = errors.New("unexpected exit")
+	// ErrNext provices a syntax error for unexpected next.
+	ErrNext = errors.New("unexpected next")
+	// ErrReturn provices a syntax error for unexpected return.
+	ErrReturn = errors.New("unexpected return")
+	// ErrExit provices a syntax error for unexpected exit.
+	ErrExit = errors.New("unexpected exit")
 )
 
 func runStmts(stmts []ast.Stmt, env *Env) (interface{}, error) {
 
-	if result, err := run(stmts, env); err == ErrReturn {
+	result, err := run(stmts, env)
+	if err == ErrReturn {
 		return result, nil
-	} else {
-		return result, err
 	}
+	return result, err
 }
 
 var afterStmts []ast.Stmt
@@ -417,7 +422,7 @@ func runSingleStmt(stmt ast.Stmt, env *Env) (interface{}, error) {
 		m := v.(map[interface{}]interface{})
 		indecies := make([]string, len(m))
 		i := 0
-		for k, _ := range m {
+		for k := range m {
 			indecies[i] = k.(string)
 			i++
 		}

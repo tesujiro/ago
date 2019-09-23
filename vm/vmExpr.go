@@ -38,19 +38,19 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 		if err != nil {
 			return nil, fmt.Errorf("field index can not convert to int :%v", err)
 		}
-		if field, err := env.GetField(findex); err != nil {
+		field, err := env.GetField(findex)
+		if err != nil {
 			return nil, err
-		} else {
-			return field, nil
 		}
+		return field, nil
 	case *ast.NumExpr:
 		lit := expr.Literal
 		if strings.Contains(lit, ".") || strings.Contains(lit, "e") {
-			if f, err := strconv.ParseFloat(lit, 64); err != nil {
+			f, err := strconv.ParseFloat(lit, 64)
+			if err != nil {
 				return 0.0, err
-			} else {
-				return f, nil
 			}
+			return f, nil
 		}
 		var i int64
 		var err error
@@ -168,10 +168,10 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 		left, right := expr.Left, expr.Right
 
 		// evaluate right expressions
-		right_values := make([]interface{}, len(right))
+		rightValues := make([]interface{}, len(right))
 		var err error
 		for i, expr := range right {
-			right_values[i], err = evalExpr(expr, env)
+			rightValues[i], err = evalExpr(expr, env)
 			if err != nil {
 				return nil, err
 			}
@@ -180,38 +180,37 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 		// evaluate assExpr
 		switch {
 		case len(left) == 1 && len(right) == 1:
-			return evalAssExpr(left[0], right_values[0], env)
+			return evalAssExpr(left[0], rightValues[0], env)
 		case len(left) > 1 && len(right) == 1:
-			val := right_values[0]
+			val := rightValues[0]
 			//if reflect.ValueOf(val).Kind() == reflect.Interface {
 			//val = reflect.ValueOf(val).Elem().Interface()
 			//}
 			if reflect.ValueOf(val).Kind() != reflect.Slice {
 				return nil, errors.New("single value assign to multi values")
-			} else {
-				elements := reflect.ValueOf(val)
-				right_values = make([]interface{}, elements.Len())
-				for i := 0; i < elements.Len(); i++ {
-					right_values[i] = elements.Index(i).Interface()
-				}
+			}
+			elements := reflect.ValueOf(val)
+			rightValues = make([]interface{}, elements.Len())
+			for i := 0; i < elements.Len(); i++ {
+				rightValues[i] = elements.Index(i).Interface()
 			}
 			fallthrough
 		default:
 			for i, expr := range left {
-				if i >= len(right_values) {
-					return right_values[len(right_values)-1], nil
+				if i >= len(rightValues) {
+					return rightValues[len(rightValues)-1], nil
 				}
-				if _, err := evalAssExpr(expr, right_values[i], env); err != nil {
+				if _, err := evalAssExpr(expr, rightValues[i], env); err != nil {
 					return nil, err
 				}
 			}
-			return right_values[len(left)-1], nil
+			return rightValues[len(left)-1], nil
 		}
 	case *ast.CompExpr:
 		left := expr.Left
 		right := expr.Right
 		operator := expr.Operator
-		before_val, err := evalExpr(left, env)
+		beforeVal, err := evalExpr(left, env)
 		if err != nil {
 			return nil, err
 		}
@@ -224,30 +223,28 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 			return nil, err
 		}
 
-		after_val, err := evalAssExpr(left, result, env)
+		afterVal, err := evalAssExpr(left, result, env)
 		if err != nil {
 			return nil, err
 		}
 		if expr.After {
-			return before_val, nil
-		} else {
-			return after_val, nil
+			return beforeVal, nil
 		}
+		return afterVal, nil
 
 	case *ast.TriOpExpr:
 		cond, err := evalExpr(expr.Cond, env)
 		if err != nil {
 			return nil, err
 		}
-		cond_b, err := strictToBool(cond)
+		boolCond, err := strictToBool(cond)
 		if err != nil {
 			return nil, fmt.Errorf("convert ternary operator:%v", err)
 		}
-		if cond_b {
+		if boolCond {
 			return evalExpr(expr.Then, env)
-		} else {
-			return evalExpr(expr.Else, env)
 		}
+		return evalExpr(expr.Else, env)
 	case *ast.ContainKeyExpr:
 		key, err := evalExpr(expr.KeyExpr, env)
 		if err != nil {
@@ -281,64 +278,64 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 		}
 		switch expr.Operator {
 		case "||":
-			left_b, err := strictToBool(left)
+			boolLeft, err := strictToBool(left)
 			if err != nil {
 				return nil, fmt.Errorf("convert left expression of OR perator:%v", err)
 			}
-			if left_b {
+			if boolLeft {
 				return true, nil
 			}
-			right_b, err := strictToBool(right)
+			boolRight, err := strictToBool(right)
 			if err != nil {
 				return nil, fmt.Errorf("convert right expression of OR perator:%v", err)
 			}
-			if right_b {
+			if boolRight {
 				return true, nil
 			}
 			return false, nil
 		case "&&":
-			left_b, err := strictToBool(left)
+			boolLeft, err := strictToBool(left)
 			if err != nil {
 				return nil, fmt.Errorf("convert left expression of AND perator:%v", err)
 			}
-			if !left_b {
+			if !boolLeft {
 				return false, nil
 			}
-			right_b, err := strictToBool(right)
+			boolRight, err := strictToBool(right)
 			if err != nil {
 				return nil, fmt.Errorf("convert right expression of AND perator:%v", err)
 			}
-			if right_b {
+			if boolRight {
 				return true, nil
 			}
 			return false, nil
 		case "==":
-			l_kind := reflect.ValueOf(left).Kind()
-			r_kind := reflect.ValueOf(right).Kind()
+			lKind := reflect.ValueOf(left).Kind()
+			rKind := reflect.ValueOf(right).Kind()
 			switch {
-			case l_kind == reflect.String && r_kind == reflect.String:
+			case lKind == reflect.String && rKind == reflect.String:
 				return left == right, nil
-			case l_kind == reflect.Float64 || r_kind == reflect.Float64:
+			case lKind == reflect.Float64 || rKind == reflect.Float64:
 				return toFloat64(left) == toFloat64(right), nil
-			case l_kind == reflect.Int || r_kind == reflect.Int:
+			case lKind == reflect.Int || rKind == reflect.Int:
 				return toString(left) == toString(right), nil
-			case l_kind == reflect.Map || r_kind == reflect.Map:
+			case lKind == reflect.Map || rKind == reflect.Map:
 				return nil, fmt.Errorf("can't read value of array")
 			default:
 				return toString(left) == toString(right), nil
 			}
 		case "!=":
 			//return left != right, nil
-			l_kind := reflect.ValueOf(left).Kind()
-			r_kind := reflect.ValueOf(right).Kind()
+			lKind := reflect.ValueOf(left).Kind()
+			rKind := reflect.ValueOf(right).Kind()
 			switch {
-			case l_kind == reflect.String && r_kind == reflect.String:
+			case lKind == reflect.String && rKind == reflect.String:
 				return left != right, nil
-			case l_kind == reflect.Float64 || r_kind == reflect.Float64:
+			case lKind == reflect.Float64 || rKind == reflect.Float64:
 				return toFloat64(left) != toFloat64(right), nil
-			case l_kind == reflect.Int || r_kind == reflect.Int:
+			case lKind == reflect.Int || rKind == reflect.Int:
 				return toString(left) != toString(right), nil
-			case l_kind == reflect.Map || r_kind == reflect.Map:
+			case lKind == reflect.Map || rKind == reflect.Map:
 				return nil, fmt.Errorf("can't read value of array")
 			default:
 				return toString(left) != toString(right), nil
@@ -352,68 +349,68 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 		case "<=":
 			return toFloat64(left) <= toFloat64(right), nil
 		case "CAT":
-			l_kind := reflect.ValueOf(left).Kind()
-			r_kind := reflect.ValueOf(right).Kind()
+			lKind := reflect.ValueOf(left).Kind()
+			rKind := reflect.ValueOf(right).Kind()
 			switch {
-			case l_kind == reflect.String || r_kind == reflect.String:
+			case lKind == reflect.String || rKind == reflect.String:
 				return toString(left) + toString(right), nil
-			case l_kind == reflect.Int || r_kind == reflect.Int:
+			case lKind == reflect.Int || rKind == reflect.Int:
 				return toString(left) + toString(right), nil
-			case l_kind == reflect.Float64 || r_kind == reflect.Float64:
+			case lKind == reflect.Float64 || rKind == reflect.Float64:
 				return toFloat64(left) + toFloat64(right), nil
-			case l_kind == reflect.Map || r_kind == reflect.Map:
+			case lKind == reflect.Map || rKind == reflect.Map:
 				return nil, fmt.Errorf("can't read value of array")
 			default:
 				return toString(left) + toString(right), nil
 			}
 		case "+":
-			l_kind := reflect.ValueOf(left).Kind()
-			r_kind := reflect.ValueOf(right).Kind()
+			lKind := reflect.ValueOf(left).Kind()
+			rKind := reflect.ValueOf(right).Kind()
 			switch {
-			case l_kind == reflect.Map || r_kind == reflect.Map:
+			case lKind == reflect.Map || rKind == reflect.Map:
 				return nil, fmt.Errorf("can't read value of array")
 			default:
 				return toFloat64(left) + toFloat64(right), nil
 			}
 		case "-":
-			l_kind := reflect.ValueOf(left).Kind()
-			r_kind := reflect.ValueOf(right).Kind()
+			lKind := reflect.ValueOf(left).Kind()
+			rKind := reflect.ValueOf(right).Kind()
 			switch {
-			case l_kind == reflect.Map || r_kind == reflect.Map:
+			case lKind == reflect.Map || rKind == reflect.Map:
 				return nil, fmt.Errorf("can't read value of array")
 			default:
 				return toFloat64(left) - toFloat64(right), nil
 			}
 		case "*":
-			l_kind := reflect.ValueOf(left).Kind()
-			r_kind := reflect.ValueOf(right).Kind()
+			lKind := reflect.ValueOf(left).Kind()
+			rKind := reflect.ValueOf(right).Kind()
 			switch {
-			case l_kind == reflect.Map || r_kind == reflect.Map:
+			case lKind == reflect.Map || rKind == reflect.Map:
 				return nil, fmt.Errorf("can't read value of array")
 			default:
 				return toFloat64(left) * toFloat64(right), nil
 			}
 		case "/":
-			l_kind := reflect.ValueOf(left).Kind()
-			r_kind := reflect.ValueOf(right).Kind()
+			lKind := reflect.ValueOf(left).Kind()
+			rKind := reflect.ValueOf(right).Kind()
 			if right == 0 {
 				return nil, fmt.Errorf("devision by zero")
 			}
 			switch {
-			case l_kind == reflect.Map || r_kind == reflect.Map:
+			case lKind == reflect.Map || rKind == reflect.Map:
 				return nil, fmt.Errorf("can't read value of array")
 			default:
 				return toFloat64(left) / toFloat64(right), nil
 			}
 		case "%":
 			//return toInt(left) % toInt(right), nil
-			l_kind := reflect.ValueOf(left).Kind()
-			r_kind := reflect.ValueOf(right).Kind()
+			lKind := reflect.ValueOf(left).Kind()
+			rKind := reflect.ValueOf(right).Kind()
 			if right == 0 {
 				return nil, fmt.Errorf("devision by zero")
 			}
 			switch {
-			case l_kind == reflect.Map || r_kind == reflect.Map:
+			case lKind == reflect.Map || rKind == reflect.Map:
 				return nil, fmt.Errorf("can't read value of array")
 			default:
 				q := int(toFloat64(left) / toFloat64(right))
@@ -431,27 +428,28 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 	case *ast.GetlineExpr:
 		var redir string
 		if expr.Command != nil {
-			command_interface, err := evalExpr(expr.Command, env)
+			cmdInterface, err := evalExpr(expr.Command, env)
 			if err != nil {
 				return nil, err
 			}
-			commandLine := command_interface.(string)
+			commandLine := cmdInterface.(string)
 			redir = commandLine
 			//fmt.Println("command=", commandLine)
 			_, err = env.GetScanner(redir)
 			if err == ErrUnknownSymbol {
 				re := regexp.MustCompile("[ \t]+")
-				cmd_array := re.Split(commandLine, -1)
-				cmd := exec.Command(cmd_array[0], cmd_array[1:]...)
-				if stdout, err := cmd.StdoutPipe(); err != nil {
+				cmdArray := re.Split(commandLine, -1)
+				cmd := exec.Command(cmdArray[0], cmdArray[1:]...)
+				stdout, err := cmd.StdoutPipe()
+				if err != nil {
 					return nil, err
-				} else {
-					_, err = env.SetFile(redir, &stdout)
-					if err != nil {
-						return 0, err
-					}
 				}
-				if err := cmd.Start(); err != nil {
+				_, err = env.SetFile(redir, &stdout)
+				if err != nil {
+					return nil, err
+				}
+				err = cmd.Start()
+				if err != nil {
 					return nil, err
 				}
 			} else if err != nil {
@@ -459,11 +457,11 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 			}
 		} else {
 			if expr.Redir != nil {
-				redir_interface, err := evalExpr(expr.Redir, env)
+				redirInterface, err := evalExpr(expr.Redir, env)
 				if err != nil {
 					return nil, err
 				}
-				redir = (redir_interface).(string)
+				redir = (redirInterface).(string)
 			} else {
 				redir = "-" // Stdin
 			}
@@ -474,14 +472,14 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 		scanner, err = env.GetScanner(redir)
 		if err == ErrUnknownSymbol {
 			// Open File if not opened yet.
-			if f, err := os.Open(redir); err != nil {
+			f, err := os.Open(redir)
+			if err != nil {
 				return 0, err
-			} else {
-				rc := io.ReadCloser(f)
-				scanner, err = env.SetFile(redir, &rc)
-				if err != nil {
-					return 0, err
-				}
+			}
+			rc := io.ReadCloser(f)
+			scanner, err = env.SetFile(redir, &rc)
+			if err != nil {
+				return 0, err
 			}
 		} else if err != nil {
 			return 0, err
@@ -509,9 +507,9 @@ func evalAssExpr(lexp ast.Expr, val interface{}, env *Env) (interface{}, error) 
 	case *ast.IdentExpr:
 		id := lexp.Literal
 		// Check the type of id in env for Safety
-		if env_val, err := env.Get(id); err == nil {
-			if reflect.TypeOf(env_val).Kind() == reflect.Map {
-				return nil, fmt.Errorf("can't assign to %v; it's an associated array name.", id)
+		if envVal, err := env.Get(id); err == nil {
+			if reflect.TypeOf(envVal).Kind() == reflect.Map {
+				return nil, fmt.Errorf("can't assign to %v; it's an associated array name", id)
 			}
 		}
 		if err := env.Set(id, val); err == ErrUnknownSymbol {
@@ -523,33 +521,33 @@ func evalAssExpr(lexp ast.Expr, val interface{}, env *Env) (interface{}, error) 
 		}
 		return val, nil
 	case *ast.FieldExpr:
-		i_val, err := evalExpr(lexp.Expr, env)
+		iVal, err := evalExpr(lexp.Expr, env)
 		if err != nil {
 			//fmt.Println("fieldExpr index error") //TODO
 			return nil, err
 		}
 		/*
-			index, ok := i_val.(int)
+			index, ok := iVal.(int)
 			if !ok {
-				return nil, fmt.Errorf("field index not int :%v", reflect.TypeOf(i_val))
+				return nil, fmt.Errorf("field index not int :%v", reflect.TypeOf(iVal))
 			}
 		*/
-		index_f, err := strictToFloat(i_val)
+		indexF, err := strictToFloat(iVal)
 		if err != nil {
 			return nil, fmt.Errorf("field index cannot convert to int :%v", err)
 		}
-		index := int(index_f)
+		index := int(indexF)
 
-		if val_int, ok := val.(int); ok {
-			val = fmt.Sprintf("%v", val_int)
+		if valInt, ok := val.(int); ok {
+			val = fmt.Sprintf("%v", valInt)
 		}
 		//fmt.Printf("evalAssExpr FieldExpr: index:%v \tval:%v\n", index, val) //TODO
-		val_string, ok := val.(string)
+		valString, ok := val.(string)
 		if !ok {
 			return nil, fmt.Errorf("field value is not string :%v", reflect.TypeOf(val))
 		}
 
-		err = env.SetField(index, val_string)
+		err = env.SetField(index, valString)
 		if err != nil {
 			//fmt.Println("fieldExpr SetField error") //TODO
 			return nil, err

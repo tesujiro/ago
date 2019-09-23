@@ -21,8 +21,8 @@ func defineFunc(funcExpr *ast.FuncExpr, env *Env) (interface{}, error) {
 	funcType := reflect.FuncOf(inType, outType, isVariadic)
 
 	// FuncDefinition
-	//runVmFunction := func(in []interface{}) (interface{}, error) {
-	runVmFunction := func(in []reflect.Value) []reflect.Value {
+	//runVMFunction := func(in []interface{}) (interface{}, error) {
+	runVMFunction := func(in []reflect.Value) []reflect.Value {
 		newEnv := env.NewEnv()
 		//defer newEnv.Destroy()  // Do not delete this line because higher order function
 
@@ -39,7 +39,8 @@ func defineFunc(funcExpr *ast.FuncExpr, env *Env) (interface{}, error) {
 		debug.Printf("Env: %#v\n", *env)
 		debug.Printf("newEnv: %#v\n", *newEnv)
 
-		if rv, err := runStmts(funcExpr.Stmts, newEnv); err != nil && err != ErrReturn {
+		rv, err := runStmts(funcExpr.Stmts, newEnv)
+		if err != nil && err != ErrReturn {
 			errv := reflect.ValueOf(reflect.ValueOf(&err).Elem())
 			debug.Println("errv:\t", errv)
 			debug.Println("errv.Type:\t", errv.Type())
@@ -47,19 +48,18 @@ func defineFunc(funcExpr *ast.FuncExpr, env *Env) (interface{}, error) {
 			debug.Println("TypeOf(errv.Int()):\t", reflect.TypeOf(errv.Interface()))
 			nilValue := reflect.New(reflect.TypeOf((*interface{})(nil)).Elem()).Elem()
 			return []reflect.Value{reflect.ValueOf(reflect.ValueOf(nilValue)), reflect.ValueOf(errv)}
-		} else {
-			var errorType = reflect.ValueOf([]error{nil}).Index(0).Type()
-			var reflectValueErrorNilValue = reflect.ValueOf(reflect.New(errorType).Elem())
-			debug.Println("return value:\t", rv)
-			debug.Println("return value Type:\t", reflect.TypeOf(rv))
-			debug.Println("return value Value:\t", reflect.ValueOf(rv))
-
-			return []reflect.Value{reflect.ValueOf(reflect.ValueOf(rv)), reflect.ValueOf(reflectValueErrorNilValue)}
 		}
+		var errorType = reflect.ValueOf([]error{nil}).Index(0).Type()
+		var reflectValueErrorNilValue = reflect.ValueOf(reflect.New(errorType).Elem())
+		debug.Println("return value:\t", rv)
+		debug.Println("return value Type:\t", reflect.TypeOf(rv))
+		debug.Println("return value Value:\t", reflect.ValueOf(rv))
+
+		return []reflect.Value{reflect.ValueOf(reflect.ValueOf(rv)), reflect.ValueOf(reflectValueErrorNilValue)}
 	}
 
 	debug.Printf("MakeFunc: funcType %v\n", funcType)
-	fn := reflect.MakeFunc(funcType, runVmFunction)
+	fn := reflect.MakeFunc(funcType, runVMFunction)
 
 	if funcExpr.Name != "" {
 		if err := env.Define(funcExpr.Name, fn); err != nil {
@@ -73,19 +73,19 @@ func callAnonymousFunc(anonymousCallExpr *ast.AnonymousCallExpr, env *Env) (inte
 	ace := anonymousCallExpr
 	//fmt.Printf("anonCallExpr:%#v\n", ace)
 	debug.Printf("anonCallExpr:%#v\n", ace)
-	if result, err := evalExpr(ace.Expr, env); err != nil {
+	result, err := evalExpr(ace.Expr, env)
+	if err != nil {
 		return nil, err
-	} else {
-		if rv, ok := result.(reflect.Value); !ok {
-			return nil, errors.New("cannot call type " + reflect.TypeOf(result).String())
-		} else {
-			if rv.Type().Kind() != reflect.Func {
-				return nil, errors.New("cannot call type " + reflect.TypeOf(result).String())
-			}
-			//return callFunc(&ast.CallExpr{Func: rv, SubExprs: ace.SubExprs}, env)
-			return evalExpr(&ast.CallExpr{Func: rv, SubExprs: ace.SubExprs}, env)
-		}
 	}
+	rv, ok := result.(reflect.Value)
+	if !ok {
+		return nil, errors.New("cannot call type " + reflect.TypeOf(result).String())
+	}
+	if rv.Type().Kind() != reflect.Func {
+		return nil, errors.New("cannot call type " + reflect.TypeOf(result).String())
+	}
+	//return callFunc(&ast.CallExpr{Func: rv, SubExprs: ace.SubExprs}, env)
+	return evalExpr(&ast.CallExpr{Func: rv, SubExprs: ace.SubExprs}, env)
 }
 
 func callFunc(callExpr *ast.CallExpr, env *Env) (interface{}, error) {
@@ -107,21 +107,21 @@ func callFunc(callExpr *ast.CallExpr, env *Env) (interface{}, error) {
 	if f.Kind() == reflect.Interface && !f.IsNil() {
 		f = f.Elem()
 	}
-	if args, err := callArgs(f, callExpr, env); err != nil {
+	args, err := callArgs(f, callExpr, env)
+	if err != nil {
 		return nil, err
-	} else {
-		debug.Printf("args: %v\n", args)
-		//for i, arg := range args {
-		//debug.Printf("=>arg[%d]: %v\n", i, arg.Interface())
-		//}
-
-		//fmt.Println("f.Call Start")
-		// Call Function
-		refvals := f.Call(args)
-		//fmt.Println("f.Call End")
-
-		return makeResult(refvals, isGoFunc(f.Type()))
 	}
+	debug.Printf("args: %v\n", args)
+	//for i, arg := range args {
+	//debug.Printf("=>arg[%d]: %v\n", i, arg.Interface())
+	//}
+
+	//fmt.Println("f.Call Start")
+	// Call Function
+	refvals := f.Call(args)
+	//fmt.Println("f.Call End")
+
+	return makeResult(refvals, isGoFunc(f.Type()))
 }
 
 func isGoFunc(rt reflect.Type) bool {
@@ -244,7 +244,7 @@ func callArgs(f reflect.Value, callExpr *ast.CallExpr, env *Env) ([]reflect.Valu
 func makeResult(ret []reflect.Value, isGoFunction bool) (interface{}, error) {
 	debug.Println("ret length:", len(ret))
 	// FOR DEBUG
-	for i, _ := range ret {
+	for i := range ret {
 		a := ret[i]
 		debug.Printf("ret[%d]           : \tType:%v\tValue:%v\tKind():%v\n", i, reflect.TypeOf(a), reflect.ValueOf(a), reflect.ValueOf(a).Kind())
 		b := a.Interface()

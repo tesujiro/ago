@@ -1,5 +1,6 @@
 package ast
 
+// Token is used in the lexer to split characters into a string called a token
 type Token struct {
 	Token   int
 	Literal string
