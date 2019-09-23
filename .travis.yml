@@ -13,7 +13,7 @@ before_install:
   - go get -u github.com/tesujiro/ago
 
 script:
-  - go test -v -count=1 github.com/tesujiro/ago/parser github.com/tesujiro/ago/vm . 
+  - go test -v -count=1 github.com/tesujiro/ago/parser github.com/tesujiro/ago/vm . -coverpkg ./... -coverprofile=cover.out -covermode=count
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)
