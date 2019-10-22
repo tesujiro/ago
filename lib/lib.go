@@ -82,6 +82,18 @@ func toFloat64(v reflect.Value) float64 {
 	}
 }
 
+func importClose(env *vm.Env) {
+	close := func(file string) int {
+		err := env.CloseFile(file)
+		if err != nil {
+			fmt.Printf("error:%v\n", err)
+			return 1
+		}
+		return 0
+	}
+	env.Define("close", reflect.ValueOf(close))
+}
+
 func sum(args ...int) int {
 	var result int
 	for _, v := range args {
@@ -161,74 +173,7 @@ func substr(str, begin reflect.Value, end_args ...reflect.Value) string { // TOD
 	return s[from-1 : to-1]
 }
 
-func index(v1, v2 reflect.Value) int {
-	s := toStr(v1)
-	substr := toStr(v2)
-	if len(s) == 0 {
-		return 0
-	}
-	return strings.Index(s, substr) + 1
-}
-
-func tolower(v1 reflect.Value) string {
-	return strings.ToLower(toStr(v1))
-}
-
-func toupper(v1 reflect.Value) string {
-	return strings.ToUpper(toStr(v1))
-}
-
-func strftime(format, timestamp reflect.Value) string {
-	table := map[string]string{
-		"%Y": "2006", "%y": "06",
-		"%m": "01",
-		"%d": "02",
-		"%H": "15",
-		"%M": "04",
-		"%S": "05",
-	}
-	f := toStr(format)
-	for k, v := range table {
-		f = strings.Replace(f, k, v, -1)
-	}
-
-	//fmt.Printf("timestamp=%#v\ntimestamp.Kind=%#v\n", timestamp, timestamp.Kind().String())
-	t64 := toInt64(timestamp)
-	u := time.Unix(t64, 0)
-	return u.Format(f)
-}
-
-func mktime(datespec reflect.Value) int64 {
-	//loc, _ := time.LoadLocation("Asia/Tokyo")
-	loc, _ := time.LoadLocation("Local")
-	t, err := time.ParseInLocation("2006 01 02 15 04 05", toStr(datespec), loc)
-	if err != nil {
-		return 0
-	}
-	return t.Unix()
-
-}
-
-// Import imports standard library.
-func Import(env *vm.Env) *vm.Env {
-	env.Define("println", reflect.ValueOf(fmt.Println))
-	env.Define("printf", reflect.ValueOf(fmt.Printf))
-	env.Define("sprintf", reflect.ValueOf(fmt.Sprintf))
-
-	close := func(file string) int {
-		err := env.CloseFile(file)
-		if err != nil {
-			fmt.Printf("error:%v\n", err)
-			return 1
-		}
-		return 0
-	}
-	env.Define("close", reflect.ValueOf(close))
-
-	env.Define("sum", reflect.ValueOf(sum))
-	env.Define("cat", reflect.ValueOf(cat))
-	env.Define("system", reflect.ValueOf(system))
-
+func importLength(env *vm.Env) {
 	length := func(v_args ...reflect.Value) int { // TODO: reflect.Value => string
 		var v reflect.Value
 		if len(v_args) > 0 {
@@ -255,11 +200,26 @@ func Import(env *vm.Env) *vm.Env {
 	}
 	env.Define("length", reflect.ValueOf(length))
 	env.Define("len", reflect.ValueOf(length))
-	env.Define("substr", reflect.ValueOf(substr))
-	env.Define("index", reflect.ValueOf(index))
-	env.Define("tolower", reflect.ValueOf(tolower))
-	env.Define("toupper", reflect.ValueOf(toupper))
+}
 
+func index(v1, v2 reflect.Value) int {
+	s := toStr(v1)
+	substr := toStr(v2)
+	if len(s) == 0 {
+		return 0
+	}
+	return strings.Index(s, substr) + 1
+}
+
+func tolower(v1 reflect.Value) string {
+	return strings.ToLower(toStr(v1))
+}
+
+func toupper(v1 reflect.Value) string {
+	return strings.ToUpper(toStr(v1))
+}
+
+func importSubGsub(env *vm.Env) {
 	// TODO: NOT SAME SPEC AS AWK gsub
 	// AWK : function call args by reference
 	/*
@@ -313,7 +273,9 @@ func Import(env *vm.Env) *vm.Env {
 		return gsub(reflect.ValueOf(regexStr), "${1}"+after+"${2}", args...)
 	}
 	env.Define("sub", reflect.ValueOf(sub))
+}
 
+func importMatch(env *vm.Env) {
 	match := func(s, r reflect.Value) int {
 		//fmt.Printf("s=%v r=%#v\n", toStr(s), r)
 		re := regexp.MustCompile(regexpToStr(r))
@@ -332,7 +294,9 @@ func Import(env *vm.Env) *vm.Env {
 		return retloc
 	}
 	env.Define("match", reflect.ValueOf(match))
+}
 
+func importSplit(env *vm.Env) {
 	split := func(str string, array map[interface{}]interface{}, vars ...string) int {
 		var sep string
 		if len(vars) > 0 {
@@ -350,6 +314,59 @@ func Import(env *vm.Env) *vm.Env {
 		return len(result)
 	}
 	env.Define("split", reflect.ValueOf(split))
+}
+
+func strftime(format, timestamp reflect.Value) string {
+	table := map[string]string{
+		"%Y": "2006", "%y": "06",
+		"%m": "01",
+		"%d": "02",
+		"%H": "15",
+		"%M": "04",
+		"%S": "05",
+	}
+	f := toStr(format)
+	for k, v := range table {
+		f = strings.Replace(f, k, v, -1)
+	}
+
+	//fmt.Printf("timestamp=%#v\ntimestamp.Kind=%#v\n", timestamp, timestamp.Kind().String())
+	t64 := toInt64(timestamp)
+	u := time.Unix(t64, 0)
+	return u.Format(f)
+}
+
+func mktime(datespec reflect.Value) int64 {
+	//loc, _ := time.LoadLocation("Asia/Tokyo")
+	loc, _ := time.LoadLocation("Local")
+	t, err := time.ParseInLocation("2006 01 02 15 04 05", toStr(datespec), loc)
+	if err != nil {
+		return 0
+	}
+	return t.Unix()
+
+}
+
+// Import imports standard library.
+func Import(env *vm.Env) *vm.Env {
+	env.Define("println", reflect.ValueOf(fmt.Println))
+	env.Define("printf", reflect.ValueOf(fmt.Printf))
+	env.Define("sprintf", reflect.ValueOf(fmt.Sprintf))
+
+	importClose(env)
+	env.Define("sum", reflect.ValueOf(sum))
+	env.Define("cat", reflect.ValueOf(cat))
+	env.Define("system", reflect.ValueOf(system))
+
+	env.Define("substr", reflect.ValueOf(substr))
+	importLength(env)
+	env.Define("index", reflect.ValueOf(index))
+	env.Define("tolower", reflect.ValueOf(tolower))
+	env.Define("toupper", reflect.ValueOf(toupper))
+
+	importSubGsub(env)
+	importMatch(env)
+	importSplit(env)
 
 	systime := func() int64 {
 		return time.Now().Unix()
