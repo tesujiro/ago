@@ -144,10 +144,10 @@ func system(command string) int {
 	return 0
 }
 
-func substr(str, begin reflect.Value, end_args ...reflect.Value) string { // TODO: reflect.Value => string
+func substr(str, begin reflect.Value, endArgs ...reflect.Value) string { // TODO: reflect.Value => string
 	var end reflect.Value
-	if len(end_args) > 0 {
-		end = end_args[0] // arg[0] is a pointer to var name
+	if len(endArgs) > 0 {
+		end = endArgs[0] // arg[0] is a pointer to var name
 	} else {
 		end = reflect.ValueOf(len(toStr(str)))
 	}
