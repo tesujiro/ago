@@ -69,20 +69,14 @@ func RunMainRules(rules []ast.Rule, env *Env) (result interface{}, err error) {
 				if err != nil {
 					return nil, fmt.Errorf("convert rule expression:%v", err)
 				}
-				//fmt.Printf("vmRule ExprPattern result:%#v bool:%v\n", result, b)
 				if !b {
 					debug.Printf("Line: %v skipped\n", childEnv.builtin.NR)
 					continue
 				}
 			}
-
-			result, err = runStmts(rule.Action, childEnv)
-			if err != nil {
-				return toInt(result), err
-			}
 		case *ast.StartStopPattern:
-			var b interface{}
 			isMatch := func() (bool, error) {
+				var b interface{}
 				if !env.GetLoop() {
 					b, err = evalExpr(pattern.Start, childEnv)
 				} else {
@@ -110,14 +104,14 @@ func RunMainRules(rules []ast.Rule, env *Env) (result interface{}, err error) {
 				if match {
 					env.SetLoop(!env.GetLoop())
 				}
-			} else if !env.GetLoop() && !reflect.ValueOf(b).Interface().(bool) {
+			} else if !env.GetLoop() {
 				debug.Printf("Line: %v skipped\n", childEnv.builtin.NR)
 				continue
 			}
-			result, err = runStmts(rule.Action, childEnv)
-			if err != nil {
-				return nil, err
-			}
+		}
+		result, err = runStmts(rule.Action, childEnv)
+		if err != nil {
+			return toInt(result), err
 		}
 	}
 	return toInt(result), err
