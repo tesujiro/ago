@@ -86,8 +86,7 @@ func RunMainRules(rules []ast.Rule, env *Env) (result interface{}, err error) {
 					return false, err
 				}
 				if reflect.ValueOf(b).Kind() != reflect.Bool {
-					err = fmt.Errorf("pattern is not bool: %v %v", reflect.ValueOf(b).Kind(), b)
-					return false, err
+					return false, fmt.Errorf("pattern is not bool: %v %v", reflect.ValueOf(b).Kind(), b)
 				}
 				return reflect.ValueOf(b).Interface().(bool), nil
 			}
