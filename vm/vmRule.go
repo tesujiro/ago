@@ -78,6 +78,8 @@ func RunMainRules(rules []ast.Rule, env *Env) (result interface{}, err error) {
 			isMatch := func() (bool, error) {
 				var b interface{}
 				if !env.GetLoop() {
+					//fmt.Printf("pattern=%#v\n", pattern)
+					//fmt.Printf("Start=%#v\n", pattern.Start)
 					b, err = evalExpr(pattern.Start, childEnv)
 				} else {
 					b, err = evalExpr(pattern.Stop, childEnv)
@@ -85,10 +87,15 @@ func RunMainRules(rules []ast.Rule, env *Env) (result interface{}, err error) {
 				if err != nil {
 					return false, err
 				}
-				if reflect.ValueOf(b).Kind() != reflect.Bool {
-					return false, fmt.Errorf("pattern is not bool: %v %v", reflect.ValueOf(b).Kind(), b)
+				switch reflect.ValueOf(b).Kind() {
+				case reflect.Bool:
+					return reflect.ValueOf(b).Interface().(bool), nil
+				case reflect.Int, reflect.Int64, reflect.Float64:
+					return b != 0, nil
+				default:
+					return false, nil
+
 				}
-				return reflect.ValueOf(b).Interface().(bool), nil
 			}
 			match, err := isMatch()
 			if err != nil {

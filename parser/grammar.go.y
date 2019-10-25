@@ -129,11 +129,11 @@ pattern
 	{
 		$$ = &ast.ExprPattern{Expr:$1}
 	}
-	| regexpr ',' regexpr
+	| expr ',' expr
 	{
 		$$ = &ast.StartStopPattern{
-			Start: &ast.MatchExpr{Expr: &defaultExpr, RegExpr: $1},
-			Stop:  &ast.MatchExpr{Expr: &defaultExpr, RegExpr: $3},
+			Start: $1,
+			Stop: $3,
 		}
 	}
 

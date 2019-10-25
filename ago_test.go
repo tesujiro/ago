@@ -637,6 +637,12 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{print 1}END{print 2}", ok: "1\n2\n"},
 		{script: "1/0{print 1.5}", in: "AAA\n", ok: "error:devision by zero\n"},
 		// /start/./stop/
+		{script: "0,0", in: "AAA\nBBB\n", ok: ""},
+		{script: "1,2", in: "AAA\nBBB\n", ok: "AAA\nBBB\n"},
+		{script: "5,0", in: "AAA\nBBB\n", ok: "AAA\nBBB\n"},
+		{script: "0,7", in: "AAA\nBBB\n", ok: ""},
+		{script: "\"xx\",7", in: "AAA\nBBB\n", ok: ""},
+		{script: "A[0],7", in: "AAA\nBBB\n", ok: ""},
 		{script: "/AAA/,/CCC/", in: "AAA\nBBB\nCCC\nDDD\n", ok: "AAA\nBBB\nCCC\n"},
 		{script: "/AAA/,/CCC/{print}", in: "AAA\nBBB\nCCC\nDDD\n", ok: "AAA\nBBB\nCCC\n"},
 		{script: "/BBB/,/CCC/{print}", in: "AAA\nBBB\nCCC\nDDD\n", ok: "BBB\nCCC\n"},
