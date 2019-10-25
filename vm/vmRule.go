@@ -78,8 +78,6 @@ func RunMainRules(rules []ast.Rule, env *Env) (result interface{}, err error) {
 			isMatch := func() (bool, error) {
 				var b interface{}
 				if !env.GetLoop() {
-					//fmt.Printf("pattern=%#v\n", pattern)
-					//fmt.Printf("Start=%#v\n", pattern.Start)
 					b, err = evalExpr(pattern.Start, childEnv)
 				} else {
 					b, err = evalExpr(pattern.Stop, childEnv)
