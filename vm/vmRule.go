@@ -90,6 +90,8 @@ func RunMainRules(rules []ast.Rule, env *Env) (result interface{}, err error) {
 					return reflect.ValueOf(b).Interface().(bool), nil
 				case reflect.Int, reflect.Int64, reflect.Float64:
 					return b != 0, nil
+				case reflect.String:
+					return true, nil
 				default:
 					return false, nil
 

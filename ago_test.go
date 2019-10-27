@@ -641,7 +641,7 @@ func TestGoa(t *testing.T) {
 		{script: "1,2", in: "AAA\nBBB\n", ok: "AAA\nBBB\n"},
 		{script: "5,0", in: "AAA\nBBB\n", ok: "AAA\nBBB\n"},
 		{script: "0,7", in: "AAA\nBBB\n", ok: ""},
-		{script: "\"xx\",7", in: "AAA\nBBB\n", ok: ""},
+		{script: "\"xx\",7", in: "AAA\nBBB\n", ok: "AAA\nBBB\n"},
 		{script: "A[0],7", in: "AAA\nBBB\n", ok: ""},
 		{script: "/AAA/,/CCC/", in: "AAA\nBBB\nCCC\nDDD\n", ok: "AAA\nBBB\nCCC\n"},
 		{script: "/AAA/,/CCC/{print}", in: "AAA\nBBB\nCCC\nDDD\n", ok: "AAA\nBBB\nCCC\n"},
