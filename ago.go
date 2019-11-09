@@ -75,23 +75,16 @@ func _main() int {
 
 	var script string
 	var files []string
-	files = []string{""}
-	//fmt.Println("len(args)", len(args))
-	switch len(args) {
-	case 0:
-	case 1:
-		if programFile != "" {
-			script = programFile
-			files = []string{args[0]}
-		} else {
+	if len(args) > 0 {
+		if programFile == "" {
 			script = args[0]
+			files = args[1:]
+		} else {
+			files = args
 		}
-	case 2:
-		script = args[0]
-		files = []string{args[1]}
-	default:
-		script = args[0]
-		files = args[1:]
+	}
+	if len(files) == 0 {
+		files = []string{""} // STDIN
 	}
 
 	if ver {
@@ -116,6 +109,7 @@ func _main() int {
 	runFile := func(file string) int {
 		var sriptReader io.Reader
 		if programFile != "" {
+			//fmt.Println("read from programFile:", programFile)
 			fp, err := os.Open(programFile)
 			if err != nil {
 				fmt.Println("script file open error:", err)
@@ -124,6 +118,7 @@ func _main() int {
 			defer fp.Close()
 			sriptReader = bufio.NewReader(fp)
 		} else {
+			//fmt.Println("read script:", script)
 			sriptReader = strings.NewReader(script)
 		}
 		var fileReader *os.File
