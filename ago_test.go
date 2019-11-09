@@ -773,7 +773,7 @@ ZZZ 1
 `},
 
 		// Command argment test
-		{prepare: func() {}, cleanup: func() {}, rc: 0},
+		{prepare: func() {}, cleanup: func() {}, rc: 1, okRegex: "Usage of .*:"},
 		{prepare: func() { os.Args = []string{os.Args[0], "-version"} }, rc: 0, ok: "Version: 0.0.0\n"},
 		{prepare: func() { os.Args = []string{os.Args[0], "-d"} }, script: "{}", in: "aaa\n", rc: 0, okRegex: "Start debug mode."},
 		{prepare: func() { os.Args = []string{os.Args[0], "-a"} }, script: "BEGIN{}{print 1}END{}", rc: 0, okRegex: `ast.NumExpr{Literal:"1"}`},

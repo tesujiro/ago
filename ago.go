@@ -7,6 +7,7 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
+	"path"
 	"strings"
 
 	"github.com/pkg/profile"
@@ -73,6 +74,16 @@ func _main() int {
 	}
 	args := f.Args()
 
+	if ver {
+		fmt.Println("Version:", version)
+		return 0
+	}
+
+	if len(args) == 0 && programFile == "" {
+		fmt.Printf("Usage of %s:\n", path.Base(os.Args[0]))
+		f.PrintDefaults()
+		return 1
+	}
 	var script string
 	var files []string
 	if len(args) > 0 {
@@ -85,11 +96,6 @@ func _main() int {
 	}
 	if len(files) == 0 {
 		files = []string{""} // STDIN
-	}
-
-	if ver {
-		fmt.Println("Version:", version)
-		return 0
 	}
 
 	if dbg {
