@@ -138,7 +138,7 @@ func (e *Env) SetField(index int, str string) error {
 var regexOrgAwkTruncate = regexp.MustCompile("^[ \t]*([^ \t].*[^ \t])[ \t]*$")
 
 // SetFieldFromLine split line string and sets the value of the fields.
-func (e *Env) SetFieldFromLine(line string) error {
+func (e *Env) SetFieldFromLine(line string) {
 	split := func(regex, line string) {
 		re := regexp.MustCompile(regex) //TODO: STORE PRE COMPILED VALUE TO ENV FOR PERFORMANCE
 		result := re.Split(line, -1)
@@ -173,7 +173,7 @@ func (e *Env) SetFieldFromLine(line string) error {
 	//e.SetFieldZero()
 	e.SetNF()
 
-	return nil
+	return
 }
 
 // GetLoop returns if current line is inside start and stop scope.

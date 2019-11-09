@@ -25,9 +25,11 @@ type PosImpl struct {
 }
 
 // Position return the position of the expression or statement.
+/*
 func (x *PosImpl) Position() Position {
 	return x.pos
 }
+*/
 
 // SetPosition is a function to specify position of the expression or statement.
 func (x *PosImpl) SetPosition(pos Position) {

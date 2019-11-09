@@ -490,10 +490,7 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 		}
 		line := scanner.Text()
 		if expr.Var == nil {
-			if err := env.SetFieldFromLine(line); err != nil {
-				fmt.Printf("error:%v\n", err)
-				return 0, err
-			}
+			env.SetFieldFromLine(line)
 		} else {
 			evalAssExpr(expr.Var, (interface{})(line), env)
 		}

@@ -780,8 +780,8 @@ ZZZ 1
 		//{prepare: func() { os.Args = []string{os.Args[0], "-c"} }, rc: 0},
 		//{prepare: func() { os.Args = []string{os.Args[0], "-m"} }, rc: 0},
 		{prepare: func() { os.Args = []string{os.Args[0], "-l"} }, script: "BEGIN{}", rc: 0, okRegex: "Start lexer debug mode"},
-		//{prepare: func() { os.Args = []string{os.Args[0], "-v", "XX"} }, rc: 1, script: "BEGIN{print XX}", ok: "\n"}, // flag exits when error
 		{prepare: func() { os.Args = []string{os.Args[0], "-v", "XX=xx"} }, rc: 0, script: "BEGIN{print XX}", ok: "xx\n"},
+		{prepare: func() { os.Args = []string{os.Args[0], "-v", "XX"} }, rc: 1, script: "BEGIN{print XX}", okRegex: "parameter must be KEY=VALUE format"},
 
 		// test for script file
 		{
@@ -800,6 +800,23 @@ ZZZ 1
 			},
 			rc: 0,
 			ok: "Hello, World!\n",
+		},
+		{
+			prepare: func() {
+				scriptfile, err := ioutil.TempFile("", "example.*.ago")
+				if err != nil {
+					log.Fatal(err)
+				}
+				tempScriptPath = scriptfile.Name()
+				fmt.Fprintf(scriptfile, "{print NR,$1;}")
+				os.Args = []string{os.Args[0], "-f", scriptfile.Name(), scriptfile.Name()}
+			},
+			cleanup: func() {
+				os.Remove(tempScriptPath)
+				programFile = ""
+			},
+			rc: 0,
+			ok: "1 {print\n",
 		},
 		{
 			prepare: func() { os.Args = []string{os.Args[0], "-f", "./xxaabbyyccccdd"} },
@@ -824,6 +841,22 @@ ZZZ 1
 			},
 			rc: 0,
 			ok: "AAA\nDDD\n",
+		},
+		{
+			prepare: func() {
+				datafile, err := ioutil.TempFile("", "example.*.data.ago")
+				if err != nil {
+					log.Fatal(err)
+				}
+				tempDataPath = datafile.Name()
+				fmt.Fprintf(datafile, "AAA BBB CCC\nDDD EEE FFF\n")
+				os.Args = []string{os.Args[0], "{print $1}", datafile.Name(), datafile.Name()}
+			},
+			cleanup: func() {
+				os.Remove(tempDataPath)
+			},
+			rc: 0,
+			ok: "AAA\nDDD\nAAA\nDDD\n",
 		},
 		{
 			prepare: func() { os.Args = []string{os.Args[0], "{print $1}", "./xxaabbyyccccdd"} },

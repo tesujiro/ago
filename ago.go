@@ -55,9 +55,7 @@ func main() {
 }
 
 func _main() int {
-	//flag.Parse()
-	//args := flag.Args()
-	f := flag.NewFlagSet(os.Args[0], flag.ExitOnError)
+	f := flag.NewFlagSet(os.Args[0], flag.ContinueOnError)
 	f.StringVar(&fs, "F", " ", "Field separator")
 	f.StringVar(&programFile, "f", "", "Program file")
 	f.BoolVar(&dbg, "d", false, "debug option")
@@ -75,17 +73,25 @@ func _main() int {
 	}
 	args := f.Args()
 
-	var file, script string
+	var script string
+	var files []string
+	files = []string{""}
+	//fmt.Println("len(args)", len(args))
 	switch len(args) {
+	case 0:
 	case 1:
 		if programFile != "" {
-			file = args[0]
+			script = programFile
+			files = []string{args[0]}
 		} else {
 			script = args[0]
 		}
 	case 2:
 		script = args[0]
-		file = args[1]
+		files = []string{args[1]}
+	default:
+		script = args[0]
+		files = args[1:]
 	}
 
 	if ver {
@@ -106,32 +112,41 @@ func _main() int {
 		defer profile.Start(profile.MemProfile).Stop()
 	}
 
-	var sriptReader io.Reader
-	if programFile != "" {
-		fp, err := os.Open(programFile)
-		if err != nil {
-			fmt.Println("script file open error:", err)
-			return 1
+	var ret int
+	runFile := func(file string) int {
+		var sriptReader io.Reader
+		if programFile != "" {
+			fp, err := os.Open(programFile)
+			if err != nil {
+				fmt.Println("script file open error:", err)
+				return 1
+			}
+			defer fp.Close()
+			sriptReader = bufio.NewReader(fp)
+		} else {
+			sriptReader = strings.NewReader(script)
 		}
-		defer fp.Close()
-		sriptReader = bufio.NewReader(fp)
-	} else {
-		sriptReader = strings.NewReader(script)
+		var fileReader *os.File
+		if file != "" {
+			fileReader, err = os.Open(file)
+			if err != nil {
+				fmt.Println("input file open error:", err)
+				return 1
+			}
+			defer fileReader.Close()
+		} else {
+			fileReader = os.Stdin
+		}
+		return runScript(sriptReader, fileReader)
 	}
 
-	var fileReader *os.File
-	if file != "" {
-		fileReader, err = os.Open(file)
-		if err != nil {
-			fmt.Println("input file open error:", err)
-			return 1
+	for _, file := range files {
+		ret = runFile(file)
+		if ret != 0 {
+			return ret
 		}
-		defer fileReader.Close()
-	} else {
-		fileReader = os.Stdin
 	}
-
-	return runScript(sriptReader, fileReader)
+	return 0
 }
 
 func initEnv() *vm.Env {
@@ -246,10 +261,7 @@ func runScript(sriptReader io.Reader, fileReader *os.File) int {
 		number++
 		fileLine := fileScanner.Text()
 		env.SetNR(number)
-		if err := env.SetFieldFromLine(fileLine); err != nil {
-			fmt.Printf("error:%v\n", err)
-			return 1
-		}
+		env.SetFieldFromLine(fileLine)
 		if len(mainRules) > 0 {
 			result, err := vm.RunMainRules(mainRules, env)
 			if err == vm.ErrNext {
