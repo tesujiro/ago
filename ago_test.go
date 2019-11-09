@@ -239,6 +239,7 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{print !1.1}", ok: "false\n"},
 		{script: "BEGIN{print !\"\"}", ok: "true\n"},
 		{script: "BEGIN{print !\"aa\"}", ok: "false\n"},
+		{script: "BEGIN{print !a[0]}", ok: "true\n"},
 		{script: "BEGIN{a=1;b=2;print a+1==b}", ok: "true\n"},
 		{script: "BEGIN{a=1;b=2;print a+1!=b}", ok: "false\n"},
 		{script: "BEGIN{a=1;b=2;print a!=b}", ok: "true\n"},
