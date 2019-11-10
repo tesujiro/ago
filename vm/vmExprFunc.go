@@ -62,7 +62,13 @@ func defineFunc(funcExpr *ast.FuncExpr, env *Env) (interface{}, error) {
 	fn := reflect.MakeFunc(funcType, runVMFunction)
 
 	if funcExpr.Name != "" {
-		if err := env.Define(funcExpr.Name, fn); err != nil {
+		if err := env.Set(funcExpr.Name, fn); err == nil {
+			return nil, errors.New("func name '" + funcExpr.Name + "' previously defined")
+		} else if err == ErrUnknownSymbol {
+			if err := env.Define(funcExpr.Name, fn); err != nil {
+				return nil, err
+			}
+		} else if err != nil {
 			return nil, err
 		}
 	}

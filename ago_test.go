@@ -510,6 +510,8 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{print func(x){if true {return func(){return x}}}(1)()}", ok: "1\n"},
 		// func rule
 		{script: "function one(){return 1}BEGIN{print one()}", ok: "1\n"},
+		{script: "function one(){return 1}function one(){return 2}BEGIN{print one()}", rc: 1, okRegex: `func name 'one' previously defined`},
+		{script: "function NF(){return 1}BEGIN{print NF()}", rc: 1, okRegex: `type of NF must be int`},
 		{script: "func one(){return 1}BEGIN{print one()}", ok: "1\n"},
 		{script: "func printOne(){print 1}BEGIN{printOne()}", ok: "1\n"},
 
@@ -773,7 +775,7 @@ ZZZ 1
 `},
 
 		// Command argment test
-		{prepare: func() {}, cleanup: func() {}, rc: 1, okRegex: "Usage of .*:"},
+		{prepare: func() {}, cleanup: func() {}, rc: 1},
 		{prepare: func() { os.Args = []string{os.Args[0], "-version"} }, rc: 0, ok: "Version: 0.0.0\n"},
 		{prepare: func() { os.Args = []string{os.Args[0], "-d"} }, script: "{}", in: "aaa\n", rc: 0, okRegex: "Start debug mode."},
 		{prepare: func() { os.Args = []string{os.Args[0], "-a"} }, script: "BEGIN{}{print 1}END{}", rc: 0, okRegex: `ast.NumExpr{Literal:"1"}`},

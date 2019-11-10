@@ -80,7 +80,7 @@ func _main() int {
 	}
 
 	if len(args) == 0 && programFile == "" {
-		fmt.Printf("Usage of %s:\n", path.Base(os.Args[0]))
+		fmt.Fprintf(os.Stderr, "Usage of %s:\n", path.Base(os.Args[0]))
 		f.PrintDefaults()
 		return 1
 	}
@@ -113,7 +113,7 @@ func _main() int {
 
 	var ret int
 	runFile := func(file string) int {
-		var sriptReader io.Reader
+		var scriptReader io.Reader
 		if programFile != "" {
 			//fmt.Println("read from programFile:", programFile)
 			fp, err := os.Open(programFile)
@@ -122,10 +122,10 @@ func _main() int {
 				return 1
 			}
 			defer fp.Close()
-			sriptReader = bufio.NewReader(fp)
+			scriptReader = bufio.NewReader(fp)
 		} else {
 			//fmt.Println("read script:", script)
-			sriptReader = strings.NewReader(script)
+			scriptReader = strings.NewReader(script)
 		}
 		var fileReader *os.File
 		if file != "" {
@@ -138,7 +138,7 @@ func _main() int {
 		} else {
 			fileReader = os.Stdin
 		}
-		return runScript(sriptReader, fileReader)
+		return runScript(scriptReader, fileReader)
 	}
 
 	for _, file := range files {
@@ -166,14 +166,14 @@ func initEnv() *vm.Env {
 	return env
 }
 
-func runScript(sriptReader io.Reader, fileReader *os.File) int {
+func runScript(scriptReader io.Reader, fileReader *os.File) int {
 
 	env := initEnv()
 	if dbg {
 		env.Dump()
 	}
 
-	bytes, err := ioutil.ReadAll(sriptReader)
+	bytes, err := ioutil.ReadAll(scriptReader)
 	if err != nil {
 		fmt.Printf("Read error: %v \n", err)
 		return 1
