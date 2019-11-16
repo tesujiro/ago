@@ -911,11 +911,21 @@ ZZZ 1
 		readFromOut, writeToOut, err := os.Pipe()
 		if err != nil {
 			os.Stdin = realStdin
-			os.Stderr = realStderr
+			//os.Stderr = realStderr
 			t.Fatal("Pipe error:", err)
 		}
 		os.Stdout = writeToOut
 		//logger.Print("pipe out created")
+
+		// ERR PIPE
+		readFromErr, writeToErr, err := os.Pipe()
+		if err != nil {
+			os.Stdin = realStdin
+			os.Stdout = realStdout
+			t.Fatal("Pipe error:", err)
+		}
+		os.Stderr = writeToErr
+		//logger.Print("pipe err created")
 
 		// Read Stdout goroutine
 		readerOut := bufio.NewScanner(readFromOut)
@@ -1018,6 +1028,8 @@ ZZZ 1
 		writeToIn.Close()
 		readFromOut.Close()
 		writeToOut.Close()
+		readFromErr.Close()
+		writeToErr.Close()
 		os.Stdin = realStdin
 		os.Stderr = realStderr
 		os.Stdout = realStdout
