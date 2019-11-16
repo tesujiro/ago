@@ -588,12 +588,10 @@ func Parse(s *Scanner) ([]ast.Rule, error) {
 	return l.result, l.e
 }
 
-/*
 // EnableErrorVerbose enabled verbose errors from the parser
 func EnableErrorVerbose() {
 	yyErrorVerbose = true
 }
-*/
 
 // TraceLexer set tracing lexer on.
 func TraceLexer() {

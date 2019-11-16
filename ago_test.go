@@ -137,11 +137,11 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{a,b=1/0,2;print a,b}", ok: "error:devision by zero\n"},
 		{script: "BEGIN{NF[0],b=1,2;print a,b}", ok: "error:type int does not support index operation\n"},
 		// basic error
-		{script: "BEGIN{a", okRegex: "Syntax error: syntax error\n", rc: 1},
-		{script: "BEGIN{a='", okRegex: "Syntax error: syntax error\n", rc: 1},
-		{script: "BEGIN{a='\n", okRegex: "Syntax error: syntax error\n", rc: 1},
-		{script: "BEGIN{a=\"\n", okRegex: "Syntax error: syntax error\n", rc: 1},
-		{script: "BEGIN{a\n=1;print a;", okRegex: "Syntax error: syntax error\n", rc: 1},
+		{script: "BEGIN{a", okRegex: "Syntax error: syntax error", rc: 1},
+		{script: "BEGIN{a='", okRegex: "Syntax error: syntax error", rc: 1},
+		{script: "BEGIN{a='\n", okRegex: "Syntax error: syntax error", rc: 1},
+		{script: "BEGIN{a=\"\n", okRegex: "Syntax error: syntax error", rc: 1},
+		{script: "BEGIN{a\n=1;print a;", okRegex: "Syntax error: syntax error", rc: 1},
 		// printf
 		{script: "BEGIN{a=1;printf \"%d\",a}", ok: "1\n"},
 		{script: "BEGIN{printf \"%.2d\",1}", ok: "01\n"},
@@ -178,10 +178,10 @@ func TestGoa(t *testing.T) {
 		// Comment
 		{script: `BEGIN{ /*a=100;*/ a= a+100;print a; }`, ok: "100\n"},
 		{script: `BEGIN{ /*a=100;a= a+100;print a; 
-		*}`, okRegex: "Syntax error: syntax error\n", rc: 1},
+		*}`, okRegex: "Syntax error: syntax error", rc: 1},
 		{script: `BEGIN{ #a=100;
 		a= a+100;print a; }`, ok: "100\n"},
-		{script: `BEGIN{ #a=100; }`, okRegex: "Syntax error: syntax error\n", rc: 1},
+		{script: `BEGIN{ #a=100; }`, okRegex: "Syntax error: syntax error", rc: 1},
 
 		// JAPANESE
 		{script: "BEGIN{print \"あいう\"}", ok: "あいう\n"},
@@ -254,11 +254,11 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{a=1;b=2;print a==1&&b==2}", ok: "true\n"},
 		{script: "BEGIN{a=1;b=2;print a==2&&b==2}", ok: "false\n"},
 		{script: "BEGIN{a=1;b=2;print a&&b}", ok: "true\n"},
-		{script: "BEGIN{a=1;b=2;print a&b}", okRegex: "Syntax error: syntax error\n", rc: 1},
+		{script: "BEGIN{a=1;b=2;print a&b}", okRegex: "Syntax error: syntax error", rc: 1},
 		{script: "BEGIN{a=1;b=2;print a==1||b==2}", ok: "true\n"},
 		{script: "BEGIN{a=1;b=2;print a==2||b==2}", ok: "true\n"},
 		{script: "BEGIN{a=1;b=2;print a||b}", ok: "true\n"},
-		{script: "BEGIN{a=1;b=2;print a|b}", okRegex: "Syntax error: syntax error\n", rc: 1},
+		{script: "BEGIN{a=1;b=2;print a|b}", okRegex: "Syntax error: syntax error", rc: 1},
 		{script: "BEGIN{print 1||1}", ok: "true\n"},
 		{script: "BEGIN{print 0||0}", ok: "false\n"},
 		{script: "BEGIN{print 1/0||1}", ok: "error:devision by zero\n"},

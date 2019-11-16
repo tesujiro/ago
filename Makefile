@@ -5,7 +5,7 @@ ago : ago.go ./parser/*.y ./parser/*.go ./ast/*.go ./vm/*.go ./lib/*.go ./parser
 	go build -o ago .
 
 ./parser/grammar.go : ./parser/grammar.go.y ./ast/*.go
-	goyacc -o ./parser/grammar.go ./parser/grammar.go.y
+	goyacc -l -o ./parser/grammar.go ./parser/grammar.go.y
 	gofmt -s -w ./parser
 
 .PHONY: lint

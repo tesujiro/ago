@@ -34,12 +34,12 @@ func strictToFloat(val interface{}) (float64, error) {
 	switch reflect.ValueOf(val).Kind() {
 	case reflect.Int64:
 		return float64(val.(int64)), nil
-	case reflect.Int32:
-		return float64(val.(int32)), nil
-	case reflect.Int16:
-		return float64(val.(int16)), nil
-	case reflect.Int8:
-		return float64(val.(int8)), nil
+	//case reflect.Int32:
+	//return float64(val.(int32)), nil
+	//case reflect.Int16:
+	//return float64(val.(int16)), nil
+	//case reflect.Int8:
+	//return float64(val.(int8)), nil
 	case reflect.Int:
 		return float64(val.(int)), nil
 	case reflect.Float64, reflect.Float32:

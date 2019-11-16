@@ -188,6 +188,7 @@ func runScript(scriptReader io.Reader, fileReader *os.File) int {
 		parser.TraceOffLexer()
 	}
 
+	parser.EnableErrorVerbose()
 	ast, parseError := parser.ParseSrc(source)
 	if parseError != nil {
 		fmt.Printf("Syntax error: %v \n", parseError)
