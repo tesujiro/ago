@@ -7,7 +7,7 @@ import (
 	"github.com/tesujiro/ago/debug"
 )
 
-// Dump provide dump function.
+// Dump provide dump AST function.
 func Dump(obj interface{}) {
 	p := func(indent string, obj interface{}) {
 		fmt.Printf("%s%T\t%#v\n", indent, obj, obj)
@@ -25,26 +25,19 @@ func Dump(obj interface{}) {
 		case reflect.Ptr:
 			debug.Println(indent, "pointer!!")
 			dumpHelper(indent, v.Elem().Interface())
-			//p(indent, v.Elem().Interface()) //same
-			//dumpHelper(nextIndent, v.Elem().Interface())
-		case reflect.Interface:
-			debug.Println(indent, "interface")
-			p(indent, v.Elem().Interface())
+		//case reflect.Interface:
+		//debug.Println(indent, "interface")
+		//p(indent, v.Elem().Interface())
 		case reflect.Slice | reflect.Array:
-			//case reflect.Array:
 			debug.Println(indent, "slice|array")
-			//p(indent, obj)
 			for i := 0; i < v.Len(); i++ {
-				//dumpHelper(nextIndent, v.Index(i).Interface())
 				dumpHelper(indent, v.Index(i).Interface())
 			}
 		case reflect.Struct:
 			debug.Println(indent, "struct")
 			pf(indent, t.String(), v.Interface())
-			//v = v.Elem()
 			for i := 0; i < v.NumField(); i++ {
 				pf(indent+"\t", t.Field(i).Name, v.Field(i).Interface())
-				//if !v.Elem().IsNil() {
 				if v.Field(i).Kind() != reflect.String &&
 					v.Field(i).Kind() != reflect.Struct &&
 					v.Field(i).Kind() != reflect.Bool &&

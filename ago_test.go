@@ -778,7 +778,7 @@ ZZZ 1
 		{prepare: func() {}, cleanup: func() {}, rc: 1},
 		{prepare: func() { os.Args = []string{os.Args[0], "-version"} }, rc: 0, ok: "Version: 0.0.0\n"},
 		{prepare: func() { os.Args = []string{os.Args[0], "-d"} }, script: "{}", in: "aaa\n", rc: 0, okRegex: "Start debug mode."},
-		{prepare: func() { os.Args = []string{os.Args[0], "-a"} }, script: "BEGIN{}{print 1}END{}", rc: 0, okRegex: `ast.NumExpr{Literal:"1"}`},
+		{prepare: func() { os.Args = []string{os.Args[0], "-a"} }, script: `BEGIN{X["x"]=1}{print 1}END{}`, rc: 0, okRegex: `ast.NumExpr{Literal:"1"}`},
 		{prepare: func() { os.Args = []string{os.Args[0], "-g"} }, script: "BEGIN{a=1}END{print a}", in: "\n", rc: 0, ok: "1\n"},
 		//{prepare: func() { os.Args = []string{os.Args[0], "-c"} }, rc: 0},
 		//{prepare: func() { os.Args = []string{os.Args[0], "-m"} }, rc: 0},
