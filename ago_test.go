@@ -183,10 +183,12 @@ func TestGoa(t *testing.T) {
 		a= a+100;print a; }`, ok: "100\n"},
 		{script: `BEGIN{ #a=100; }`, okRegex: "Syntax error: syntax error", rc: 1},
 
-		// JAPANESE
+		// Multibyte character
 		{script: "BEGIN{print \"あいう\"}", ok: "あいう\n"},
 		{script: "BEGIN{a=\"あいう\";b=\"えお\";print a+b}", ok: "0\n"},
 		{script: "BEGIN{a[\"あ\"]=1;a[\"い\"]=2;a[\"う\"]=3;for(key in a){print key,a[key]}}", ok: "あ 1\nい 2\nう 3\n"},
+		{script: "BEGIN{あ=\"xxx\";print あ}", ok: "xxx\n"},
+		{script: "BEGIN{🍺=\"xxx\";print 🍺}", rc: 1}, // error?
 
 		// variable and scope
 		// builtin
@@ -780,8 +782,8 @@ ZZZ 1
 		{prepare: func() { os.Args = []string{os.Args[0], "-d"} }, script: "{}", in: "aaa\n", rc: 0, okRegex: "Start debug mode."},
 		{prepare: func() { os.Args = []string{os.Args[0], "-a"} }, script: `BEGIN{X["x"]=1}{print 1}END{}`, rc: 0, okRegex: `ast.NumExpr{Literal:"1"}`},
 		{prepare: func() { os.Args = []string{os.Args[0], "-g"} }, script: "BEGIN{a=1}END{print a}", in: "\n", rc: 0, ok: "1\n"},
-		//{prepare: func() { os.Args = []string{os.Args[0], "-c"} }, rc: 0},
-		//{prepare: func() { os.Args = []string{os.Args[0], "-m"} }, rc: 0},
+		//{prepare: func() { os.Args = []string{os.Args[0], "-c"} }, script: "BEGIN{}", rc: 0}, // TODO: remove .pprof file after test
+		//{prepare: func() { os.Args = []string{os.Args[0], "-m"} }, script: "BEGIN{}", rc: 0}, // TODO: remove .pprof file after test
 		{prepare: func() { os.Args = []string{os.Args[0], "-l"} }, script: "BEGIN{}", rc: 0, okRegex: "Start lexer debug mode"},
 		{prepare: func() { os.Args = []string{os.Args[0], "-v", "XX=xx"} }, rc: 0, script: "BEGIN{print XX}", ok: "xx\n"},
 		{prepare: func() { os.Args = []string{os.Args[0], "-v", "XX"} }, rc: 1, script: "BEGIN{print XX}", okRegex: "parameter must be KEY=VALUE format"},
