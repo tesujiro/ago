@@ -188,7 +188,7 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{a=\"あいう\";b=\"えお\";print a+b}", ok: "0\n"},
 		{script: "BEGIN{a[\"あ\"]=1;a[\"い\"]=2;a[\"う\"]=3;for(key in a){print key,a[key]}}", ok: "あ 1\nい 2\nう 3\n"},
 		{script: "BEGIN{あ=\"xxx\";print あ}", ok: "xxx\n"},
-		{script: "BEGIN{🍺=\"xxx\";print 🍺}", rc: 1}, // error?
+		{script: "BEGIN{🍺=\"xxx\";print 🍺}", rc: 1}, // not UNICODE letter
 
 		// variable and scope
 		// builtin

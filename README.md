@@ -76,6 +76,7 @@ Please note that the language and command args may change at any time.
 * A command can be piped to getline (ex. "date" | getline DATE), but the command is not invoked from shell, cannot use shell functions in the command.
 * can set multiple chars to RS. (same as GAWK)
 * Changing RS variable is valid only before scanning files. (Can change RS only in "BEGIN{}" rule.)
+* All unicode character can be used for variable names(ex.  ビール="beer!";print ビール)
 
 # To be fixed
 * no bool literal (true/false->0/1)
