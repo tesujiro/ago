@@ -72,7 +72,6 @@ func (e *Env) SetRSTART(i int) {
 
 // GetField gets the field value with specified index. ex: $1, $NF, $i
 func (e *Env) GetField(i int) (string, error) {
-	// TODO: out of index
 	if i < 0 || i >= len(e.builtin.field) {
 		return "", nil
 	}
@@ -81,13 +80,11 @@ func (e *Env) GetField(i int) (string, error) {
 
 // SetFieldZero sets the value of the field zero or $0.
 func (e *Env) SetFieldZero() error {
-	//fmt.Println("SetFieldZero:", e.builtin.field)
 	if len(e.builtin.field) <= 1 {
 		e.builtin.field[0] = ""
 		return nil
 	}
 	str := e.builtin.field[1]
-	//fmt.Println("len:", len(e.builtin.field))
 	for i := 2; i < len(e.builtin.field); i++ {
 		str += e.builtin.OFS + e.builtin.field[i]
 	}
@@ -104,9 +101,6 @@ func (e *Env) SetField(index int, str string) error {
 	if index >= len(e.builtin.field) {
 		newField := make([]string, index+1)
 		for i := 1; i < len(e.builtin.field); i++ {
-			//newField[i] = getField(i)
-			//f, _ := e.GetField(i)
-			//newField[i] = f
 			newField[i] = e.builtin.field[i]
 		}
 		e.builtin.field = newField
@@ -153,7 +147,6 @@ func (e *Env) SetFieldFromLine(line string) {
 		split(e.builtin.FS, line)
 	}
 	e.builtin.field[0] = line
-	//e.SetFieldZero()
 	e.SetNF()
 
 	return
