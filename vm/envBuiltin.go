@@ -80,10 +80,6 @@ func (e *Env) GetField(i int) (string, error) {
 
 // SetFieldZero sets the value of the field zero or $0.
 func (e *Env) SetFieldZero() error {
-	if len(e.builtin.field) <= 1 {
-		e.builtin.field[0] = ""
-		return nil
-	}
 	str := e.builtin.field[1]
 	for i := 2; i < len(e.builtin.field); i++ {
 		str += e.builtin.OFS + e.builtin.field[i]
