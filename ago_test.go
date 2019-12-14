@@ -211,6 +211,7 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{print RS}", ok: "\n"},
 		{script: `BEGIN{RS="is"}{print NR,"["$0"]"}`, in: "this_is_a_file", ok: "1 [th]\n2 [_]\n3 [_a_file\n]\n"},
 		{script: `{print NR,"["$0"]";RS="is"}`, in: "this is a file\nthis\n", ok: "1 [this is a file]\n2 [this]\n"}, // panic scan after Split()
+		{script: `BEGIN{SUBSEP="AA";A[1,2]=10;for (key in A){ print key;};}`, ok: "1AA2\n"},
 		// global
 		{script: "BEGIN{A=1}END{print A}", ok: "1\n"},
 		{script: "BEGIN{Abc=1}END{print Abc}", ok: "1\n"},

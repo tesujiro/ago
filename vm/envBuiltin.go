@@ -60,23 +60,6 @@ func (e *Env) SetFS(fs string) {
 	//e.Dump()
 }
 
-// SetOFS sets built in variable OFS, output field separator.
-func (e *Env) SetOFS(fs string) {
-	e.builtin.OFS = fs
-	//e.Dump()
-}
-
-// SetORS sets built in variable ORS.
-func (e *Env) SetORS(fs string) {
-	e.builtin.ORS = fs
-	//e.Dump()
-}
-
-// SetSUBSEP sets built in variable SUBSEP, sub separator.
-func (e *Env) SetSUBSEP(ss string) {
-	e.builtin.SUBSEP = ss
-}
-
 // SetRLENGTH sets built in variable RLENGTH, the length of the match.
 func (e *Env) SetRLENGTH(i int) {
 	e.builtin.RLENGTH = i
