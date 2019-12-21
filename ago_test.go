@@ -615,7 +615,10 @@ func TestGoa(t *testing.T) {
 		// lib: systime
 		{script: "BEGIN{systime()}", ok: ""},
 		// lib: system
-		{script: "BEGIN{print system(\"echo aaa\")}", ok: "aaa\n0\n"},
+		{script: "BEGIN{system(\"echo aaa\")}", ok: "aaa\n"},
+		{script: "BEGIN{system(\"echox aaa\")}", okRegex: `not found`},
+		{script: "BEGIN{print system(\"test 1 -eq 1\")}", ok: "0\n"},
+		{script: "BEGIN{print system(\"test 1 -eq 0\")}", ok: "1\n"},
 
 		// field
 		{script: "{print $1}", in: "Hello World!\n", ok: "Hello\n"},
