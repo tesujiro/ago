@@ -116,11 +116,11 @@ func system(command string) int {
 	cmd := exec.Command(cmdArray[0], cmdArray[1:]...)
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
-		fmt.Printf("%v", err)
+		fmt.Println("%v\n", err)
 		return 1
 	}
 	if err := cmd.Start(); err != nil {
-		fmt.Printf("%v", err)
+		fmt.Println("%v\n", err)
 		return 1
 	}
 	scanner := bufio.NewScanner(stdout)
@@ -137,7 +137,7 @@ func system(command string) int {
 				return status.ExitStatus()
 			}
 		} else {
-			fmt.Printf("%v", err)
+			fmt.Printf("%v\n", err)
 			return 1
 		}
 	}

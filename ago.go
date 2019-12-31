@@ -175,7 +175,7 @@ func runScript(scriptReader io.Reader, fileReader *os.File) int {
 
 	bytes, err := ioutil.ReadAll(scriptReader)
 	if err != nil {
-		fmt.Printf("Read error: %v \n", err)
+		fmt.Printf("Read error: %v\n", err)
 		return 1
 	}
 	source := string(bytes)
@@ -191,7 +191,7 @@ func runScript(scriptReader io.Reader, fileReader *os.File) int {
 	parser.EnableErrorVerbose()
 	ast, parseError := parser.ParseSrc(source)
 	if parseError != nil {
-		fmt.Printf("Syntax error: %v \n", parseError)
+		fmt.Printf("Syntax error: %v\n", parseError)
 		if e, ok := parseError.(*parser.Error); ok {
 			fmt.Printf("at Line %v Column %v\n", e.Pos.Line, e.Pos.Column)
 			line := strings.Split(source, "\n")[e.Pos.Line-1]
