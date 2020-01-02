@@ -341,12 +341,16 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 				return toString(left) != toString(right), nil
 			}
 		case ">":
+			// TODO: check kind is string or number
 			return toFloat64(left) > toFloat64(right), nil
 		case ">=":
+			// TODO: check kind is string or number
 			return toFloat64(left) >= toFloat64(right), nil
 		case "<":
+			// TODO: check kind is string or number
 			return toFloat64(left) < toFloat64(right), nil
 		case "<=":
+			// TODO: check kind is string or number
 			return toFloat64(left) <= toFloat64(right), nil
 		case "CAT":
 			lKind := reflect.ValueOf(left).Kind()
