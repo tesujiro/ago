@@ -36,7 +36,7 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 		}
 		findex, err := strictToInt(index)
 		if err != nil {
-			return nil, fmt.Errorf("field index can not convert to int :%v", err)
+			return nil, fmt.Errorf("field index cannot convert to int :%v", err)
 		}
 		field, err := env.GetField(findex)
 		if err != nil {
