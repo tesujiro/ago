@@ -141,6 +141,7 @@ func callArgs(f reflect.Value, callExpr *ast.CallExpr, env *Env) ([]reflect.Valu
 	if f.Type().NumIn() < 1 {
 		return []reflect.Value{}, nil
 	}
+	// TODO: This is not illegal in AWK.
 	if !f.Type().IsVariadic() && f.Type().NumIn() != len(callExpr.SubExprs) ||
 		f.Type().IsVariadic() && f.Type().NumIn()-1 > len(callExpr.SubExprs) {
 		return []reflect.Value{}, fmt.Errorf("function wants %v arguments but received %v", f.Type().NumIn(), len(callExpr.SubExprs))
