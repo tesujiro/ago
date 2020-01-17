@@ -533,6 +533,12 @@ func TestGoa(t *testing.T) {
 		{script: "function multi(){return 1,2}BEGIN{x,y=multi(); print x,y}", ok: "1 2\n"},
 		{script: "function multi(){return 1,2}BEGIN{x=multi(); print x}", ok: "1 2\n"},
 		{script: "function multi(){return 1,2}BEGIN{x,y,z=multi(); print x,y}", ok: "1 2\n"},
+		{script: "function multi(){return 1,2,3}BEGIN{x,y,z=multi(); print x,y,z}", ok: "1 2 3\n"},
+		{script: "function multi(){return 1,2,3}BEGIN{x,y=multi(); print x,y}", ok: "1 2\n"},
+		{script: "function multi(){return 1,2,3}BEGIN{x=multi(); print x}", ok: "1 2 3\n"},
+		{script: `function multi(){return 1,"one"}BEGIN{x=multi(); print x}`, ok: "1 one\n"},
+		{script: `function multi(){return 1,"one"}BEGIN{x,y=multi(); print x,y}`, ok: "1 one\n"},
+		{script: `function multi(){return 1,"one"}BEGIN{x,y=multi(); print x}`, ok: "1\n"},
 		{script: "function parm1(x){return x}BEGIN{print parm1(\"1\")}", ok: "1\n"},
 		//{script: "function parm2(x,y){return x}BEGIN{print parm2(\"1\")}", ok: "1\n"}, //TODO: not illegal
 
