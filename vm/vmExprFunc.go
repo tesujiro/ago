@@ -290,6 +290,7 @@ func makeResult(ret []reflect.Value, isGoFunction bool) (interface{}, error) {
 		return nil, fmt.Errorf("user defined function value 2 did not return reflect value type but returned invalid type")
 	}
 	if !ret[0].Interface().(reflect.Value).IsValid() {
+		// when func without param
 		ret[0] = reflect.ValueOf(reflect.ValueOf(""))
 	}
 	if !ret[1].Interface().(reflect.Value).IsValid() {
@@ -314,11 +315,6 @@ func makeResult(ret []reflect.Value, isGoFunction bool) (interface{}, error) {
 		return result, nil
 	}
 
-	var errorType = reflect.ValueOf([]error{nil}).Index(0).Type()
-	if rvError.Type() == errorType {
-		// RETURN error
-		return nil, rvError.Interface().(error)
-	}
-
-	return result, nil
+	// RETURN error
+	return nil, rvError.Interface().(error)
 }
