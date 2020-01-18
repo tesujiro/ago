@@ -501,16 +501,17 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{a=1;Fn=func(){a=100;};Fn();print a}", ok: "100\n"},
 		// anonymous func
 		{script: "BEGIN{print func (x){return x+100;}(10)}", ok: "110\n"},
-		{script: "BEGIN{print func (x){return x+100;}()}", ok: "error:function wants 1 arguments but received 0\n"}, //TODO: not illegal
+		{script: "BEGIN{print func (x){return x+100;}()}", ok: "100\n"},
 		{script: "BEGIN{print (1+1)(10)}", ok: "error:cannot call type float64\n"},
 		{script: "BEGIN{Fn=func (x){return func(y) {return x*10+y};};Fn2=Fn(10);print Fn2(2)}", ok: "102\n"},
 		// recursive call
 		{script: "BEGIN{Factorial=func(x){if x==1 {1} else { x*Factorial(x-1)}};print Factorial(3)}", ok: "6\n"},
 		{script: "BEGIN{Factorial=func(x){if x==1 {return 1} else { return x*Factorial(x-1)}};print Factorial(3)}", ok: "6\n"},
 		// higher order function
-		{script: "BEGIN{func (x){return func(y) {return x*10+y};}()(2)}", ok: "error:function wants 1 arguments but received 0\n"},  //TODO: not illegal
-		{script: "BEGIN{func (x){return func(y) {return x*10+y};}(10)()}", ok: "error:function wants 1 arguments but received 0\n"}, //TODO: not illegal
+		{script: "BEGIN{print func (x){return func(y) {return x*10+y};}()(2)}", ok: "2\n"},
+		{script: "BEGIN{print func (x){return func(y) {return x*10+y};}(10)()}", ok: "100\n"},
 		{script: "BEGIN{print func (x){return func(y) {return x*10+y};}(10)(2)}", ok: "102\n"},
+		{script: "BEGIN{print func (x){return func(y) {return x*10+y};}(10,20)(2,3)}", ok: "102\n"},
 		{script: "BEGIN{Fibo=func(){x,y=0,1;return func(){x,y=y,x+y;return y}};f=Fibo();f();f();f();print f();}", ok: "5\n"},
 		// higher order & recursive
 		{script: "BEGIN{mod=func(x){f=func(y){ if y<x {return y} else { return f(y-x) }};return f};mod3=mod(3);print mod3(11);}", ok: "2\n"},
@@ -540,7 +541,7 @@ func TestGoa(t *testing.T) {
 		{script: `function multi(){return 1,"one"}BEGIN{x,y=multi(); print x,y}`, ok: "1 one\n"},
 		{script: `function multi(){return 1,"one"}BEGIN{x,y=multi(); print x}`, ok: "1\n"},
 		{script: "function parm1(x){return x}BEGIN{print parm1(\"1\")}", ok: "1\n"},
-		//{script: "function parm2(x,y){return x}BEGIN{print parm2(\"1\")}", ok: "1\n"}, //TODO: not illegal
+		{script: "function parm2(x,y){return x}BEGIN{print parm2(\"1\")}", ok: "1\n"},
 
 		// command parameter
 

@@ -141,22 +141,23 @@ func callArgs(f reflect.Value, callExpr *ast.CallExpr, env *Env) ([]reflect.Valu
 	if f.Type().NumIn() < 1 {
 		return []reflect.Value{}, nil
 	}
-	// TODO: This is not illegal in AWK.
-	if !f.Type().IsVariadic() && f.Type().NumIn() != len(callExpr.SubExprs) ||
-		f.Type().IsVariadic() && f.Type().NumIn()-1 > len(callExpr.SubExprs) {
-		return []reflect.Value{}, fmt.Errorf("function wants %v arguments but received %v", f.Type().NumIn(), len(callExpr.SubExprs))
+	if !f.Type().IsVariadic() && f.Type().NumIn() != len(callExpr.SubExprs) {
+		// when function parameter is different from func definition
+		newSubExprs := make([]ast.Expr, f.Type().NumIn())
+		for i, expr := range callExpr.SubExprs {
+			if i == cap(newSubExprs) {
+				break
+			}
+			newSubExprs[i] = expr
+		}
+		callExpr.SubExprs = newSubExprs
 	}
+	// TODO: when variadic
+	//if f.Type().IsVariadic() && f.Type().NumIn()-1 != len(callExpr.SubExprs) {
+	//}
 	var args []reflect.Value
 	args = make([]reflect.Value, len(callExpr.SubExprs), len(callExpr.SubExprs))
-	/*
-		if f.Type().NumIn() > len(callExpr.SubExprs) {
-			args = make([]reflect.Value, f.Type().NumIn(), f.Type().NumIn())
-		} else {
-			args = make([]reflect.Value, len(callExpr.SubExprs), len(callExpr.SubExprs))
-		}
-	*/
 	// func has variadic args
-	//hasVariadicArgs := f.Type().In(f.Type().NumIn()-1).Kind() == reflect.Slice
 	hasVariadicArgs := f.Type().IsVariadic()
 
 	funcArgType := func(n int) reflect.Type {
