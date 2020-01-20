@@ -542,6 +542,7 @@ func TestGoa(t *testing.T) {
 		{script: `function multi(){return 1,"one"}BEGIN{x,y=multi(); print x}`, ok: "1\n"},
 		{script: "function parm1(x){return x}BEGIN{print parm1(\"1\")}", ok: "1\n"},
 		{script: "function parm2(x,y){return x}BEGIN{print parm2(\"1\")}", ok: "1\n"},
+		//{script: "function f(P1,P2){P2=100;return P1*P2}BEGIN{P2=5;print f(3);print P2}", ok: "300\n5\n"}, // TODO: local variable with Capital Variable name
 
 		// command parameter
 
