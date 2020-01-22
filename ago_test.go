@@ -163,6 +163,7 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{a=123;print a++;print a}", ok: "123\n124\n"},
 		{script: "BEGIN{a=123;print --a;print a}", ok: "122\n122\n"},
 		{script: "BEGIN{a=123;print a--;print a}", ok: "123\n122\n"},
+		//{script: "BEGIN{print a++;print a++}", ok: "1\n2\n"}, //TODO
 		{script: "BEGIN{a[1]=123;print ++a[1];print a[1]}", ok: "124\n124\n"},
 		{script: "BEGIN{a[1]=123;print a[1]++;print a[1]}", ok: "123\n124\n"},
 		{script: "BEGIN{a[1]=123;print --a[1];print a[1]}", ok: "122\n122\n"},
@@ -478,6 +479,8 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{one=func(){return 1}; print one()}", ok: "1\n"},
 		{script: "BEGIN{a=10;plusone=func(){a++};plusone();print a}", ok: "11\n"},
 		{script: "BEGIN{print func(){return 1}()}", ok: "1\n"},
+		{script: "BEGIN{i=1;f=func(){return i*10};i=5;print f()}", ok: "50\n"},
+		//{script: "BEGIN{f=func(){return a++};print f();print f();print f();}", ok: "0\n1\n2\n"},
 		{script: "BEGIN{a=10;plusone=func(){a++;return};plusone();print a}", ok: "11\n"},
 		{script: "BEGIN{hash=func(){m[1]=1;m[2]=2;m[3]=3;return m}; m=hash();print m[1]}", ok: "1\n"},
 		{script: "BEGIN{map=func(){m[1]=1;m[2]=2;m[3]=3;return m}; print map()[1]}", ok: "1\n"},
