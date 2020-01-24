@@ -11,6 +11,7 @@ import (
 )
 
 const defaultValue = ""
+const defaultNumberValue = 0
 
 // ErrUnknownSymbol provides unknown symbol error.
 var ErrUnknownSymbol = errors.New("unknown symbol")
@@ -76,6 +77,11 @@ func isGlobalVarName(s string) bool {
 // GetDefaultValue provides a default vavlue.
 func (e *Env) GetDefaultValue() interface{} {
 	return defaultValue
+}
+
+// GetDefaultValue provides a default vavlue.
+func (e *Env) GetDefaultNumberValue() interface{} {
+	return defaultNumberValue
 }
 
 // Set provides a setter for an environment variable.

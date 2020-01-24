@@ -214,6 +214,11 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 		if err != nil {
 			return nil, err
 		}
+		// Check beforeValue is Number
+		kind := reflect.ValueOf(beforeVal).Kind()
+		if kind != reflect.Int && kind != reflect.Float64 {
+			beforeVal = env.GetDefaultNumberValue()
+		}
 
 		if operator == "++" || operator == "--" {
 			right = &ast.NumExpr{Literal: "1"}

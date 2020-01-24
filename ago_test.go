@@ -163,7 +163,7 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{a=123;print a++;print a}", ok: "123\n124\n"},
 		{script: "BEGIN{a=123;print --a;print a}", ok: "122\n122\n"},
 		{script: "BEGIN{a=123;print a--;print a}", ok: "123\n122\n"},
-		//{script: "BEGIN{print a++;print a++}", ok: "1\n2\n"}, //TODO
+		{script: "BEGIN{print a;print a++;print a}", ok: "\n0\n1\n"},
 		{script: "BEGIN{a[1]=123;print ++a[1];print a[1]}", ok: "124\n124\n"},
 		{script: "BEGIN{a[1]=123;print a[1]++;print a[1]}", ok: "123\n124\n"},
 		{script: "BEGIN{a[1]=123;print --a[1];print a[1]}", ok: "122\n122\n"},
