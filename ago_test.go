@@ -531,6 +531,7 @@ func TestGoa(t *testing.T) {
 		{script: "function one(){return 1}BEGIN{print one()}", ok: "1\n"},
 		{script: "function one(){return 1}function one(){return 2}BEGIN{print one()}", rc: 1, okRegex: `func name 'one' previously defined`},
 		{script: "function NF(){return 1}BEGIN{print NF()}", rc: 1, okRegex: `type of NF must be int`},
+		{script: "function f(NF){NF=100;return NF}BEGIN{NF=5;print f();print NF}", rc: 1, okRegex: `cannot define builtin variable 'NF'`},
 		{script: "func one(){return 1}BEGIN{print one()}", ok: "1\n"},
 		{script: "func printOne(){print 1}BEGIN{printOne()}", ok: "1\n"},
 		{script: "function multi(){return 1,2}BEGIN{print multi()}", ok: "1 2\n"},
@@ -545,7 +546,8 @@ func TestGoa(t *testing.T) {
 		{script: `function multi(){return 1,"one"}BEGIN{x,y=multi(); print x}`, ok: "1\n"},
 		{script: "function parm1(x){return x}BEGIN{print parm1(\"1\")}", ok: "1\n"},
 		{script: "function parm2(x,y){return x}BEGIN{print parm2(\"1\")}", ok: "1\n"},
-		//{script: "function f(P1,P2){P2=100;return P1*P2}BEGIN{P2=5;print f(3);print P2}", ok: "300\n5\n"}, // TODO: local variable with Capital Variable name
+		{script: "function f(p1,p2){p2=100;return p1*p2}BEGIN{p2=5;print f(3);print p2}", ok: "300\n5\n"},
+		//{script: "function f(P){P=100;return P}BEGIN{P=5;print f();print P}", ok: "100\n5\n"},
 
 		// command parameter
 

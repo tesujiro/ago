@@ -27,14 +27,14 @@ func defineFunc(funcExpr *ast.FuncExpr, env *Env) (interface{}, error) {
 		//defer newEnv.Destroy()  // Do not delete this line because higher order function
 
 		for i, arg := range funcExpr.Args {
-			//val := reflect.ValueOf(in[i]).Interface().(reflect.Value).Interface().(reflect.Value).Interface()
 			val := in[i].Interface().(reflect.Value).Interface()
 			debug.Printf("arg[%v]: %#v\tType:%v\tValue:%v\n", i, in[i], reflect.TypeOf(val), reflect.ValueOf(val))
-			//if err := newEnv.Set(arg, val); err != nil {
 			if err := newEnv.Define(arg, val); err != nil {
-				return []reflect.Value{reflect.ValueOf(interface{}(nil)), reflect.ValueOf(err)} // TODO:buggy
+				debug.Printf("newEnv.Define returned error  arg:%v error:%v\n", arg, err)
+				nilValue := reflect.New(reflect.TypeOf((*interface{})(nil)).Elem()).Elem()
+				errValue := reflect.ValueOf(reflect.ValueOf(err))
+				return []reflect.Value{reflect.ValueOf(nilValue), reflect.ValueOf(errValue)}
 			}
-			//}
 		}
 		debug.Printf("Env: %#v\n", *env)
 		debug.Printf("newEnv: %#v\n", *newEnv)
