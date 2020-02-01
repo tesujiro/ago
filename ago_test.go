@@ -480,7 +480,6 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{a=10;plusone=func(){a++};plusone();print a}", ok: "11\n"},
 		{script: "BEGIN{print func(){return 1}()}", ok: "1\n"},
 		{script: "BEGIN{i=1;f=func(){return i*10};i=5;print f()}", ok: "50\n"},
-		//{script: "BEGIN{f=func(){return a++};print f();print f();print f();}", ok: "0\n1\n2\n"},
 		{script: "BEGIN{a=10;plusone=func(){a++;return};plusone();print a}", ok: "11\n"},
 		{script: "BEGIN{hash=func(){m[1]=1;m[2]=2;m[3]=3;return m}; m=hash();print m[1]}", ok: "1\n"},
 		{script: "BEGIN{map=func(){m[1]=1;m[2]=2;m[3]=3;return m}; print map()[1]}", ok: "1\n"},
@@ -547,7 +546,9 @@ func TestGoa(t *testing.T) {
 		{script: "function parm1(x){return x}BEGIN{print parm1(\"1\")}", ok: "1\n"},
 		{script: "function parm2(x,y){return x}BEGIN{print parm2(\"1\")}", ok: "1\n"},
 		{script: "function f(p1,p2){p2=100;return p1*p2}BEGIN{p2=5;print f(3);print p2}", ok: "300\n5\n"},
-		//{script: "function f(P){P=100;return P}BEGIN{P=5;print f();print P}", ok: "100\n5\n"},
+		{script: "function f( ){return A++}BEGIN{print f();print f();print f();}", ok: "0\n1\n2\n"},
+		{script: "function f(A){return A++}BEGIN{print f();print f();print f();}", ok: "0\n0\n0\n"},
+		//{script: "function f(A){return A++}BEGIN{A=100;print f();print f();print f();print A}", ok: "0\n0\n0\n100\n"},
 
 		// command parameter
 

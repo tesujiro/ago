@@ -122,7 +122,6 @@ func (e *Env) Set(k string, v interface{}) error {
 
 	// global variable
 	if isGlobalVarName(k) {
-		//fmt.Printf("==>global var\n")
 		if _, ok := e.global[k]; ok {
 			e.global[k] = v
 			return nil
@@ -131,10 +130,7 @@ func (e *Env) Set(k string, v interface{}) error {
 	}
 
 	// local variable
-	if err := e.setLocalVar(k, v); err != nil {
-		return ErrUnknownSymbol
-	}
-	return nil
+	return e.setLocalVar(k, v)
 }
 
 // setLocalVar sets a local variable.
@@ -199,18 +195,12 @@ func (e *Env) Get(k string) (interface{}, error) {
 	}
 
 	// global variable
-	if isGlobalVarName(k) {
-		if v, ok := e.global[k]; ok {
-			return v, nil
-		}
+	if v, ok := e.global[k]; ok {
+		return v, nil
 	}
 
 	// local variable
-	v, err := e.getLocalVar(k)
-	if err != nil {
-		return nil, ErrUnknownSymbol
-	}
-	return v, nil
+	return e.getLocalVar(k)
 }
 
 func (e *Env) getLocalVar(k string) (interface{}, error) {
