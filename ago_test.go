@@ -548,7 +548,7 @@ func TestGoa(t *testing.T) {
 		{script: "function f(p1,p2){p2=100;return p1*p2}BEGIN{p2=5;print f(3);print p2}", ok: "300\n5\n"},
 		{script: "function f( ){return A++}BEGIN{print f();print f();print f();}", ok: "0\n1\n2\n"},
 		{script: "function f(A){return A++}BEGIN{print f();print f();print f();}", ok: "0\n0\n0\n"},
-		//{script: "function f(A){return A++}BEGIN{A=100;print f();print f();print f();print A}", ok: "0\n0\n0\n100\n"},
+		{script: "function f(A){return A++}BEGIN{A=100;print f();print f();print f();print A}", ok: "0\n0\n0\n100\n"},
 
 		// command parameter
 
@@ -914,6 +914,7 @@ ZZZ 1
 	realStdout := os.Stdout
 	realStderr := os.Stderr
 	caseNumber := 0
+	//fmt.Fprintln(realStdout, "Start Tests")
 
 	for _, test := range tests {
 		caseNumber++

@@ -29,7 +29,7 @@ func defineFunc(funcExpr *ast.FuncExpr, env *Env) (interface{}, error) {
 		for i, arg := range funcExpr.Args {
 			val := in[i].Interface().(reflect.Value).Interface()
 			debug.Printf("arg[%v]: %#v\tType:%v\tValue:%v\n", i, in[i], reflect.TypeOf(val), reflect.ValueOf(val))
-			if err := newEnv.Define(arg, val); err != nil {
+			if err := newEnv.DefineFuncArg(arg, val); err != nil {
 				debug.Printf("newEnv.Define returned error  arg:%v error:%v\n", arg, err)
 				nilValue := reflect.New(reflect.TypeOf((*interface{})(nil)).Elem()).Elem()
 				errValue := reflect.ValueOf(reflect.ValueOf(err))

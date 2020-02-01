@@ -25,6 +25,7 @@ type Env struct {
 	parent  *Env
 	builtin *builtin
 	global  map[string]interface{}
+	funcArg map[string]interface{}
 	//importFunc map[string]func(*Env) (reflect.Value, error)
 	readCloser map[string]*io.ReadCloser
 	scanner    map[string]*bufio.Scanner
@@ -37,6 +38,7 @@ func NewEnv() *Env {
 		parent:  nil,
 		builtin: newBuiltIn(),
 		global:  make(map[string]interface{}),
+		funcArg: make(map[string]interface{}),
 		//importFunc: make(map[string]func(*Env) (reflect.Value, error)),
 		readCloser: make(map[string]*io.ReadCloser),
 		scanner:    make(map[string]*bufio.Scanner),
@@ -50,6 +52,7 @@ func (e *Env) NewEnv() *Env {
 		parent:  e,
 		builtin: e.builtin,
 		global:  e.global,
+		funcArg: make(map[string]interface{}),
 		//importFunc: e.importFunc,
 		readCloser: e.readCloser,
 		scanner:    e.scanner,
@@ -122,6 +125,10 @@ func (e *Env) Set(k string, v interface{}) error {
 
 	// global variable
 	if isGlobalVarName(k) {
+		if _, ok := e.funcArg[k]; ok {
+			e.funcArg[k] = v
+			return nil
+		}
 		if _, ok := e.global[k]; ok {
 			e.global[k] = v
 			return nil
@@ -182,6 +189,22 @@ func (e *Env) Define(k string, v interface{}) error {
 	return nil
 }
 
+func (e *Env) DefineFuncArg(k string, v interface{}) error {
+	// builtin
+	bt := reflect.TypeOf(e.builtin).Elem()
+	if _, ok := bt.FieldByName(k); ok {
+		return fmt.Errorf("cannot define builtin variable '%v'", k)
+	}
+	if isGlobalVarName(k) {
+		// function arg var
+		e.funcArg[k] = v
+	} else {
+		// local var
+		e.env[k] = v
+	}
+	return nil
+}
+
 // Get gets a value of a variable.
 func (e *Env) Get(k string) (interface{}, error) {
 	// Builtin
@@ -192,6 +215,11 @@ func (e *Env) Get(k string) (interface{}, error) {
 			fv := bv.FieldByName(k)
 			return fv.Interface(), nil
 		}
+	}
+
+	// function arg variable
+	if v, ok := e.funcArg[k]; ok {
+		return v, nil
 	}
 
 	// global variable
