@@ -70,11 +70,7 @@ func isGlobalVarName(s string) bool {
 	if globalVars {
 		return true
 	}
-	if len(s) == 0 {
-		return false
-	}
-	r := s[0]
-	return ('A' <= r && r <= 'Z')
+	return len(s) > 0 && 'A' <= s[0] && s[0] <= 'Z'
 }
 
 // GetDefaultValue provides a default vavlue.
