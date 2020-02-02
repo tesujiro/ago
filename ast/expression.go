@@ -95,11 +95,6 @@ type ItemExpr struct {
 	Index []Expr
 }
 
-// RegExpr provide regular expression.
-type RegExpr struct {
-	Literal string
-}
-
 // MatchExpr provide match expression. ex: $1 ~ /AAA/
 type MatchExpr struct {
 	Expr    Expr

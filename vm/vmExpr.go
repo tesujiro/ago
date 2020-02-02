@@ -432,8 +432,14 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 			return nil, err
 		}
 		s := toString(val)
-		re := expr.RegExpr.(*ast.RegExpr).Literal
-		return regexp.MatchString(re, s)
+		//re := expr.RegExpr.(*ast.ConstExpr).Literal
+		re, err := evalExpr(expr.RegExpr, env)
+		if err != nil {
+			return nil, err
+		}
+		//fmt.Printf("re=%#v\n", re)
+		//fmt.Printf("re=%v\n", toString(re))
+		return regexp.MatchString(toString(re), s)
 	case *ast.GetlineExpr:
 		var redir string
 		if expr.Command != nil {

@@ -40,7 +40,7 @@ var inRegExp bool
 %type <expr>		variable
 %type <expr>		simple_variable
 %type <expr>		opt_expr
-%type <expr>		regexpr
+%type <expr>		regexp_literal
 %type <expr>		input_redir
 %type <exprs>		exprs
 %type <exprs>		variables
@@ -407,15 +407,23 @@ simp_expr
 		$$ = &ast.ContainKeyExpr{KeyExpr: $1, MapID: $3.Literal}
 	}
 	/* REGEXP */
-	| simp_expr '~' regexpr
+	| simp_expr '~' regexp_literal
 	{
 		$$ = &ast.MatchExpr{Expr: $1, RegExpr: $3}
 	}
-	| simp_expr NOTTILDE regexpr
+        | simp_expr '~' common_expr
+	{
+		$$ = &ast.MatchExpr{Expr: $1, RegExpr: $3}
+	}
+	| simp_expr NOTTILDE regexp_literal
 	{
 		$$ = &ast.UnaryExpr{Operator: "!", Expr: &ast.MatchExpr{Expr: $1, RegExpr: $3}}
 	}
-	| regexpr
+	| simp_expr NOTTILDE common_expr
+	{
+		$$ = &ast.UnaryExpr{Operator: "!", Expr: &ast.MatchExpr{Expr: $1, RegExpr: $3}}
+	}
+	| regexp_literal
 	{
 		$$ = &ast.MatchExpr{Expr: &defaultExpr, RegExpr: $1}
 	}
@@ -429,8 +437,8 @@ simp_expr
 		$$ = &ast.CompExpr{Left: $1, Operator: "--", After:true}
 	}
 
-regexpr
-	: a_slash
+regexp_literal
+	: a_slash /* REGEXP contiunes next */
 	{
 		//fmt.Println("YACC: want regexp!!")
 		inRegExp=true
@@ -438,7 +446,7 @@ regexpr
 	REGEXP
 	{
 		//fmt.Println("FINISH")
-		$$ = &ast.RegExpr{Literal: $3.Literal}
+		$$ = &ast.StringExpr{Literal: $3.Literal}
 	}
 
 input_redir
@@ -456,7 +464,7 @@ non_post_simp_expr
 	{
 		$$ = &ast.UnaryExpr{Operator: "!", Expr:$2}
 	}
-	| regexpr
+	| regexp_literal
 	{
 		$$ = $1
 	}

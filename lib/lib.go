@@ -37,7 +37,7 @@ func regexpToStr(v reflect.Value) string {
 		return v.Interface().(string)
 	}
 	switch v.Elem().Interface().(type) {
-	case ast.RegExpr:
+	case ast.ConstExpr, ast.StringExpr:
 		//return v.Elem().Interface().(string)
 		return v.Elem().FieldByName("Literal").String()
 	default:
