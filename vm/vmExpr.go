@@ -282,149 +282,21 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 			return nil, err
 		}
 		switch expr.Operator {
-		case "||":
-			boolLeft, err := strictToBool(left)
-			if err != nil {
-				return nil, fmt.Errorf("convert left expression of OR perator:%v", err)
-			}
-			if boolLeft {
-				return true, nil
-			}
-			boolRight, err := strictToBool(right)
-			if err != nil {
-				return nil, fmt.Errorf("convert right expression of OR perator:%v", err)
-			}
-			if boolRight {
-				return true, nil
-			}
-			return false, nil
-		case "&&":
-			boolLeft, err := strictToBool(left)
-			if err != nil {
-				return nil, fmt.Errorf("convert left expression of AND perator:%v", err)
-			}
-			if !boolLeft {
-				return false, nil
-			}
-			boolRight, err := strictToBool(right)
-			if err != nil {
-				return nil, fmt.Errorf("convert right expression of AND perator:%v", err)
-			}
-			if boolRight {
-				return true, nil
-			}
-			return false, nil
-		case "==":
-			lKind := reflect.ValueOf(left).Kind()
-			rKind := reflect.ValueOf(right).Kind()
-			switch {
-			case lKind == reflect.String && rKind == reflect.String:
-				return left == right, nil
-			case lKind == reflect.Float64 || rKind == reflect.Float64:
-				return toFloat64(left) == toFloat64(right), nil
-			case lKind == reflect.Int || rKind == reflect.Int:
-				return toString(left) == toString(right), nil
-			case lKind == reflect.Map || rKind == reflect.Map:
-				return nil, fmt.Errorf("can't read value of array")
-			default:
-				return toString(left) == toString(right), nil
-			}
-		case "!=":
-			//return left != right, nil
-			lKind := reflect.ValueOf(left).Kind()
-			rKind := reflect.ValueOf(right).Kind()
-			switch {
-			case lKind == reflect.String && rKind == reflect.String:
-				return left != right, nil
-			case lKind == reflect.Float64 || rKind == reflect.Float64:
-				return toFloat64(left) != toFloat64(right), nil
-			case lKind == reflect.Int || rKind == reflect.Int:
-				return toString(left) != toString(right), nil
-			case lKind == reflect.Map || rKind == reflect.Map:
-				return nil, fmt.Errorf("can't read value of array")
-			default:
-				return toString(left) != toString(right), nil
-			}
-		case ">":
-			// TODO: check kind is string or number
-			return toFloat64(left) > toFloat64(right), nil
-		case ">=":
-			// TODO: check kind is string or number
-			return toFloat64(left) >= toFloat64(right), nil
-		case "<":
-			// TODO: check kind is string or number
-			return toFloat64(left) < toFloat64(right), nil
-		case "<=":
-			// TODO: check kind is string or number
-			return toFloat64(left) <= toFloat64(right), nil
+		case "||", "&&":
+			return evalBoolOp(expr.Operator, left, right)
+		case "==", "!=":
+			return compareEqual(expr.Operator, left, right)
+		case ">", ">=", "<", "<=":
+			return compareInequal(expr.Operator, left, right)
 		case "CAT":
 			lKind := reflect.ValueOf(left).Kind()
 			rKind := reflect.ValueOf(right).Kind()
-			switch {
-			case lKind == reflect.String || rKind == reflect.String:
-				return toString(left) + toString(right), nil
-			case lKind == reflect.Int || rKind == reflect.Int:
-				return toString(left) + toString(right), nil
-			case lKind == reflect.Float64 || rKind == reflect.Float64:
-				return toFloat64(left) + toFloat64(right), nil
-			case lKind == reflect.Map || rKind == reflect.Map:
+			if lKind == reflect.Map || rKind == reflect.Map {
 				return nil, fmt.Errorf("can't read value of array")
-			default:
-				return toString(left) + toString(right), nil
 			}
-		case "+":
-			lKind := reflect.ValueOf(left).Kind()
-			rKind := reflect.ValueOf(right).Kind()
-			switch {
-			case lKind == reflect.Map || rKind == reflect.Map:
-				return nil, fmt.Errorf("can't read value of array")
-			default:
-				return toFloat64(left) + toFloat64(right), nil
-			}
-		case "-":
-			lKind := reflect.ValueOf(left).Kind()
-			rKind := reflect.ValueOf(right).Kind()
-			switch {
-			case lKind == reflect.Map || rKind == reflect.Map:
-				return nil, fmt.Errorf("can't read value of array")
-			default:
-				return toFloat64(left) - toFloat64(right), nil
-			}
-		case "*":
-			lKind := reflect.ValueOf(left).Kind()
-			rKind := reflect.ValueOf(right).Kind()
-			switch {
-			case lKind == reflect.Map || rKind == reflect.Map:
-				return nil, fmt.Errorf("can't read value of array")
-			default:
-				return toFloat64(left) * toFloat64(right), nil
-			}
-		case "/":
-			lKind := reflect.ValueOf(left).Kind()
-			rKind := reflect.ValueOf(right).Kind()
-			if right == 0 {
-				return nil, fmt.Errorf("devision by zero")
-			}
-			switch {
-			case lKind == reflect.Map || rKind == reflect.Map:
-				return nil, fmt.Errorf("can't read value of array")
-			default:
-				return toFloat64(left) / toFloat64(right), nil
-			}
-		case "%":
-			//return toInt(left) % toInt(right), nil
-			lKind := reflect.ValueOf(left).Kind()
-			rKind := reflect.ValueOf(right).Kind()
-			if right == 0 {
-				return nil, fmt.Errorf("devision by zero")
-			}
-			switch {
-			case lKind == reflect.Map || rKind == reflect.Map:
-				return nil, fmt.Errorf("can't read value of array")
-			default:
-				q := int(toFloat64(left) / toFloat64(right))
-				return toFloat64(left) - toFloat64(right)*float64(q), nil
-			}
+			return toString(left) + toString(right), nil
+		case "+", "-", "*", "/", "%":
+			return evalArithOp(expr.Operator, left, right)
 		}
 	case *ast.MatchExpr:
 		val, err := evalExpr(expr.Expr, env)
