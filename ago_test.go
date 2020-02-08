@@ -201,6 +201,7 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{NF=1}END{print NF}", ok: "0\n"},
 		{script: "BEGIN{NF=1.1}END{print NF}", ok: "0\n"},
 		//{script: "BEGIN{NF=1.1;print NF}", ok: "1.1\n"},  ??TODO
+		//{script: "BEGIN{NR=1.1;print NR}", ok: "1\n"},  ??TODO
 		{script: "BEGIN{NF=\"aaa\"}", ok: "error:type of NF must be int ,not string\n"},
 		{script: "BEGIN{$0=\"aaa\";print}", ok: "aaa\n"},
 		{script: "BEGIN{$1=\"aaa\";print}", ok: "aaa\n"},
@@ -343,8 +344,7 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{a,b=1,2;print b}", ok: "2\n"},
 		{script: "BEGIN{a,b=1,2,3;print b}", ok: "2\n"},
 		{script: "BEGIN{a,b,c=1,2;print b}", ok: "2\n"},
-
-		// {script: "BEGIN{t=func(){return 1,2}();print t}", ok: "1 2\n"}, //TODO: SHOULD BE ERROR??
+		//{script: "BEGIN{t=func(){return 1,2}();print t}", ok: "1 2\n"}, //TODO: SHOULD BE ERROR??
 
 		// if statement
 		{script: "BEGIN{a=1;if a==1 { a=2 ;print a;}}", ok: "2\n"},
