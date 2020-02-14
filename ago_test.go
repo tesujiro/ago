@@ -689,6 +689,7 @@ func TestGoa(t *testing.T) {
 		{script: "BEGIN{FS=\":\"}{print NF}", in: "\n:\naaa:bbb\n", ok: "0\n2\n2\n"},
 		{script: "BEGIN{FS=\"\"}{print NF}", in: "aaa\n", ok: "3\n"},
 		{script: "BEGIN{FS=\"\"}{print NF}", in: "あああ\n", ok: "3\n"},
+		{script: "BEGIN{FS=\"\"}{print $2}", in: "あいう\n", ok: "い\n"},
 		{script: "{print length($1)*1}", in: "Hello World!\n", ok: "5\n"},
 		{script: "$1==\"AAA\"{print;COUNT++} END{print COUNT}", in: "AAA BBB CCC\nAAA BBB CCC\n", ok: "AAA BBB CCC\nAAA BBB CCC\n2\n"},
 		{script: "NR==1{$2=$1 ;print $0,NF} NR==2{$5=$1; print $0,NF}", in: "AAA BBB CCC\nAAA BBB CCC\n", ok: "AAA AAA CCC 3\nAAA BBB CCC  AAA 5\n"},

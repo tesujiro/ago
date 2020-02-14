@@ -128,11 +128,13 @@ func (e *Env) SetFieldFromLine(line string) {
 		}
 	}
 	switch e.builtin.FS {
-	case "":
-		e.builtin.field = make([]string, len([]rune(line))+1)
-		for i, r := range []rune(line) {
-			e.builtin.field[i] = string(r)
-		}
+	/*
+		case "":
+			e.builtin.field = make([]string, len([]rune(line))+1)
+			for i, r := range []rune(line) {
+				e.builtin.field[i+1] = string(r)
+			}
+	*/
 	case " ":
 		// SPECIAL CASE FOR ORIGINAL AWK
 		newline := regexOrgAwkTruncate.ReplaceAllString(line, "$1")
