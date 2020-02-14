@@ -27,22 +27,22 @@ $ go get -u github.com/tesujiro/ago
 ```
 > echo A Long Time Ago | ago '{print "Hello, ",$NF,"!"}'
 Hello, Ago !
-> printf "AAA\nBBB\nAAA\DDD" | ago '/A+/{++N};END{print N+0}'
+> printf "AAA\nBBB\nAAA\DDD" | ago '/A+/{++N};END{print N}'
 2
 > printf "AAA\nAAA\nDDD\nDDD\n" | ago '!A[$0]++'
 AAA
 DDD
-> echo AAA BBB CCC AAA ZZZ AAA CCC | ago '{for i=1; i<=NF; i++{ COUNT[$i]++ }} END{for (key in COUNT){ print key,COUNT[key] }}'
+> echo AAA BBB CCC AAA ZZZ AAA CCC | ago '{ for i=1; i<=NF; i++{ COUNT[$i]++ }} END{for (key in COUNT){ print key, COUNT[key] }}'
 AAA 3
 BBB 1
 CCC 2
 ZZZ 1
-> printf 'aaa,bbb,"ccc,ddd\neeee"\n' | ago -F , '{ret=split($0,a,"\"");if(ret%2==0){pLine=$0;pNF=NF;getline;NF=pNF+NF-1;$0=pLine $0};print NF;print}'
+> printf 'aaa,bbb,"ccc,ddd\neeee"\n' | ago -F , '{ ret=split($0,a,"\""); if(ret%2==0){ pLine=$0; pNF=NF; getline; NF=pNF+NF-1; $0=pLine $0}; print NF; print}'
 4
 aaa,bbb,"ccc,dddeeee"
-> echo 123 | ago 'BEGIN{Factorial=func(x){if x==1 {1} else { x*Factorial(x-1)}}}{print Factorial($1)}'
+> echo 123 | ago 'BEGIN{ Factorial=func(x){ if x==1 {1} else { x*Factorial(x-1) }}} {print Factorial($1)}'
 1.21463e+205
-> echo 12 34|./ago '{print func(a,b){return b,a}($1,$2)}'
+> echo 12 34| ago '{ print func(a, b){return b, a}($1, $2) }'
 34 12
 >
 
