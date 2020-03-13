@@ -220,6 +220,17 @@ retry:
 			case '=':
 				tok = MULEQ
 				lit = "*="
+			case '*':
+				tok = POW
+				lit = "^"
+				s.next()
+				switch s.peek() {
+				case '=':
+					tok = POWEQ
+					lit = "^="
+				default:
+					s.back()
+				}
 			default:
 				s.back()
 				tok = int(ch)
@@ -269,6 +280,17 @@ retry:
 				s.back()
 				tok = int(ch)
 				lit = string(ch)
+			}
+		case '^':
+			s.next()
+			switch s.peek() {
+			case '=':
+				tok = POWEQ
+				lit = "^="
+			default:
+				tok = POW
+				lit = "^"
+				s.back()
 			}
 		case '>':
 			s.next()
@@ -336,7 +358,7 @@ retry:
 					lit = string(ch)
 				}
 		*/
-		case '(', ')', ':', ';', '{', '}', '[', ']', ',', '^', '?', '$', '~', '.':
+		case '(', ')', ':', ';', '{', '}', '[', ']', ',', '?', '$', '~', '.':
 			tok = int(ch)
 			lit = string(ch)
 		default:

@@ -2,6 +2,7 @@ package vm
 
 import (
 	"fmt"
+	"math"
 	"reflect"
 )
 
@@ -85,6 +86,8 @@ func evalArithOp(op string, left, right interface{}) (interface{}, error) {
 		return toFloat64(left) * toFloat64(right), nil
 	case "/":
 		return toFloat64(left) / toFloat64(right), nil
+	case "^":
+		return math.Pow(toFloat64(left), toFloat64(right)), nil
 	default:
 		q := int(toFloat64(left) / toFloat64(right))
 		return toFloat64(left) - toFloat64(right)*float64(q), nil

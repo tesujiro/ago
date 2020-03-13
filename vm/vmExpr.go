@@ -295,7 +295,7 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 				return nil, fmt.Errorf("can't read value of array")
 			}
 			return toString(left) + toString(right), nil
-		case "+", "-", "*", "/", "%":
+		case "+", "-", "*", "/", "%", "^":
 			return evalArithOp(expr.Operator, left, right)
 		}
 	case *ast.MatchExpr:

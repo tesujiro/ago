@@ -18,11 +18,10 @@ require (
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/spf13/viper v1.5.0 // indirect
-	github.com/tesujiro/ago/ast v0.0.0-00010101000000-000000000000 // indirect
-	github.com/tesujiro/ago/debug v0.0.0-00010101000000-000000000000
+	github.com/tesujiro/ago/debug v0.0.0-20200224044000-d07d2c158e90
 	github.com/tesujiro/ago/lib v0.0.0-00010101000000-000000000000
 	github.com/tesujiro/ago/parser v0.0.0-00010101000000-000000000000
-	github.com/tesujiro/ago/vm v0.0.0-00010101000000-000000000000
+	github.com/tesujiro/ago/vm v0.0.0-20200224044000-d07d2c158e90
 	//github.com/tesujiro/ago/ast v0.0.0-20190921213547-14c7a56cfab4 // indirect
 	//github.com/tesujiro/ago/debug v0.0.0-20190921213547-14c7a56cfab4
 	//github.com/tesujiro/ago/lib v0.0.0-20190921213547-14c7a56cfab4

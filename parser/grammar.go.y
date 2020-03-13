@@ -47,16 +47,16 @@ var inRegExp bool
 %type <exprs>		opt_exprs
 %type <identArgs>	ident_args
 
-%token <token> IDENT NUMBER STRING TRUE FALSE NIL
+%token <token> IDENT NUMBER STRING TRUE FALSE NIL POW
 %token <token> EQEQ NEQ GE LE NOTTILDE ANDAND OROR LEN 
-%token <token> PLUSPLUS MINUSMINUS PLUSEQ MINUSEQ MULEQ DIVEQ MODEQ
+%token <token> PLUSPLUS MINUSMINUS PLUSEQ MINUSEQ MULEQ DIVEQ MODEQ POWEQ
 %token <token> DELETE IN
 %token <token> BEGIN END PRINT PRINTF REGEXP
 %token <token> IF ELSE FOR WHILE DO BREAK CONTINUE
 %token <token> FUNC RETURN EXIT NEXT
 %token <token> CONCAT_OP GETLINE
 
-%right '=' PLUSEQ MINUSEQ MULEQ DIVEQ MODEQ
+%right '=' PLUSEQ MINUSEQ MULEQ DIVEQ MODEQ POWEQ
 %right '?' ':'
 %left IN
 %left OROR
@@ -72,6 +72,7 @@ var inRegExp bool
 %left '+' '-'
 %left '*' '/' '%'
 %right '!' UNARY
+%left POW
 %left PLUSPLUS MINUSMINUS
 %left '$'
 %nonassoc '['
@@ -308,6 +309,10 @@ expr
 	{
 		$$ = &ast.CompExpr{Left: $1, Operator: "%=", Right: $3}
 	}
+	| variable POWEQ expr
+	{
+		$$ = &ast.CompExpr{Left: $1, Operator: "^=", Right: $3}
+	}
 	/* TERNARY OPERATOR */
 	| expr '?' expr ':' expr
 	{
@@ -376,6 +381,10 @@ simp_expr
 	| simp_expr '%' simp_expr
 	{
 		$$ = &ast.BinOpExpr{Left: $1, Operator: "%", Right: $3}
+	}
+	| simp_expr POW simp_expr
+	{
+		$$ = &ast.BinOpExpr{Left: $1, Operator: "^", Right: $3}
 	}
 	/* RELATION EXPRESSION */
 	| simp_expr EQEQ simp_expr
