@@ -127,7 +127,6 @@ func TestGoa(t *testing.T) {
 				{script: `BEGIN{print '1' 0.2}`, ok: "10.2\n"},
 				{script: `BEGIN{print 123 45}`, ok: "12345\n"},
 				{script: `BEGIN{print 1.23 4.5}`, ok: "1.234.5\n"},
-				//{script: `BEGIN{i=123;j=10i;print j}`, ok: "10123\n"}, // TODO?
 				{script: `BEGIN{a[1]=1;a[2]=10;print a[1]+a[2]}`, ok: "11\n"},
 				{script: `BEGIN{a[1]=1;a[2]=10;print a[1]-a[2]}`, ok: "-9\n"},
 				{script: `BEGIN{a[1]=10;a[2]=5;print a[1]*a[2]}`, ok: "50\n"},
