@@ -504,9 +504,6 @@ func (s *Scanner) scanNumber() (string, error) {
 			}
 			ret = appendNumberAndPoint(s, ret)
 		}
-		if isLetter(s.peek()) {
-			return "", errors.New("identifier starts immediately after numeric literal")
-		}
 	}
 	return string(ret), nil
 }
