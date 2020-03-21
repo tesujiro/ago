@@ -1,7 +1,10 @@
 *~
 *swp
 *.bak
-cpu*
+*.pprof
+*.svg
+*.out
+*.pdf
 cover*
 /prof.pdf
 /y.output
