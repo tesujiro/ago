@@ -105,10 +105,10 @@ func _main() int {
 		debug.Off()
 	}
 	if cpuProf {
-		defer profile.Start().Stop()
+		defer profile.Start(profile.ProfilePath(".")).Stop()
 	}
 	if memProf {
-		defer profile.Start(profile.MemProfile).Stop()
+		defer profile.Start(profile.MemProfile, profile.ProfilePath(".")).Stop()
 	}
 
 	var ret int

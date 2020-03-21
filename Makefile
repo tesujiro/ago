@@ -31,10 +31,13 @@ cover:
 testcase: ./*_test.go ./vm/*_test.go ./parser/grammar.go
 	TESTCASE=0 go test -v -count=1 .
 
-.PHONY: prof
-prof:
-	# make prof ARG=[PPROF PATH]
-	go tool pprof --pdf ./ago ${ARG} > ./prof.pdf
+.PHONY: prof_cpu
+prof_cpu:
+	go tool pprof --pdf ./ago ./cpu.pprof > ./cpu.pdf
+
+.PHONY: prof_mem
+prof_mem:
+	go tool pprof --pdf ./ago ./mem.pprof > ./mem.pdf
 
 .PHONY: bench
 bench:
