@@ -1,0 +1,24 @@
+#!/bin/bash
+
+for sc_awk in `ls *-awk.sh`
+do
+    sc_ago=`echo $sc_awk | sed -e 's/-awk.sh/-ago.sh/'`
+    if [[ ! -f $sc_awk ]];
+    then
+	echo "ERROR: $sc_awk does not exist"
+	continue;
+    fi
+    if [[ ! -f $sc_ago ]];
+    then
+	echo "ERROR: $sc_ago does not exist"
+	continue;
+    fi
+    diff <(./$sc_awk) <(./$sc_ago)
+    result=$?
+    if [ $result -ne 0 ];
+    then
+	echo "ERROR: $sc_awk $sc_ago"
+	continue
+    fi
+    echo "Passed: $sc_awk $sc_ago"
+done
