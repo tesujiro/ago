@@ -3,6 +3,7 @@ all : ago
 ago : ago.go ./parser/*.y ./parser/*.go ./ast/*.go ./vm/*.go ./lib/*.go ./parser/grammar.go
 	#go get -u
 	go build -o ago .
+	cp ago $$GOPATH/bin
 
 ./parser/grammar.go : ./parser/grammar.go.y ./ast/*.go
 	goyacc -l -o ./parser/grammar.go ./parser/grammar.go.y
