@@ -1,0 +1,1 @@
+awk '/Susie/' emp.data

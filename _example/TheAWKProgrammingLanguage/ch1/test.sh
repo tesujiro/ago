@@ -3,15 +3,17 @@
 for sc_awk in `ls *-awk.sh`
 do
     sc_ago=`echo $sc_awk | sed -e 's/-awk.sh/-ago.sh/'`
-    if [[ ! -f $sc_awk ]];
-    then
-	echo "ERROR: $sc_awk does not exist"
-	continue;
-    fi
+    #if [[ ! -f $sc_awk ]];
+    #then
+	#echo "ERROR: $sc_awk does not exist"
+	#continue;
+    #fi
     if [[ ! -f $sc_ago ]];
     then
-	echo "ERROR: $sc_ago does not exist"
-	continue;
+	#echo "ERROR: $sc_ago does not exist"
+	#continue;
+	sed -e 's/^awk/ago -g/' $sc_awk > $sc_ago
+	chmod u+x $sc_ago
     fi
     diff <(./$sc_awk) <(./$sc_ago)
     result=$?
