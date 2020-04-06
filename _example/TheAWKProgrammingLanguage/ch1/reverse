@@ -1,0 +1,9 @@
+# reverse - 入力を行ごとに逆順で印字する
+
+	{ line[NR] = $0 }	#各入力行を記憶する
+END	{ i = NR
+	  while (i > 0) {
+		print line[i]
+		i = i - 1
+	  }
+	}
