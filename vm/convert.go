@@ -45,11 +45,13 @@ func strictToFloat(val interface{}) (float64, error) {
 	case reflect.Float64, reflect.Float32:
 		return val.(float64), nil
 	case reflect.String:
-		// "1.1" -> 1
+		// "1.1" -> 1.1
+		// ".123" -> 0.123
 		// "1.xx" -> 1
 		// "1e1.xx" -> 10 //TODO
 		// "0x11.xx" -> 17  //TODO
-		digit := `(\-|\+)?\d+(\.\d*)?`
+		//digit := `(\-|\+)?\d+(\.\d*)?`
+		digit := `(\-|\+)?\d+(\.\d*)?|(\-|\+)?\.\d+`
 		re := regexp.MustCompile(`^` + digit)
 		numStr := re.FindString(val.(string))
 		if len(numStr) == 0 {

@@ -115,7 +115,7 @@ retry:
 		} else {
 			tok = IDENT
 		}
-	case isDigit(ch):
+	case isDigit(ch) || ch == '.':
 		tok = NUMBER
 		lit, err = s.scanNumber()
 		if err != nil {

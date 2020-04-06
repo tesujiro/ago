@@ -49,13 +49,18 @@ func TestGoa(t *testing.T) {
 				{script: `BEGIN{print 2-1}`, ok: "1\n"},
 				{script: `BEGIN{print 2.3-1.2}`, ok: "1.1\n"},
 				{script: `BEGIN{print 2-'1.2'}`, ok: "0.8\n"},
+				{script: `BEGIN{print 1+.1}`, ok: "1.1\n"},
+				{script: `BEGIN{print 1+".1"}`, ok: "1.1\n"},
+				{script: `BEGIN{print 10^".1"}`, ok: "1.25893\n"},
+				{script: `BEGIN{print 1+"+.1"}`, ok: "1.1\n"},
+				{script: `BEGIN{print 1+"-.1"}`, ok: "0.9\n"},
 				{script: `BEGIN{print 1e3}`, ok: "1000\n"},
 				{script: `BEGIN{print 1e10}`, ok: "1e+10\n"},
 				{script: `BEGIN{print 1e10.23}`, rc: 1},
 				{script: `BEGIN{print 0x0a}`, ok: "10\n"},
 				{script: `BEGIN{print 0x10}`, ok: "16\n"},
 				{script: `BEGIN{print 0x1F}`, ok: "31\n"},
-				{script: `BEGIN{print 0x1.23}`, rc: 1},
+				{script: `BEGIN{print 0x1.23}`, rc: 0},
 				{script: `BEGIN{print nil}`, ok: "\n"},
 				{script: `BEGIN{print 1}`, ok: "1\n"},
 				{script: `BEGIN{print 9223372036854775807}`, ok: "9223372036854775807\n"},
@@ -1168,7 +1173,7 @@ ZZZ 1
 				}
 				rc := _main()
 				if rc != test.rc && !strings.Contains(test.ok, "error") {
-					t.Errorf("return code want:%v get:%v case:%v\n", test.rc, rc, test)
+					t.Errorf("return code want:%v get:%v case:%v\n", test.rc, rc, test.script)
 				}
 				if len(test.files) > 0 {
 					deleteFiles(dir)
