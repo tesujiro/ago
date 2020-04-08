@@ -666,6 +666,7 @@ func TestGoa(t *testing.T) {
 				{script: "function one(){return 1}function one(){return 2}BEGIN{print one()}", rc: 1, okRegex: `func name 'one' previously defined`},
 				{script: "function NF(){return 1}BEGIN{print NF()}", rc: 1, okRegex: `type of NF must be int`},
 				{script: "function f(NF){NF=100;return NF}BEGIN{NF=5;print f();print NF}", rc: 1, okRegex: `cannot define builtin variable 'NF'`},
+				{script: "function f(field){field=100;return field}BEGIN{field=5;print f();print field}", rc: 0, ok: "100\n5\n"},
 				{script: `func one(){return 1}BEGIN{print one()}`, ok: "1\n"},
 				{script: `func printOne(){print 1}BEGIN{printOne()}`, ok: "1\n"},
 				{script: `function multi(){return 1,2}BEGIN{print multi()}`, ok: "1 2\n"},

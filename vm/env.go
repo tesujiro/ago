@@ -8,6 +8,7 @@ import (
 	"io"
 	"os"
 	"reflect"
+	"strings"
 )
 
 const defaultValue = ""
@@ -172,7 +173,8 @@ func (e *Env) DefineDefaultMapValue(k string, idx interface{}) (interface{}, err
 func (e *Env) Define(k string, v interface{}) error {
 	// builtin
 	bt := reflect.TypeOf(e.builtin).Elem()
-	if _, ok := bt.FieldByName(k); ok {
+	if _, ok := bt.FieldByName(k); ok && k == strings.ToUpper(k) {
+		//if _, ok := bt.FieldByName(k); ok {
 		return fmt.Errorf("cannot define builtin variable '%v'", k)
 	}
 	if isGlobalVarName(k) {
@@ -188,7 +190,7 @@ func (e *Env) Define(k string, v interface{}) error {
 func (e *Env) DefineFuncArg(k string, v interface{}) error {
 	// builtin
 	bt := reflect.TypeOf(e.builtin).Elem()
-	if _, ok := bt.FieldByName(k); ok {
+	if _, ok := bt.FieldByName(k); ok && k == strings.ToUpper(k) {
 		return fmt.Errorf("cannot define builtin variable '%v'", k)
 	}
 	if isGlobalVarName(k) {
