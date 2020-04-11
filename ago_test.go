@@ -41,6 +41,8 @@ func TestGoa(t *testing.T) {
 			tests: []test{
 				{script: `BEGIN{print 1+1}`, ok: "2\n"},
 				{script: `BEGIN{print 1+1}#comment`, ok: "2\n"},
+				{script: "BEGIN{print 1\\\n+1}", ok: "2\n"},
+				{script: "BEGIN{print 1\\#xxx\n+1}", rc: 1},
 				{script: `BEGIN{print 1+2}`, ok: "3\n"},
 				{script: `BEGIN{print 1+'2'}`, ok: "3\n"},
 				{script: `BEGIN{print 1+'x2'}`, ok: "1\n"},

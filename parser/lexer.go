@@ -14,6 +14,8 @@ const (
 	EOF = -1
 	// EOL is short for End of line.
 	EOL = '\n'
+	// CONTINUATION is single statement in multiple lines.
+	CONTINUATION = '\\'
 )
 
 // Error provides a convenient interface for handling runtime error.
@@ -134,6 +136,14 @@ retry:
 		if err != nil {
 			return
 		}
+	case ch == CONTINUATION:
+		s.next()
+		if !isEOL(s.peek()) {
+			err = errors.New("The backslash character must be the final character on the line.")
+			return
+		}
+		s.next()
+		return s.Scan()
 	/*
 		case ch == '`':
 			tok = STRING
