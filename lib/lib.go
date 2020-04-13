@@ -350,6 +350,9 @@ func mktime(datespec reflect.Value) int64 {
 // Import imports standard library.
 func Import(env *vm.Env) *vm.Env {
 	env.Define("println", reflect.ValueOf(fmt.Println))
+	// TODO:printf("%d",x) if x is float64 use int(x)
+	// TODO:printf("%f",x) if x is int use float64(x)
+	// printf formatter : %d, %e, %g, %o, %x, %c, %s
 	env.Define("printf", reflect.ValueOf(fmt.Printf))
 	env.Define("sprintf", reflect.ValueOf(fmt.Sprintf))
 
