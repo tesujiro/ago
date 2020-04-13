@@ -629,7 +629,7 @@ func TestGoa(t *testing.T) {
 			tests: []test{
 				{script: `BEGIN{print func (x){return x+100;}(10)}`, ok: "110\n"},
 				{script: `BEGIN{print func (x){return x+100;}()}`, ok: "100\n"},
-				{script: `BEGIN{print (1+1)(10)}`, ok: "error:cannot call type float64\n"},
+				{script: `BEGIN{print (1+1)(10)}`, ok: "error:cannot call type int\n"},
 				{script: `BEGIN{Fn=func (x){return func(y) {return x*10+y};};Fn2=Fn(10);print Fn2(2)}`, ok: "102\n"},
 			},
 		},

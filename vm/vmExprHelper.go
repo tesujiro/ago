@@ -91,19 +91,32 @@ func evalArithOp(op string, left, right interface{}) (interface{}, error) {
 	if (op == "/" || op == "%") && right == 0 {
 		return nil, fmt.Errorf("devision by zero")
 	}
+	normNumber := func(f float64) interface{} {
+		//fmt.Printf("f=%v\n", f)
+		if math.Round(f) == f {
+			return int(f)
+		}
+		return f
+	}
 	switch op {
 	case "+":
-		return toFloat64(left) + toFloat64(right), nil
+		//return toFloat64(left) + toFloat64(right), nil
+		return normNumber(toFloat64(left) + toFloat64(right)), nil
 	case "-":
-		return toFloat64(left) - toFloat64(right), nil
+		//return toFloat64(left) - toFloat64(right), nil
+		return normNumber(toFloat64(left) - toFloat64(right)), nil
 	case "*":
-		return toFloat64(left) * toFloat64(right), nil
+		//return toFloat64(left) * toFloat64(right), nil
+		return normNumber(toFloat64(left) * toFloat64(right)), nil
 	case "/":
-		return toFloat64(left) / toFloat64(right), nil
+		//return toFloat64(left) / toFloat64(right), nil
+		return normNumber(toFloat64(left) / toFloat64(right)), nil
 	case "^":
-		return math.Pow(toFloat64(left), toFloat64(right)), nil
+		//return math.Pow(toFloat64(left), toFloat64(right)), nil
+		return normNumber(math.Pow(toFloat64(left), toFloat64(right))), nil
 	default:
 		q := int(toFloat64(left) / toFloat64(right))
-		return toFloat64(left) - toFloat64(right)*float64(q), nil
+		//return toFloat64(left) - toFloat64(right)*float64(q), nil
+		return normNumber(toFloat64(left) - toFloat64(right)*float64(q)), nil
 	}
 }
