@@ -611,6 +611,7 @@ func TestGoa(t *testing.T) {
 				{script: `BEGIN{printf("%d\n",100+123)}`, ok: "223\n"},
 				{script: `BEGIN{printf("%d\n",100-123)}`, ok: "-23\n"},
 				{script: `BEGIN{printf("%g\n",123/100)}`, ok: "1.23\n"},
+				//{script: `BEGIN{printf("%d\n",123/100)}`, ok: "1\n"}, //TODO: fix printf implementation problem
 				{script: `BEGIN{print sum(1,2,3)}`, ok: "6\n"},
 				{script: `BEGIN{print sum()}`, ok: "0\n"},
 				{script: `BEGIN{print cat("abc","def")}`, ok: "abcdef\n"},
