@@ -806,6 +806,10 @@ func TestGoa(t *testing.T) {
 			name: "Fields",
 			tests: []test{
 				// field
+				{script: `{print $1}`, in: "123 456\n", ok: "123\n"},
+				{script: `{$1=$1*100;print $1}`, in: "123 456\n", ok: "12300\n"},
+				{script: `{$1=$1+$2;print $1}`, in: "123 456\n", ok: "579\n"},
+				{script: `{$1=$2/$1;print $1}`, in: "123 456\n", ok: "3.707317073170732\n"},
 				{script: `{print $1}`, in: "Hello World!\n", ok: "Hello\n"},
 				{script: `{print $(1/1)}`, in: "Hello World!\n", ok: "Hello\n"},
 				{script: `{print $(1/0)}`, in: "Hello World!\n", ok: "error:devision by zero\n"},

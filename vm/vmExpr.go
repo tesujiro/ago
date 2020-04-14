@@ -424,6 +424,8 @@ func evalAssExpr(lexp ast.Expr, val interface{}, env *Env) (interface{}, error) 
 
 		if valInt, ok := val.(int); ok {
 			val = fmt.Sprintf("%v", valInt)
+		} else if valFloat, ok := val.(float64); ok {
+			val = fmt.Sprintf("%v", valFloat)
 		}
 		//fmt.Printf("evalAssExpr FieldExpr: index:%v \tval:%v\n", index, val) //TODO
 		valString, ok := val.(string)
