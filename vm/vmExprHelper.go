@@ -75,7 +75,7 @@ func compareInequal(op string, left, right interface{}) (interface{}, error) {
 	}
 	if lKind == reflect.Map || rKind == reflect.Map {
 		return nil, fmt.Errorf("can't read value of array")
-	} else if lKind == reflect.String && rKind == reflect.String {
+	} else if lKind == reflect.String || rKind == reflect.String {
 		return compString(op, toString(left), toString(right)), nil
 	} else {
 		return compNumber(op, toFloat64(left), toFloat64(right)), nil
@@ -92,7 +92,6 @@ func evalArithOp(op string, left, right interface{}) (interface{}, error) {
 		return nil, fmt.Errorf("devision by zero")
 	}
 	normNumber := func(f float64) interface{} {
-		//fmt.Printf("f=%v\n", f)
 		if math.Round(f) == f {
 			return int(f)
 		}
