@@ -9,6 +9,15 @@ import (
 	"github.com/tesujiro/ago/ast"
 )
 
+// ToInt convert type to int
+func ToInt(val interface{}) interface{} {
+	i, err := strictToInt(val)
+	if err != nil {
+		return val
+	}
+	return i
+}
+
 func toInt(val interface{}) int {
 	i, err := strictToInt(val)
 	if err != nil {
@@ -23,6 +32,15 @@ func strictToInt(val interface{}) (int, error) {
 		return 0, err
 	}
 	return int(f), nil
+}
+
+// ToFloat convert type to float64
+func ToFloat64(val interface{}) interface{} {
+	i, err := strictToFloat(val)
+	if err != nil {
+		return val
+	}
+	return i
 }
 
 func toFloat64(val interface{}) float64 {
@@ -91,6 +109,11 @@ func strictToBool(val interface{}) (bool, error) {
 	default:
 		return false, fmt.Errorf("convert interface{} to bool failed")
 	}
+}
+
+// ToFloat convert type to string
+func ToString(val interface{}) interface{} {
+	return toString(val)
 }
 
 func toString(val interface{}) string {

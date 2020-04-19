@@ -9,7 +9,6 @@ import (
 	"os/exec"
 	"reflect"
 	"regexp"
-	"strconv"
 	"strings"
 	"syscall"
 	"time"
@@ -19,16 +18,7 @@ import (
 )
 
 func toStr(v reflect.Value) string {
-	switch v.Type().Kind() {
-	case reflect.String:
-		return v.Interface().(string)
-	case reflect.Int:
-		return fmt.Sprintf("%v", v.Interface().(int))
-	case reflect.Float64:
-		return fmt.Sprintf("%v", v.Interface().(float64))
-	default:
-		return ""
-	}
+	return vm.ToString(v.Interface()).(string)
 }
 
 func regexpToStr(v reflect.Value) string {
@@ -46,20 +36,7 @@ func regexpToStr(v reflect.Value) string {
 }
 
 func toInt(v reflect.Value) int {
-	switch v.Type().Kind() {
-	case reflect.String:
-		i, err := strconv.Atoi(v.Interface().(string))
-		if err != nil {
-			return 0
-		}
-		return i
-	case reflect.Int:
-		return v.Interface().(int)
-	case reflect.Float64, reflect.Float32:
-		return int(v.Interface().(float64))
-	default:
-		return 0
-	}
+	return vm.ToInt(v.Interface()).(int)
 }
 
 func toInt64(v reflect.Value) int64 {
@@ -72,14 +49,39 @@ func toInt64(v reflect.Value) int64 {
 }
 
 func toFloat64(v reflect.Value) float64 {
-	switch v.Type().Kind() {
-	case reflect.Int, reflect.Int32, reflect.Int64:
-		return float64(v.Interface().(int))
-	case reflect.Float64, reflect.Float32:
-		return v.Interface().(float64)
-	default:
-		return float64(toInt(v))
+	return vm.ToFloat64(v.Interface()).(float64)
+}
+
+func updateArgs(format string, a ...interface{}) []interface{} {
+	fmtSpec := `%\d*(\.\d+)?[d|e|g|o|x|c|s]`
+	re := regexp.MustCompile(fmtSpec)
+	specifiers := re.FindAllString(format, -1)
+	for i, spec := range specifiers {
+		if i > len(a)-1 {
+			break
+		}
+		switch spec[len(spec)-1] {
+		case 'd':
+			a[i] = vm.ToInt(a[i].(reflect.Value).Interface())
+		case 'e', 'g':
+			a[i] = vm.ToFloat64(a[i].(reflect.Value).Interface())
+		case 's':
+			a[i] = vm.ToString(a[i].(reflect.Value).Interface())
+		}
 	}
+	return a
+}
+
+func importPrintf(env *vm.Env) {
+	printf := func(format string, a ...interface{}) (n int, err error) {
+		return fmt.Printf(format, updateArgs(format, a...)...)
+	}
+	env.Define("printf", reflect.ValueOf(printf))
+
+	sprintf := func(format string, a ...interface{}) string {
+		return fmt.Sprintf(format, updateArgs(format, a...)...)
+	}
+	env.Define("sprintf", reflect.ValueOf(sprintf))
 }
 
 func importClose(env *vm.Env) {
@@ -353,8 +355,9 @@ func Import(env *vm.Env) *vm.Env {
 	// TODO:printf("%d",x) if x is float64 use int(x)
 	// TODO:printf("%f",x) if x is int use float64(x)
 	// printf formatter : %d, %e, %g, %o, %x, %c, %s
-	env.Define("printf", reflect.ValueOf(fmt.Printf))
-	env.Define("sprintf", reflect.ValueOf(fmt.Sprintf))
+	//env.Define("printf", reflect.ValueOf(fmt.Printf))
+	//env.Define("sprintf", reflect.ValueOf(fmt.Sprintf))
+	importPrintf(env)
 
 	importClose(env)
 	env.Define("sum", reflect.ValueOf(sum))

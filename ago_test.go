@@ -176,6 +176,9 @@ func TestGoa(t *testing.T) {
 				{script: `BEGIN{printf "%.2d",1}`, ok: "01\n"},
 				{script: `BEGIN{printf "%.2f",1.34}`, ok: "1.34\n"},
 				{script: `BEGIN{printf "%s","abc"}`, ok: "abc\n"},
+				{script: `BEGIN{printf "%d","abc"}`, ok: "%!d(string=abc)\n"},
+				{script: `BEGIN{printf "%g","abc"}`, ok: "%!g(string=abc)\n"},
+				{script: `BEGIN{printf "%d"}`, ok: "%!d(MISSING)\n"},
 			},
 		},
 		{
