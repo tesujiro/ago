@@ -3,6 +3,7 @@ package vm
 import (
 	"fmt"
 	"regexp"
+	"strconv"
 )
 
 type builtin struct {
@@ -70,12 +71,29 @@ func (e *Env) SetRSTART(i int) {
 	e.builtin.RSTART = i
 }
 
+// GetField gets the field 0 value or $0.
+func (e *Env) GetFieldZero() (string, error) {
+	return e.builtin.field[0], nil
+}
+
 // GetField gets the field value with specified index. ex: $1, $NF, $i
-func (e *Env) GetField(i int) (string, error) {
+func (e *Env) GetField(i int) (interface{}, error) {
 	if i < 0 || i >= len(e.builtin.field) {
 		return "", nil
 	}
-	return e.builtin.field[i], nil
+	field := e.builtin.field[i]
+	digit := `(\-|\+)?\d+(\.\d*)?([e|E]\d+)?|(\-|\+)?\.\d+([e|E]\d+)?`
+	re := regexp.MustCompile(`^` + digit + `$`)
+	numStr := re.FindString(field)
+	if len(numStr) == 0 || numStr != field {
+		return field, nil
+	}
+	fnum, _ := strconv.ParseFloat(numStr, 64)
+	inum, err := strconv.ParseInt(numStr, 10, 64)
+	if err == nil {
+		return inum, nil
+	}
+	return fnum, nil
 }
 
 // SetFieldZero sets the value of the field zero or $0.

@@ -50,6 +50,7 @@ func compareInequal(op string, left, right interface{}) (interface{}, error) {
 	lKind := reflect.ValueOf(left).Kind()
 	rKind := reflect.ValueOf(right).Kind()
 	compNumber := func(op string, l, r float64) bool {
+		//fmt.Printf("op=%v\tl=%v\tr=%v\n", op, l, r)
 		switch op {
 		case ">":
 			return l > r
@@ -73,6 +74,7 @@ func compareInequal(op string, left, right interface{}) (interface{}, error) {
 			return l <= r
 		}
 	}
+	//fmt.Printf("lKind=%v\trKind=%v\n", lKind, rKind)
 	if lKind == reflect.Map || rKind == reflect.Map {
 		return nil, fmt.Errorf("can't read value of array")
 	} else if lKind == reflect.String || rKind == reflect.String {

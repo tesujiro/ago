@@ -179,7 +179,7 @@ func importLength(env *vm.Env) {
 		if len(v_args) > 0 {
 			v = v_args[0] // arg[0] is a pointer to var name
 		} else {
-			vString, _ := env.GetField(0)
+			vString, _ := env.GetFieldZero()
 			v = reflect.ValueOf(vString)
 		}
 		switch v.Type().Kind() {
@@ -247,7 +247,7 @@ func importSubGsub(env *vm.Env) {
 
 		} else {
 			//TODO: error
-			vVal, _ = env.GetField(0)
+			vVal, _ = env.GetFieldZero()
 		}
 		// MAIN
 		regexStr := regexpToStr(before)
