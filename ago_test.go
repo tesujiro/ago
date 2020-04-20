@@ -617,7 +617,7 @@ func TestGoa(t *testing.T) {
 				{script: `BEGIN{printf("%d\n",100+123)}`, ok: "223\n"},
 				{script: `BEGIN{printf("%d\n",100-123)}`, ok: "-23\n"},
 				{script: `BEGIN{printf("%g\n",123/100)}`, ok: "1.23\n"},
-				//{script: `BEGIN{printf("%d\n",123/100)}`, ok: "1\n"}, //TODO: fix printf implementation problem
+				{script: `BEGIN{printf("%d\n",123/100)}`, ok: "1\n"},
 				{script: `BEGIN{print sum(1,2,3)}`, ok: "6\n"},
 				{script: `BEGIN{print sum()}`, ok: "0\n"},
 				{script: `BEGIN{print cat("abc","def")}`, ok: "abcdef\n"},
@@ -751,6 +751,11 @@ func TestGoa(t *testing.T) {
 				{script: `{print length()}`, in: "Hello!", ok: "6\n"},
 				// lib:sprintf
 				{script: `BEGIN{print sprintf("%d:%s",100,"abc")}`, ok: "100:abc\n"},
+				{script: `BEGIN{print sprintf("%s","abc")}`, ok: "abc\n"},
+				{script: `BEGIN{print sprintf("%s",100)}`, ok: "100\n"},
+				{script: `BEGIN{print sprintf("%d","100")}`, ok: "100\n"},
+				{script: `BEGIN{print sprintf("%f",1.23)}`, ok: "1.230000\n"},
+				{script: `BEGIN{print sprintf("%f","1.23")}`, ok: "1.230000\n"},
 				// lib:substr
 				{script: `BEGIN{print substr("abcde",1,3)}`, ok: "abc\n"},
 				{script: `BEGIN{print substr("abcde",0,3)}`, ok: "abc\n"},

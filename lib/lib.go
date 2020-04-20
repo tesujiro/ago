@@ -53,9 +53,11 @@ func toFloat64(v reflect.Value) float64 {
 }
 
 func updateArgs(format string, a ...interface{}) []interface{} {
-	fmtSpec := `%\d*(\.\d+)?[d|e|g|o|x|c|s]`
+	fmtSpec := `%\d*(\.\d+)?[d|e|f|g|o|x|c|s]`
 	re := regexp.MustCompile(fmtSpec)
 	specifiers := re.FindAllString(format, -1)
+	//fmt.Printf("specifiers=%v\n", specifiers)
+	//fmt.Printf("a=%v\n", a)
 	for i, spec := range specifiers {
 		if i > len(a)-1 {
 			break
@@ -63,7 +65,7 @@ func updateArgs(format string, a ...interface{}) []interface{} {
 		switch spec[len(spec)-1] {
 		case 'd':
 			a[i] = vm.ToInt(a[i].(reflect.Value).Interface())
-		case 'e', 'g':
+		case 'e', 'f', 'g':
 			a[i] = vm.ToFloat64(a[i].(reflect.Value).Interface())
 		case 's':
 			a[i] = vm.ToString(a[i].(reflect.Value).Interface())
@@ -352,11 +354,6 @@ func mktime(datespec reflect.Value) int64 {
 // Import imports standard library.
 func Import(env *vm.Env) *vm.Env {
 	env.Define("println", reflect.ValueOf(fmt.Println))
-	// TODO:printf("%d",x) if x is float64 use int(x)
-	// TODO:printf("%f",x) if x is int use float64(x)
-	// printf formatter : %d, %e, %g, %o, %x, %c, %s
-	//env.Define("printf", reflect.ValueOf(fmt.Printf))
-	//env.Define("sprintf", reflect.ValueOf(fmt.Sprintf))
 	importPrintf(env)
 
 	importClose(env)
