@@ -43,3 +43,7 @@ prof_mem:
 .PHONY: bench
 bench:
 	go test -bench . -benchmem
+
+.PHONY: merge
+merge:
+	git checkout master && git merge develop && git push && git checkout develop
