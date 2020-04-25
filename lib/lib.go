@@ -273,8 +273,8 @@ func importSubGsub(env *vm.Env) {
 	}
 
 	gsub := func(before reflect.Value, after string, args ...*string) int {
-		regexStr := "(" + regexpToStr(before) + ")"    // add parenthes for '&' meta chars
-		after = strings.ReplaceAll(after, "&", "${1}") // replace '&' meta char
+		regexStr := "(" + regexpToStr(before) + ")"     // add parenthes for '&' meta chars
+		after = strings.Replace(after, "&", "${1}", -1) // replace '&' meta char
 		return regexReplace(regexStr, after, args...)
 	}
 	env.Define("gsub", reflect.ValueOf(gsub))
@@ -282,7 +282,7 @@ func importSubGsub(env *vm.Env) {
 	sub := func(before reflect.Value, after string, args ...*string) int {
 		regexStr := "^(.*?)(" + regexpToStr(before) + ")(.*)$"
 		after = "${1}" + after + "${3}"
-		after = strings.ReplaceAll(after, "&", "${2}") // replace '&' meta char
+		after = strings.Replace(after, "&", "${2}", -1) // replace '&' meta char
 		return regexReplace(regexStr, after, args...)
 	}
 	env.Define("sub", reflect.ValueOf(sub))
