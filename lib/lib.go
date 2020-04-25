@@ -234,7 +234,7 @@ func importSubGsub(env *vm.Env) {
 			return result
 		}
 	*/
-	gsub := func(before reflect.Value, after string, args ...*string) int {
+	regexReplace := func(regexStr string, after string, args ...*string) int {
 		// PARSE ARGS
 		var vName string
 		var vVal interface{}
@@ -254,8 +254,10 @@ func importSubGsub(env *vm.Env) {
 			vVal, _ = env.GetFieldZero()
 		}
 		// MAIN
-		regexStr := regexpToStr(before)
+		//regexStr := "(" + regexpToStr(before) + ")" // add parenthes for '&' meta chars
 		re := regexp.MustCompile(regexStr)
+		match := re.FindAllString(vVal.(string), -1)
+		//after = strings.ReplaceAll(after, "&", "${1}") // replace '&' meta char
 		result := re.ReplaceAllString(vVal.(string), after)
 		if len(args) > 0 {
 			vName = *args[0]
@@ -267,14 +269,21 @@ func importSubGsub(env *vm.Env) {
 			//TODO: error
 			_ = env.SetField(0, result)
 		}
-		return len(re.FindAllString(vVal.(string), -1))
+		return len(match)
+	}
+
+	gsub := func(before reflect.Value, after string, args ...*string) int {
+		regexStr := "(" + regexpToStr(before) + ")"    // add parenthes for '&' meta chars
+		after = strings.ReplaceAll(after, "&", "${1}") // replace '&' meta char
+		return regexReplace(regexStr, after, args...)
 	}
 	env.Define("gsub", reflect.ValueOf(gsub))
 
 	sub := func(before reflect.Value, after string, args ...*string) int {
-		regexStr := regexpToStr(before)
-		regexStr = "^(.*?)" + regexStr + "(.*)$"
-		return gsub(reflect.ValueOf(regexStr), "${1}"+after+"${2}", args...)
+		regexStr := "^(.*?)(" + regexpToStr(before) + ")(.*)$"
+		after = "${1}" + after + "${3}"
+		after = strings.ReplaceAll(after, "&", "${2}") // replace '&' meta char
+		return regexReplace(regexStr, after, args...)
 	}
 	env.Define("sub", reflect.ValueOf(sub))
 }

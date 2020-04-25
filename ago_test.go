@@ -797,6 +797,9 @@ func TestGoa(t *testing.T) {
 				{script: `BEGIN{S="aabbaacc";print gsub(/^a+/,"A",S);print S}`, ok: "1\nAbbaacc\n"},
 				{script: `BEGIN{S="aabbaacc";print sub(/^a+/,"",S);print S}`, ok: "1\nbbaacc\n"},
 				{script: `BEGIN{S="aabbaacc";print sub(/c+$/,"",S);print S}`, ok: "1\naabbaa\n"},
+				{script: `BEGIN{S="banana";print gsub(/a+/,"&b&",S);print S}`, ok: "3\nbabanabanaba\n"},
+				{script: `BEGIN{S="banaanaaa";print gsub(/a+/,"&b&",S);print S}`, ok: "3\nbabanaabaanaaabaaa\n"},
+				{script: `BEGIN{S="banaanaaa";print sub(/a+/,"&b&",S);print S}`, ok: "1\nbabanaanaaa\n"},
 				{script: `{print sub(/a+/,"");print }`, in: "aabbaacc", ok: "1\nbbaacc\n"},
 				{script: `{print gsub(/a+/,"");print }`, in: "aabbaacc", ok: "2\nbbcc\n"},
 				// lib: mktime,strftime
