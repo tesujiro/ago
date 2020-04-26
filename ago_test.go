@@ -800,6 +800,10 @@ func TestGoa(t *testing.T) {
 				{script: `BEGIN{S="banana";print gsub(/a+/,"&b&",S);print S}`, ok: "3\nbabanabanaba\n"},
 				{script: `BEGIN{S="banaanaaa";print gsub(/a+/,"&b&",S);print S}`, ok: "3\nbabanaabaanaaabaaa\n"},
 				{script: `BEGIN{S="banaanaaa";print sub(/a+/,"&b&",S);print S}`, ok: "1\nbabanaanaaa\n"},
+				{script: `BEGIN{S="banana";print gsub(/a+/,"\&b\&",S);print S}`, ok: "3\nbabanabanaba\n"},
+				{script: `BEGIN{S="banana";print gsub(/a+/,"\\&b\\&",S);print S}`, ok: "3\nb&b&n&b&n&b&\n"},
+				{script: `BEGIN{S="banana";print sub(/a+/,"\&b\&",S);print S}`, ok: "1\nbabanana\n"},
+				{script: `BEGIN{S="banana";print sub(/a+/,"\\&b\\&",S);print S}`, ok: "1\nb&b&nana\n"},
 				{script: `{print sub(/a+/,"");print }`, in: "aabbaacc", ok: "1\nbbaacc\n"},
 				{script: `{print gsub(/a+/,"");print }`, in: "aabbaacc", ok: "2\nbbcc\n"},
 				// lib: mktime,strftime
