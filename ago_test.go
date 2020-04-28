@@ -59,6 +59,8 @@ func TestGoa(t *testing.T) {
 				{script: `BEGIN{print 1e3}`, ok: "1000\n"},
 				{script: `BEGIN{print 1e10}`, ok: "1e+10\n"},
 				{script: `BEGIN{print 1e10.23}`, rc: 1},
+				{script: `BEGIN{print "1e2"+1}`, ok: "101\n"},
+				{script: `BEGIN{print "1e-2"+1}`, ok: "1.01\n"},
 				{script: `BEGIN{print 0x0a}`, ok: "10\n"},
 				{script: `BEGIN{print 0x10}`, ok: "16\n"},
 				{script: `BEGIN{print 0x1F}`, ok: "31\n"},

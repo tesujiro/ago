@@ -66,14 +66,14 @@ func strictToFloat(val interface{}) (float64, error) {
 		// "1.1" -> 1.1
 		// ".123" -> 0.123
 		// "1.xx" -> 1
-		// "1e1.xx" -> 10 //TODO
+		// "1e1.xx" -> 10
 		// "0x11.xx" -> 17  //TODO
 		//digit := `(\-|\+)?\d+(\.\d*)?`
-		digit := `(\-|\+)?\d+(\.\d*)?|(\-|\+)?\.\d+`
+		//digit := `(\-|\+)?\d+(\.\d*)?|(\-|\+)?\.\d+`
+		digit := `(\-|\+)?\d+(\.\d*)?((e|E)(\-|\+)?\d+)?|(\-|\+)?\.\d+((e|E)(\-|\+)?\d+)?`
 		re := regexp.MustCompile(`^` + digit)
 		numStr := re.FindString(val.(string))
 		if len(numStr) == 0 {
-			re = regexp.MustCompile(`^` + digit + `(e|E)` + digit)
 			return 0, fmt.Errorf("cannot convert to float:%v", reflect.ValueOf(val).Kind())
 		}
 
