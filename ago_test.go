@@ -56,6 +56,8 @@ func TestGoa(t *testing.T) {
 				{script: `BEGIN{print 10^".1"}`, ok: "1.25893\n"},
 				{script: `BEGIN{print 1+"+.1"}`, ok: "1.1\n"},
 				{script: `BEGIN{print 1+"-.1"}`, ok: "0.9\n"},
+				{script: `BEGIN{print 1.23456789}`, ok: "1.23457\n"},
+				{script: `BEGIN{OFMT="%.7g";print 1.23456789}`, ok: "1.234568\n"},
 				{script: `BEGIN{print 1e3}`, ok: "1000\n"},
 				{script: `BEGIN{print 1e10}`, ok: "1e+10\n"},
 				{script: `BEGIN{print 1e10.23}`, rc: 1},
