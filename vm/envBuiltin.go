@@ -12,7 +12,8 @@ type builtin struct {
 	FS, OFS string
 	ORS     string
 	SUBSEP  string
-	//OFMT,FNR,
+	OFMT    string
+	//FNR,
 	RLENGTH, RSTART int
 	RS              string
 	//ENVIRON
@@ -27,13 +28,14 @@ func newBuiltIn() *builtin {
 		SUBSEP: string([]byte{0x1c}),
 		ORS:    "\n",
 		OFS:    " ",
+		OFMT:   "%.6g",
 	}
 }
 
 // TODO: repeated names
 func (e *Env) isBuiltin(k string) bool {
 	switch k {
-	case "NF", "NR", "FS", "OFS", "ORS", "SUBSEP", "RLENGTH", "RSTART", "RS":
+	case "NF", "NR", "FS", "OFS", "ORS", "SUBSEP", "OFMT", "RLENGTH", "RSTART", "RS":
 		return true
 	default:
 		return false

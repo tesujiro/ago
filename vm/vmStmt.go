@@ -195,11 +195,13 @@ func runSingleStmt(stmt ast.Stmt, env *Env) (interface{}, error) {
 			if 0 < i && i < len(stmt.Exprs) {
 				fmt.Printf("%v", env.builtin.OFS)
 			}
-			//fmt.Printf("%v", result)
+			ofmt, _ := env.Get("OFMT")
 			switch reflect.ValueOf(result).Kind() {
 			case reflect.Float64:
-				fmt.Printf("%.6g", result)
-			case reflect.Int, reflect.Int64, reflect.Bool, reflect.String:
+				fmt.Printf(ofmt.(string), result)
+			case reflect.Int, reflect.Int64:
+				fmt.Printf("%v", result)
+			case reflect.String, reflect.Bool:
 				fmt.Printf("%v", result)
 			case reflect.Slice:
 				len := reflect.ValueOf(result).Len()
