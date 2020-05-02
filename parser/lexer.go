@@ -504,7 +504,7 @@ func (s *Scanner) scanNumber() (string, error) {
 		}
 	} else {
 		ret = appendNumberAndPoint(s, ret)
-		if s.peek() == 'e' {
+		if s.peek() == 'e' || s.peek() == 'E' {
 			ret = append(ret, s.peek())
 			s.next()
 			if isDigit(s.peek()) || s.peek() == '+' || s.peek() == '-' {

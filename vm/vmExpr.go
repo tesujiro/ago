@@ -45,6 +45,7 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 		return field, nil
 	case *ast.NumExpr:
 		lit := expr.Literal
+		lit = strings.Replace(lit, "E", "e", 1)
 		if strings.Contains(lit, ".") || strings.Contains(lit, "e") {
 			f, err := strconv.ParseFloat(lit, 64)
 			if err != nil {
