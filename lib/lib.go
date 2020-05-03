@@ -17,8 +17,8 @@ import (
 	"github.com/tesujiro/ago/vm"
 )
 
-func toStr(v reflect.Value) string {
-	return vm.ToString(v.Interface()).(string)
+func toStr(env *vm.Env, v reflect.Value) string {
+	return env.ToString(v.Interface()).(string)
 }
 
 func regexpToStr(v reflect.Value) string {
@@ -35,24 +35,24 @@ func regexpToStr(v reflect.Value) string {
 	}
 }
 
-func toInt(v reflect.Value) int {
-	return vm.ToInt(v.Interface()).(int)
+func toInt(env *vm.Env, v reflect.Value) int {
+	return env.ToInt(v.Interface()).(int)
 }
 
-func toInt64(v reflect.Value) int64 {
+func toInt64(env *vm.Env, v reflect.Value) int64 {
 	switch v.Type().Kind() {
 	case reflect.Int64:
 		return v.Interface().(int64)
 	default:
-		return int64(toInt(v))
+		return int64(toInt(env, v))
 	}
 }
 
-func toFloat64(v reflect.Value) float64 {
-	return vm.ToFloat64(v.Interface()).(float64)
+func toFloat64(env *vm.Env, v reflect.Value) float64 {
+	return env.ToFloat64(v.Interface()).(float64)
 }
 
-func updateArgs(format string, a ...interface{}) []interface{} {
+func updateArgs(env *vm.Env, format string, a ...interface{}) []interface{} {
 	fmtSpec := `%\d*(\.\d+)?[d|e|f|g|o|x|c|s]`
 	re := regexp.MustCompile(fmtSpec)
 	specifiers := re.FindAllString(format, -1)
@@ -64,11 +64,11 @@ func updateArgs(format string, a ...interface{}) []interface{} {
 		}
 		switch spec[len(spec)-1] {
 		case 'd':
-			a[i] = vm.ToInt(a[i].(reflect.Value).Interface())
+			a[i] = env.ToInt(a[i].(reflect.Value).Interface())
 		case 'e', 'f', 'g':
-			a[i] = vm.ToFloat64(a[i].(reflect.Value).Interface())
+			a[i] = env.ToFloat64(a[i].(reflect.Value).Interface())
 		case 's':
-			a[i] = vm.ToString(a[i].(reflect.Value).Interface())
+			a[i] = env.ToString(a[i].(reflect.Value).Interface())
 		}
 	}
 	return a
@@ -76,12 +76,12 @@ func updateArgs(format string, a ...interface{}) []interface{} {
 
 func importPrintf(env *vm.Env) {
 	printf := func(format string, a ...interface{}) (n int, err error) {
-		return fmt.Printf(format, updateArgs(format, a...)...)
+		return fmt.Printf(format, updateArgs(env, format, a...)...)
 	}
 	env.Define("printf", reflect.ValueOf(printf))
 
 	sprintf := func(format string, a ...interface{}) string {
-		return fmt.Sprintf(format, updateArgs(format, a...)...)
+		return fmt.Sprintf(format, updateArgs(env, format, a...)...)
 	}
 	env.Define("sprintf", reflect.ValueOf(sprintf))
 }
@@ -148,33 +148,36 @@ func system(command string) int {
 	return 0
 }
 
-func substr(str, begin reflect.Value, endArgs ...reflect.Value) string { // TODO: reflect.Value => string
-	var end reflect.Value
-	if len(endArgs) > 0 {
-		end = endArgs[0] // arg[0] is a pointer to var name
-	} else {
-		end = reflect.ValueOf(len(toStr(str)))
+func importSubstr(env *vm.Env) {
+	substr := func(str, begin reflect.Value, endArgs ...reflect.Value) string { // TODO: reflect.Value => string
+		var end reflect.Value
+		if len(endArgs) > 0 {
+			end = endArgs[0] // arg[0] is a pointer to var name
+		} else {
+			end = reflect.ValueOf(len(toStr(env, str)))
+		}
+		s := toStr(env, str)
+		b := toInt(env, begin)
+		e := toInt(env, end)
+		var from, to int
+		if b > 0 {
+			from = b
+		} else {
+			from = 1
+		}
+		if from+e < len(s)+1 {
+			//fmt.Printf("path1:")
+			to = from + e
+		} else {
+			//fmt.Printf("path2:")
+			to = len(s) + 1
+		}
+		if len(s) == 0 || from >= to {
+			return ""
+		}
+		return s[from-1 : to-1]
 	}
-	s := toStr(str)
-	b := toInt(begin)
-	e := toInt(end)
-	var from, to int
-	if b > 0 {
-		from = b
-	} else {
-		from = 1
-	}
-	if from+e < len(s)+1 {
-		//fmt.Printf("path1:")
-		to = from + e
-	} else {
-		//fmt.Printf("path2:")
-		to = len(s) + 1
-	}
-	if len(s) == 0 || from >= to {
-		return ""
-	}
-	return s[from-1 : to-1]
+	env.Define("substr", reflect.ValueOf(substr))
 }
 
 func importLength(env *vm.Env) {
@@ -188,9 +191,9 @@ func importLength(env *vm.Env) {
 		}
 		switch v.Type().Kind() {
 		case reflect.Int:
-			return len(toStr(v))
+			return len(toStr(env, v))
 		case reflect.String:
-			return len(toStr(v))
+			return len(toStr(env, v))
 		case reflect.Map:
 			s := v.Interface().(map[interface{}]interface{})
 			return len(s)
@@ -206,21 +209,30 @@ func importLength(env *vm.Env) {
 	env.Define("len", reflect.ValueOf(length))
 }
 
-func index(v1, v2 reflect.Value) int {
-	s := toStr(v1)
-	substr := toStr(v2)
-	if len(s) == 0 {
-		return 0
+func importIndex(env *vm.Env) {
+	index := func(v1, v2 reflect.Value) int {
+		s := toStr(env, v1)
+		substr := toStr(env, v2)
+		if len(s) == 0 {
+			return 0
+		}
+		return strings.Index(s, substr) + 1
 	}
-	return strings.Index(s, substr) + 1
+	env.Define("index", reflect.ValueOf(index))
 }
 
-func tolower(v1 reflect.Value) string {
-	return strings.ToLower(toStr(v1))
+func importTolower(env *vm.Env) {
+	tolower := func(v1 reflect.Value) string {
+		return strings.ToLower(toStr(env, v1))
+	}
+	env.Define("tolower", reflect.ValueOf(tolower))
 }
 
-func toupper(v1 reflect.Value) string {
-	return strings.ToUpper(toStr(v1))
+func importToupper(env *vm.Env) {
+	toupper := func(v1 reflect.Value) string {
+		return strings.ToUpper(toStr(env, v1))
+	}
+	env.Define("toupper", reflect.ValueOf(toupper))
 }
 
 func importSubGsub(env *vm.Env) {
@@ -298,8 +310,8 @@ func importMatch(env *vm.Env) {
 	match := func(s, r reflect.Value) int {
 		//fmt.Printf("s=%v r=%#v\n", toStr(s), r)
 		re := regexp.MustCompile(regexpToStr(r))
-		loc := re.FindStringIndex(toStr(s))
-		result := re.FindString(toStr(s))
+		loc := re.FindStringIndex(toStr(env, s))
+		result := re.FindString(toStr(env, s))
 		var retloc, retlen int
 		if len(loc) > 0 {
 			retloc = loc[0] + 1
@@ -335,35 +347,40 @@ func importSplit(env *vm.Env) {
 	env.Define("split", reflect.ValueOf(split))
 }
 
-func strftime(format, timestamp reflect.Value) string {
-	table := map[string]string{
-		"%Y": "2006", "%y": "06",
-		"%m": "01",
-		"%d": "02",
-		"%H": "15",
-		"%M": "04",
-		"%S": "05",
-	}
-	f := toStr(format)
-	for k, v := range table {
-		f = strings.Replace(f, k, v, -1)
-	}
+func importStrftime(env *vm.Env) {
+	strftime := func(format, timestamp reflect.Value) string {
+		table := map[string]string{
+			"%Y": "2006", "%y": "06",
+			"%m": "01",
+			"%d": "02",
+			"%H": "15",
+			"%M": "04",
+			"%S": "05",
+		}
+		f := toStr(env, format)
+		for k, v := range table {
+			f = strings.Replace(f, k, v, -1)
+		}
 
-	//fmt.Printf("timestamp=%#v\ntimestamp.Kind=%#v\n", timestamp, timestamp.Kind().String())
-	t64 := toInt64(timestamp)
-	u := time.Unix(t64, 0)
-	return u.Format(f)
+		//fmt.Printf("timestamp=%#v\ntimestamp.Kind=%#v\n", timestamp, timestamp.Kind().String())
+		t64 := toInt64(env, timestamp)
+		u := time.Unix(t64, 0)
+		return u.Format(f)
+	}
+	env.Define("strftime", reflect.ValueOf(strftime))
 }
 
-func mktime(datespec reflect.Value) int64 {
-	//loc, _ := time.LoadLocation("Asia/Tokyo")
-	loc, _ := time.LoadLocation("Local")
-	t, err := time.ParseInLocation("2006 01 02 15 04 05", toStr(datespec), loc)
-	if err != nil {
-		return 0
+func importMktime(env *vm.Env) {
+	mktime := func(datespec reflect.Value) int64 {
+		//loc, _ := time.LoadLocation("Asia/Tokyo")
+		loc, _ := time.LoadLocation("Local")
+		t, err := time.ParseInLocation("2006 01 02 15 04 05", toStr(env, datespec), loc)
+		if err != nil {
+			return 0
+		}
+		return t.Unix()
 	}
-	return t.Unix()
-
+	env.Define("mktime", reflect.ValueOf(mktime))
 }
 
 // Import imports standard library.
@@ -376,11 +393,11 @@ func Import(env *vm.Env) *vm.Env {
 	env.Define("cat", reflect.ValueOf(cat))
 	env.Define("system", reflect.ValueOf(system))
 
-	env.Define("substr", reflect.ValueOf(substr))
+	importSubstr(env)
 	importLength(env)
-	env.Define("index", reflect.ValueOf(index))
-	env.Define("tolower", reflect.ValueOf(tolower))
-	env.Define("toupper", reflect.ValueOf(toupper))
+	importIndex(env)
+	importTolower(env)
+	importToupper(env)
 
 	importSubGsub(env)
 	importMatch(env)
@@ -390,11 +407,11 @@ func Import(env *vm.Env) *vm.Env {
 		return time.Now().Unix()
 	}
 	env.Define("systime", reflect.ValueOf(systime))
-	env.Define("strftime", reflect.ValueOf(strftime))
-	env.Define("mktime", reflect.ValueOf(mktime))
+	importStrftime(env)
+	importMktime(env)
 
 	toInteger := func(v reflect.Value) int {
-		return toInt(v)
+		return toInt(env, v)
 	}
 	env.Define("int", reflect.ValueOf(toInteger))
 
@@ -409,32 +426,32 @@ func Import(env *vm.Env) *vm.Env {
 	env.Define("srand", reflect.ValueOf(srandom))
 
 	sqrt := func(arg reflect.Value) float64 {
-		return math.Sqrt(toFloat64(arg))
+		return math.Sqrt(toFloat64(env, arg))
 	}
 	env.Define("sqrt", reflect.ValueOf(sqrt))
 
 	exp := func(arg reflect.Value) float64 {
-		return math.Exp(toFloat64(arg))
+		return math.Exp(toFloat64(env, arg))
 	}
 	env.Define("exp", reflect.ValueOf(exp))
 
 	log := func(arg reflect.Value) float64 {
-		return math.Log(toFloat64(arg))
+		return math.Log(toFloat64(env, arg))
 	}
 	env.Define("log", reflect.ValueOf(log))
 
 	sin := func(arg reflect.Value) float64 {
-		return math.Sin(toFloat64(arg))
+		return math.Sin(toFloat64(env, arg))
 	}
 	env.Define("sin", reflect.ValueOf(sin))
 
 	cos := func(arg reflect.Value) float64 {
-		return math.Cos(toFloat64(arg))
+		return math.Cos(toFloat64(env, arg))
 	}
 	env.Define("cos", reflect.ValueOf(cos))
 
 	atan2 := func(arg1, arg2 reflect.Value) float64 {
-		return math.Atan2(toFloat64(arg1), toFloat64(arg2))
+		return math.Atan2(toFloat64(env, arg1), toFloat64(env, arg2))
 	}
 	env.Define("atan2", reflect.ValueOf(atan2))
 

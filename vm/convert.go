@@ -10,7 +10,7 @@ import (
 )
 
 // ToInt convert type to int
-func ToInt(val interface{}) interface{} {
+func (env *Env) ToInt(val interface{}) interface{} {
 	i, err := strictToInt(val)
 	if err != nil {
 		return val
@@ -35,7 +35,7 @@ func strictToInt(val interface{}) (int, error) {
 }
 
 // ToFloat convert type to float64
-func ToFloat64(val interface{}) interface{} {
+func (env *Env) ToFloat64(val interface{}) interface{} {
 	i, err := strictToFloat(val)
 	if err != nil {
 		return val
@@ -112,7 +112,7 @@ func strictToBool(val interface{}) (bool, error) {
 }
 
 // ToFloat convert type to string
-func ToString(val interface{}) interface{} {
+func (env *Env) ToString(val interface{}) interface{} {
 	return toString(val)
 }
 
