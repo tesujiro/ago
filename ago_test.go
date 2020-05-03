@@ -839,6 +839,7 @@ func TestGoa(t *testing.T) {
 				{script: `{print $1*10}`, in: "1E2\n", ok: "1000\n"},
 				{script: `{print $1*10}`, in: "1.23\n", ok: "12.3\n"},
 				{script: `{print $1*10}`, in: "-1.23\n", ok: "-12.3\n"},
+				{script: `{$3=$1+$2;$4=$1/$2;$5=$1/($1+$2);print}`, in: "100 200\n", ok: "100 200 300 0.5\n"},
 				{script: `{print $1}`, in: "Hello World!\n", ok: "Hello\n"},
 				{script: `{print $(1/1)}`, in: "Hello World!\n", ok: "Hello\n"},
 				{script: `{print $(1/0)}`, in: "Hello World!\n", ok: "error:devision by zero\n"},
