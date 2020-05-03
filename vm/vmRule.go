@@ -33,10 +33,10 @@ func RunFuncRules(rules []ast.Rule, env *Env) (result interface{}, err error) {
 		funcExpr := &ast.FuncExpr{Name: rule.Pattern.(*ast.FuncPattern).Name, Args: rule.Pattern.(*ast.FuncPattern).Args, Stmts: rule.Action}
 		result, err = evalExpr(funcExpr, env)
 		if err != nil {
-			return toInt(result), err
+			return env.toInt(result), err
 		}
 	}
-	return toInt(result), nil
+	return env.toInt(result), nil
 }
 
 // RunBeginRules executes begin rules with a specified env.
@@ -46,10 +46,10 @@ func RunBeginRules(rules []ast.Rule, env *Env) (result interface{}, err error) {
 		childEnv := env.NewEnv()
 		result, err = runStmts(rule.Action, childEnv)
 		if err != nil {
-			return toInt(result), err
+			return env.toInt(result), err
 		}
 	}
-	return toInt(result), err
+	return env.toInt(result), err
 }
 
 // RunMainRules executes main rules with a specified env.
@@ -63,9 +63,9 @@ func RunMainRules(rules []ast.Rule, env *Env) (result interface{}, err error) {
 			if expr != nil {
 				result, err := evalExpr(expr, childEnv)
 				if err != nil {
-					return toInt(result), err
+					return env.toInt(result), err
 				}
-				b, err := strictToBool(result)
+				b, err := env.strictToBool(result)
 				if err != nil {
 					return nil, fmt.Errorf("convert rule expression:%v", err)
 				}
@@ -117,10 +117,10 @@ func RunMainRules(rules []ast.Rule, env *Env) (result interface{}, err error) {
 		}
 		result, err = runStmts(rule.Action, childEnv)
 		if err != nil {
-			return toInt(result), err
+			return env.toInt(result), err
 		}
 	}
-	return toInt(result), err
+	return env.toInt(result), err
 }
 
 // RunEndRules executes end rules with a specified env.

@@ -152,7 +152,7 @@ func runSingleStmt(stmt ast.Stmt, env *Env) (interface{}, error) {
 			}
 			id = ie.Literal
 			var err error
-			index, err = getHashIndex(env, expr.Index)
+			index, err = env.getHashIndex(expr.Index)
 			if err != nil {
 				return nil, err
 			}
@@ -224,7 +224,7 @@ func runSingleStmt(stmt ast.Stmt, env *Env) (interface{}, error) {
 		if err != nil {
 			return nil, err
 		}
-		b, err := strictToBool(result)
+		b, err := env.strictToBool(result)
 		if err != nil {
 			return nil, fmt.Errorf("convert if condition:%v", err)
 		}
@@ -242,7 +242,7 @@ func runSingleStmt(stmt ast.Stmt, env *Env) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-			b, err := strictToBool(result)
+			b, err := env.strictToBool(result)
 			if err != nil {
 				return nil, fmt.Errorf("convert else if condition:%v", err)
 			}
@@ -299,7 +299,7 @@ func runSingleStmt(stmt ast.Stmt, env *Env) (interface{}, error) {
 				if err != nil {
 					return nil, err
 				}
-				b, err := strictToBool(result)
+				b, err := env.strictToBool(result)
 				if err != nil {
 					return nil, fmt.Errorf("convert while condition:%v", err)
 				}
@@ -341,7 +341,7 @@ func runSingleStmt(stmt ast.Stmt, env *Env) (interface{}, error) {
 				if err != nil {
 					return nil, err
 				}
-				b, err := strictToBool(result)
+				b, err := env.strictToBool(result)
 				if err != nil {
 					return nil, fmt.Errorf("convert for loop condition:%v", err)
 				}
@@ -393,7 +393,7 @@ func runSingleStmt(stmt ast.Stmt, env *Env) (interface{}, error) {
 				if err != nil {
 					return nil, err
 				}
-				b, err := strictToBool(result)
+				b, err := env.strictToBool(result)
 				if err != nil {
 					return nil, fmt.Errorf("convert do loop condition:%v", err)
 				}

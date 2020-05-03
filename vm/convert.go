@@ -11,23 +11,23 @@ import (
 
 // ToInt convert type to int
 func (env *Env) ToInt(val interface{}) interface{} {
-	i, err := strictToInt(val)
+	i, err := env.strictToInt(val)
 	if err != nil {
 		return val
 	}
 	return i
 }
 
-func toInt(val interface{}) int {
-	i, err := strictToInt(val)
+func (env *Env) toInt(val interface{}) int {
+	i, err := env.strictToInt(val)
 	if err != nil {
 		return 0
 	}
 	return i
 }
 
-func strictToInt(val interface{}) (int, error) {
-	f, err := strictToFloat(val)
+func (env *Env) strictToInt(val interface{}) (int, error) {
+	f, err := env.strictToFloat(val)
 	if err != nil {
 		return 0, err
 	}
@@ -36,19 +36,19 @@ func strictToInt(val interface{}) (int, error) {
 
 // ToFloat convert type to float64
 func (env *Env) ToFloat64(val interface{}) interface{} {
-	i, err := strictToFloat(val)
+	i, err := env.strictToFloat(val)
 	if err != nil {
 		return val
 	}
 	return i
 }
 
-func toFloat64(val interface{}) float64 {
-	f, _ := strictToFloat(val)
+func (env *Env) toFloat64(val interface{}) float64 {
+	f, _ := env.strictToFloat(val)
 	return f
 }
 
-func strictToFloat(val interface{}) (float64, error) {
+func (env *Env) strictToFloat(val interface{}) (float64, error) {
 	switch reflect.ValueOf(val).Kind() {
 	case reflect.Int64:
 		return float64(val.(int64)), nil
@@ -88,15 +88,15 @@ func strictToFloat(val interface{}) (float64, error) {
 	}
 }
 
-func toBool(val interface{}) bool {
-	b, err := strictToBool(val)
+func (env *Env) toBool(val interface{}) bool {
+	b, err := env.strictToBool(val)
 	if err != nil {
 		return false
 	}
 	return b
 }
 
-func strictToBool(val interface{}) (bool, error) {
+func (env *Env) strictToBool(val interface{}) (bool, error) {
 	switch reflect.ValueOf(val).Kind() {
 	case reflect.Bool:
 		return val.(bool), nil
@@ -113,10 +113,10 @@ func strictToBool(val interface{}) (bool, error) {
 
 // ToFloat convert type to string
 func (env *Env) ToString(val interface{}) interface{} {
-	return toString(val)
+	return env.toString(val)
 }
 
-func toString(val interface{}) string {
+func (env *Env) toString(val interface{}) string {
 	switch reflect.ValueOf(val).Kind() {
 	case reflect.String:
 		return val.(string)
@@ -129,7 +129,7 @@ func toString(val interface{}) string {
 	}
 }
 
-func getHashIndex(env *Env, exprs []ast.Expr) (string, error) {
+func (env *Env) getHashIndex(exprs []ast.Expr) (string, error) {
 	var index string
 	for i, expr := range exprs {
 		//fmt.Printf("Index[%v]:%v\n", k, expr)
