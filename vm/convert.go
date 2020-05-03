@@ -123,7 +123,8 @@ func (env *Env) toString(val interface{}) string {
 	case reflect.Int64, reflect.Int32, reflect.Int16, reflect.Int8, reflect.Int:
 		return fmt.Sprintf("%v", val)
 	case reflect.Float64, reflect.Float32:
-		return fmt.Sprintf("%v", val)
+		ofmt, _ := env.Get("OFMT")
+		return fmt.Sprintf(ofmt.(string), val)
 	default:
 		return ""
 	}

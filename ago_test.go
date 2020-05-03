@@ -122,6 +122,8 @@ func TestGoa(t *testing.T) {
 				{script: `BEGIN{print 1 "b"}`, ok: "1b\n"},
 				{script: `BEGIN{print 1 1}`, ok: "11\n"},
 				{script: `BEGIN{print 123i}`, ok: "123\n"},
+				{script: `BEGIN{print 123 ""}`, ok: "123\n"},
+				{script: `BEGIN{print 0.123456789 ""}`, ok: "0.123457\n"},
 				{script: `BEGIN{i=1;print 123i}`, ok: "1231\n"},
 				{script: `BEGIN{i=1;print 123i123}`, ok: "123\n"},
 				{script: `BEGIN{i=1;print 123i 123}`, ok: "1231123\n"},
