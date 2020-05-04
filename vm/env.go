@@ -33,14 +33,14 @@ type Env struct {
 }
 
 // NewEnv is a Env constructor,
-func NewEnv() *Env {
+func NewEnv(files []string) *Env {
 	global := make(map[string]interface{})
 	global["ENVIRON"] = getEnvVars()
 
 	return &Env{
 		env:     make(map[string]interface{}),
 		parent:  nil,
-		builtin: newBuiltIn(),
+		builtin: newBuiltIn(files),
 		global:  global,
 		funcArg: make(map[string]interface{}),
 		//importFunc: make(map[string]func(*Env) (reflect.Value, error)),
@@ -259,7 +259,7 @@ func (e *Env) SetFile(k string, f *io.ReadCloser) (*bufio.Scanner, error) {
 	}
 	_, ok := e.readCloser[k]
 	if ok {
-		fmt.Printf("SetFile(%v)\n", k)
+		//fmt.Printf("SetFile(%v)\n", k)
 		return nil, ErrAlreadyKnownSymbol
 	}
 	scanner := bufio.NewScanner(io.Reader(*f))

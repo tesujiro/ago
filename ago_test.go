@@ -1129,13 +1129,28 @@ ZZZ 1
 						tempDataPath = datafile.Name()
 						fmt.Fprintf(datafile, "AAA BBB CCC\nDDD EEE FFF\n")
 						os.Args = []string{os.Args[0], "{print NR,FILENAME,FNR}", datafile.Name(), datafile.Name()}
-						fmt.Printf("tempDataPath=%v\n", tempDataPath)
 					},
 					cleanup: func() {
 						os.Remove(tempDataPath)
 					},
 					rc:      0,
 					okRegex: "1 /.*example.*ago 1\n2 /.*example.*ago 2\n3 /.*example.*ago 1\n4 /.*example.*ago 2\n",
+				},
+				{
+					prepare: func() {
+						datafile, err := ioutil.TempFile("", "example.*.data.ago")
+						if err != nil {
+							log.Fatal(err)
+						}
+						tempDataPath = datafile.Name()
+						fmt.Fprintf(datafile, "AAA,BBB,CCC\nDDD,EEE,FFF\n")
+						os.Args = []string{os.Args[0], "-F", ",", "BEGIN{print ARGC, ARGV[0], ARGV[1], ARGV[2]}", datafile.Name(), datafile.Name()}
+					},
+					cleanup: func() {
+						os.Remove(tempDataPath)
+					},
+					rc:      0,
+					okRegex: "2 ago /.*example.*ago /.*example.*ago\n2 ago /.*example.*ago /.*example.*ago\n",
 				},
 				{
 					prepare: func() { os.Args = []string{os.Args[0], "{print $1}", "./xxaabbyyccccdd"} },

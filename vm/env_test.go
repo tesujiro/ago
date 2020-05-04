@@ -19,7 +19,7 @@ func TestSetGet(t *testing.T) {
 		{checkSet: false, checkDefine: true, key: "KEY", value: 123},
 	}
 	for _, c := range cases {
-		e := NewEnv()
+		e := NewEnv([]string{})
 		if c.checkSet {
 			if err := e.Set(c.key, c.value); err != nil {
 				if err.Error() != c.message {
@@ -59,7 +59,7 @@ func TestChildEnv(t *testing.T) {
 		{key: "float", value: 1.1},
 	}
 
-	root := NewEnv()
+	root := NewEnv([]string{})
 	for _, test := range tests {
 		if err := root.Define(test.key, test.value); err != nil {
 			t.Errorf("Env.Set error :%v", err)

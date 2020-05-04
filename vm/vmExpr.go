@@ -117,18 +117,14 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 		// TODO:Elem()
 
 		switch reflect.ValueOf(value).Kind() {
-		/*
-			case reflect.Slice, reflect.Array:
-				// index change to int
-				if i, ok := index.(int); !ok {
-					return nil, errors.New("index cannot convert to int")
-				} else {
-					if i < 0 || reflect.ValueOf(value).Len() <= i {
-						return nil, errors.New("index out of range")
-					}
-					return reflect.ValueOf(value).Index(i).Interface(), nil
-				}
-		*/
+		case reflect.Slice, reflect.Array:
+			// index change to int
+			i := env.toInt(index)
+			if i < 0 || reflect.ValueOf(value).Len() <= i {
+				//return nil, errors.New("index out of range")
+				return nil, nil
+			}
+			return reflect.ValueOf(value).Index(i).Interface(), nil
 		case reflect.Map:
 			m, ok := value.(map[interface{}]interface{})
 			if !ok {

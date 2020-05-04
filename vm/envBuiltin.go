@@ -2,12 +2,14 @@ package vm
 
 import (
 	"fmt"
+	"os"
 	"regexp"
 	"strconv"
 )
 
 type builtin struct {
-	//ARGC,ARGV
+	ARGC        int
+	ARGV        []string
 	FILENAME    string
 	NF, NR, FNR int
 	FS, OFS     string
@@ -22,8 +24,12 @@ type builtin struct {
 }
 
 // newBuiltIn returns new builtin variables.
-func newBuiltIn() *builtin {
+func newBuiltIn(files []string) *builtin {
+	args := []string{os.Args[0]}
+	args = append(args, files...)
 	return &builtin{
+		ARGC:   len(files),
+		ARGV:   args,
 		SUBSEP: string([]byte{0x1c}),
 		ORS:    "\n",
 		OFS:    " ",
@@ -34,7 +40,11 @@ func newBuiltIn() *builtin {
 // TODO: repeated names
 func (e *Env) isBuiltin(k string) bool {
 	switch k {
-	case "FILENAME", "NF", "NR", "FNR", "FS", "OFS", "ORS", "SUBSEP", "OFMT", "RLENGTH", "RSTART", "RS":
+	case "ARGC", "ARGV",
+		"FILENAME", "NF", "NR", "FNR",
+		"FS", "OFS", "ORS",
+		"SUBSEP", "OFMT", "CONVFMT",
+		"RLENGTH", "RSTART", "RS":
 		return true
 	default:
 		return false

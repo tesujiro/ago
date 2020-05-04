@@ -56,7 +56,7 @@ Please note that the language and command args may change at any time.
 
 # Still not implemented
 * nextfile
-* var: FILENAME, FNR, CONVFMT
+* var: CONVFMT
 * print error with line number
 * asort(),asort()
 * import & call go library

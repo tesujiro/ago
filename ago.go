@@ -143,7 +143,7 @@ func _main() int {
 		return runScript(env, scriptReader, file, fileReader)
 	}
 
-	env := initEnv()
+	env := initEnv(files)
 	if dbg {
 		env.Dump()
 	}
@@ -157,8 +157,8 @@ func _main() int {
 	return 0
 }
 
-func initEnv() *vm.Env {
-	env := vm.NewEnv()
+func initEnv(files []string) *vm.Env {
+	env := vm.NewEnv(files)
 	env = lib.Import(env)
 	env.SetFS(fs)
 
@@ -252,6 +252,12 @@ func runScript(env *vm.Env, scriptReader io.Reader, file string, fileReader *os.
 	}
 
 	if len(mainRules) == 0 && len(endRules) == 0 {
+		err = env.CloseFile(file)
+		if err != nil {
+			fmt.Printf("close file error: %v \n", err)
+			return 1
+		}
+
 		return 0
 	}
 
