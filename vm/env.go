@@ -254,8 +254,12 @@ func (e *Env) getLocalVar(k string) (interface{}, error) {
 
 // SetFile defines a new file.
 func (e *Env) SetFile(k string, f *io.ReadCloser) (*bufio.Scanner, error) {
+	if k == "" {
+		k = "-" // stdin
+	}
 	_, ok := e.readCloser[k]
 	if ok {
+		fmt.Printf("SetFile(%v)\n", k)
 		return nil, ErrAlreadyKnownSymbol
 	}
 	scanner := bufio.NewScanner(io.Reader(*f))
@@ -339,6 +343,10 @@ func (e *Env) GetScanner(k string) (*bufio.Scanner, error) {
 
 // CloseFile close a file.
 func (e *Env) CloseFile(k string) error {
+	if k == "" {
+		k = "-"
+	}
+
 	f, ok := e.readCloser[k]
 	if !ok {
 		return ErrUnknownSymbol

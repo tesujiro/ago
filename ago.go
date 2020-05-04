@@ -112,7 +112,7 @@ func _main() int {
 	}
 
 	var ret int
-	runFile := func(file string) int {
+	runFile := func(env *vm.Env, file string) int {
 		var scriptReader io.Reader
 		if programFile != "" {
 			//fmt.Println("read from programFile:", programFile)
@@ -127,6 +127,8 @@ func _main() int {
 			//fmt.Println("read script:", script)
 			scriptReader = strings.NewReader(script)
 		}
+
+		//TODO: refact: open file in runScript
 		var fileReader *os.File
 		if file != "" {
 			fileReader, err = os.Open(file)
@@ -138,11 +140,16 @@ func _main() int {
 		} else {
 			fileReader = os.Stdin
 		}
-		return runScript(scriptReader, fileReader)
+		return runScript(env, scriptReader, file, fileReader)
+	}
+
+	env := initEnv()
+	if dbg {
+		env.Dump()
 	}
 
 	for _, file := range files {
-		ret = runFile(file)
+		ret = runFile(env, file)
 		if ret != 0 {
 			return ret
 		}
@@ -166,12 +173,7 @@ func initEnv() *vm.Env {
 	return env
 }
 
-func runScript(scriptReader io.Reader, fileReader *os.File) int {
-
-	env := initEnv()
-	if dbg {
-		env.Dump()
-	}
+func runScript(env *vm.Env, scriptReader io.Reader, file string, fileReader *os.File) int {
 
 	bytes, err := ioutil.ReadAll(scriptReader)
 	if err != nil {
@@ -209,9 +211,8 @@ func runScript(scriptReader io.Reader, fileReader *os.File) int {
 	}
 
 	var fileScanner *bufio.Scanner
-	redir := "-" // a kind of stdin
 	rc := io.ReadCloser(fileReader)
-	fileScanner, err = env.SetFile(redir, &rc)
+	fileScanner, err = env.SetFile(file, &rc)
 	if err != nil {
 		fmt.Printf("env error: %v \n", err)
 		return 1
@@ -293,6 +294,12 @@ func runScript(scriptReader io.Reader, fileReader *os.File) int {
 	}
 	if err != nil {
 		fmt.Printf("error:%v\n", err)
+		return 1
+	}
+
+	err = env.CloseFile(file)
+	if err != nil {
+		fmt.Printf("close file error: %v \n", err)
 		return 1
 	}
 
