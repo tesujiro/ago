@@ -217,6 +217,7 @@ func runScript(env *vm.Env, scriptReader io.Reader, file string, fileReader *os.
 		fmt.Printf("env error: %v \n", err)
 		return 1
 	}
+	env.SetFILENAME(file)
 
 	var result interface{}
 
@@ -263,7 +264,8 @@ func runScript(env *vm.Env, scriptReader io.Reader, file string, fileReader *os.
 	for fileScanner.Scan() {
 		number++
 		fileLine := fileScanner.Text()
-		env.SetNR(number)
+		env.IncNR()
+		env.SetFNR(number)
 		env.SetFieldFromLine(fileLine)
 		if len(mainRules) > 0 {
 			result, err := vm.RunMainRules(mainRules, env)

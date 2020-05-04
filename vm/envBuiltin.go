@@ -7,17 +7,16 @@ import (
 )
 
 type builtin struct {
-	//ARGC,ARGV,FILENAME
-	NF, NR  int
-	FS, OFS string
-	ORS     string
-	SUBSEP  string
-	OFMT    string
-	//FNR,
+	//ARGC,ARGV
+	FILENAME    string
+	NF, NR, FNR int
+	FS, OFS     string
+	ORS         string
+	SUBSEP      string
+	OFMT        string
+	//CONVFMT
 	RLENGTH, RSTART int
 	RS              string
-	//ENVIRON
-	//CONVFMT
 	field           []string
 	inStartStopLoop bool
 }
@@ -35,16 +34,26 @@ func newBuiltIn() *builtin {
 // TODO: repeated names
 func (e *Env) isBuiltin(k string) bool {
 	switch k {
-	case "NF", "NR", "FS", "OFS", "ORS", "SUBSEP", "OFMT", "RLENGTH", "RSTART", "RS":
+	case "FILENAME", "NF", "NR", "FNR", "FS", "OFS", "ORS", "SUBSEP", "OFMT", "RLENGTH", "RSTART", "RS":
 		return true
 	default:
 		return false
 	}
 }
 
-// SetNR sets built in variable NR, number of records.
-func (e *Env) SetNR(i int) {
-	e.builtin.NR = i
+// SetFILENAME sets built in variable FNR, number of records.
+func (e *Env) SetFILENAME(s string) {
+	e.builtin.FILENAME = s
+}
+
+// IncNR increments built in variable NR, number of records.
+func (e *Env) IncNR() {
+	e.builtin.NR++
+}
+
+// SetNR sets built in variable FNR, number of records.
+func (e *Env) SetFNR(i int) {
+	e.builtin.FNR = i
 }
 
 // SetNF sets built in variable NF, number of fields.
