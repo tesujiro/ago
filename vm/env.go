@@ -34,11 +34,14 @@ type Env struct {
 
 // NewEnv is a Env constructor,
 func NewEnv() *Env {
+	global := make(map[string]interface{})
+	global["ENVIRON"] = getEnvVars()
+
 	return &Env{
 		env:     make(map[string]interface{}),
 		parent:  nil,
 		builtin: newBuiltIn(),
-		global:  make(map[string]interface{}),
+		global:  global,
 		funcArg: make(map[string]interface{}),
 		//importFunc: make(map[string]func(*Env) (reflect.Value, error)),
 		readCloser: make(map[string]*io.ReadCloser),
@@ -58,6 +61,15 @@ func (e *Env) NewEnv() *Env {
 		readCloser: e.readCloser,
 		scanner:    e.scanner,
 	}
+}
+
+func getEnvVars() map[interface{}]interface{} {
+	envs := make(map[interface{}]interface{})
+	for _, v := range os.Environ() {
+		x := strings.SplitN(v, "=", 2)
+		envs[x[0]] = x[1]
+	}
+	return envs
 }
 
 var globalVars bool

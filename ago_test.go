@@ -570,6 +570,7 @@ func TestGoa(t *testing.T) {
 				{script: `BEGIN{delete a;a=2}`, ok: "error:can't assign to a; it's an associated array name\n"},
 				{script: `BEGIN{list=func(){a[1]=1;a[2]=2;a[3]=3;return a};delete list()[1]}`, ok: "error:non variable does not support delete operation\n"},
 				{script: `BEGIN{list=func(){a[1]=1;a[2]=2;a[3]=3;return a};list()[1]=3}`, ok: "error:invalid assignment\n"},
+				{script: `BEGIN{print (length(ENVIRON["PATH"])>0) }`, ok: "true\n"},
 			},
 		},
 		{
