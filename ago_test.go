@@ -1134,7 +1134,7 @@ ZZZ 1
 						os.Remove(tempDataPath)
 					},
 					rc:      0,
-					okRegex: "1 /.*example.*ago 1\n2 /.*example.*ago 2\n3 /.*example.*ago 1\n4 /.*example.*ago 2\n",
+					okRegex: "1 /.*example.*ago.* 1\n2 /.*example.*ago.* 2\n3 /.*example.*ago.* 1\n4 /.*example.*ago.* 2\n",
 				},
 				{
 					prepare: func() {
@@ -1150,7 +1150,7 @@ ZZZ 1
 						os.Remove(tempDataPath)
 					},
 					rc:      0,
-					okRegex: "2 ago /.*example.*ago /.*example.*ago\n2 ago /.*example.*ago /.*example.*ago\n",
+					okRegex: "2 ago /.*example.*ago.* /.*example.*ago.*\n2 ago /.*example.*ago.* /.*example.*ago.*\n",
 				},
 				{
 					prepare: func() { os.Args = []string{os.Args[0], "{print $1}", "./xxaabbyyccccdd"} },
