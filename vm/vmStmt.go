@@ -199,7 +199,11 @@ func runSingleStmt(stmt ast.Stmt, env *Env) (interface{}, error) {
 			switch reflect.ValueOf(result).Kind() {
 			case reflect.Float64:
 				fmt.Printf(ofmt.(string), result)
-			case reflect.Int, reflect.Int64:
+			case reflect.Int:
+				//fmt.Printf(ofmt.(string), float64(result.(int)))
+				fmt.Printf("%v", result)
+			case reflect.Int64:
+				//fmt.Printf(ofmt.(string), float64(result.(int64)))
 				fmt.Printf("%v", result)
 			case reflect.String, reflect.Bool:
 				fmt.Printf("%v", result)
