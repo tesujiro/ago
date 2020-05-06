@@ -1225,9 +1225,32 @@ ZZZ 1
 					okRegex: "3 ago /.*example.*ago.* /.*example.*ago.*\n",
 				},
 				{
-					prepare: func() { os.Args = []string{os.Args[0], "{print $1}", "./xxaabbyyccccdd"} },
+					prepare: func() { os.Args = []string{os.Args[0], "{print $1}", "./no_such_file"} },
 					rc:      1,
 					okRegex: "no such file or directory\n",
+				},
+				{
+					prepare: func() { os.Args = []string{os.Args[0], `BEGIN{print "xxx"}`, "./no_such_file"} },
+					rc:      0,
+					ok:      "xxx\n",
+				},
+				{
+					prepare: func() {
+						datafile, err := ioutil.TempFile("", "example.*.data.ago")
+						if err != nil {
+							log.Fatal(err)
+						}
+						tempDataPath = datafile.Name()
+						os.Args = []string{os.Args[0], `{print}`, tempDataPath}
+					},
+					cleanup: func() {
+						err := os.Remove(tempDataPath)
+						if err != nil {
+							fmt.Printf("os.Remove error:%v\n", err)
+						}
+					},
+					rc: 0,
+					ok: "",
 				},
 			},
 		},
