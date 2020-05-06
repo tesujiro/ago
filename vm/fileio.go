@@ -7,24 +7,108 @@ import (
 	"os"
 )
 
-// SetFile defines a new file.
-func (e *Env) SetFile(k string, f *io.ReadCloser) (*bufio.Scanner, error) {
-	if k == "" {
-		k = "-" // stdin
+// GetLine read one line from input files. If EOF and no file to read, return io.EOF.
+func (e *Env) GetLine() (string, error) {
+	openNextFile := func() error {
+		//fmt.Printf("curFileIndex=%v\n", e.fileInfo.curFileIndex)
+		var fileReader *os.File
+		var file string
+		//fmt.Printf("len(files)==%v\n", len(e.fileInfo.files))
+		if len(e.fileInfo.files) == 0 {
+			fileReader = os.Stdin
+			file = "-"
+		} else {
+			if e.fileInfo.curFileIndex >= len(e.fileInfo.files) {
+				return io.EOF
+			}
+			file = e.fileInfo.files[e.fileInfo.curFileIndex]
+			e.fileInfo.curFileIndex++
+			//fmt.Printf("file=%v\n", file)
+			var err error
+			fileReader, err = os.Open(file)
+			if err != nil {
+				return fmt.Errorf("open %v error: %v", file, err)
+			}
+		}
+		e.SetFILENAME(file)
+		e.ResetFNR()
+
+		readCloser := io.ReadCloser(fileReader)
+		e.fileInfo.curFileCloser = &readCloser
+		e.fileInfo.curFileScanner = bufio.NewScanner(io.Reader(readCloser))
+		err := e.setScannerSplit("")
+		if err != nil {
+			return err
+		}
+		//fmt.Println("openNextFile finished normally")
+		return nil
 	}
-	_, ok := e.readCloser[k]
-	if ok {
-		//fmt.Printf("SetFile(%v)\n", k)
-		return nil, ErrAlreadyKnownSymbol
+
+	if e.fileInfo.curFileScanner == nil {
+		//fmt.Println("Getline openNextFile")
+		err := openNextFile()
+		if err != nil {
+			return "", err
+		}
 	}
-	scanner := bufio.NewScanner(io.Reader(*f))
-	e.readCloser[k] = f
-	e.scanner[k] = scanner
-	err := e.setScannerSplit(k)
-	if err != nil {
-		return nil, err
+	for !(e.fileInfo.curFileScanner).Scan() {
+		//fmt.Printf("Getline scan finished -> openNextFile: Scanner.Err=%v\n", e.fileInfo.curFileScanner.Err())
+		if err := e.fileInfo.curFileScanner.Err(); err != nil {
+			return "", err
+		}
+		if len(e.fileInfo.files) == 0 {
+			// when read from Stdin
+			return "", io.EOF
+		}
+		if err := (*e.fileInfo.curFileCloser).Close(); err != nil {
+			return "", err
+		}
+		e.fileInfo.curFileCloser = nil
+		e.fileInfo.curFileScanner = nil
+		err := openNextFile()
+		if err != nil {
+			return "", err
+		}
 	}
-	return scanner, nil
+	e.IncFNR()
+	e.IncNR()
+	return e.fileInfo.curFileScanner.Text(), nil
+}
+
+// GetLine read one line from specified file. If EOF, return io.EOF.
+func (e *Env) GetLineFrom(file string) (string, error) {
+	openFile := func(file string) error {
+		var fileReader *os.File
+		var err error
+		if file != "" {
+			fileReader, err = os.Open(file)
+			if err != nil {
+				return fmt.Errorf("open %v error: %v", file, err)
+			}
+		} else {
+			fileReader = os.Stdin
+			file = "-"
+		}
+		readCloser := io.ReadCloser(fileReader)
+		e.fileInfo.readCloser[file] = &readCloser
+		e.fileInfo.scanner[file] = bufio.NewScanner(io.Reader(readCloser))
+		err = e.setScannerSplit(file)
+		if err != nil {
+			return err
+		}
+		return nil
+	}
+
+	if e.fileInfo.scanner[file] == nil {
+		err := openFile(file)
+		if err != nil {
+			return "", err
+		}
+	}
+	if !e.fileInfo.scanner[file].Scan() {
+		return "", io.EOF
+	}
+	return e.fileInfo.scanner[file].Text(), nil
 }
 
 func (e *Env) setScannerSplit(key string) error {
@@ -68,17 +152,16 @@ func (e *Env) setScannerSplit(key string) error {
 		}
 	}
 	if key == "" {
-		// set split func to all the scanners
-		for _, scanner := range e.scanner {
-			// scanner.Split() panics when used after Scan()
-			// No interface to check Scan() is called .
+		// set split func to current scanner
+		if e.fileInfo.curFileScanner != nil {
+			scanner := e.fileInfo.curFileScanner
 			if len(scanner.Text()) == 0 {
 				scanner.Split(split)
 			}
 		}
 	} else {
-		// set split func to speified  scanner
-		scanner, ok := e.scanner[key]
+		// set split func to speified scanner
+		scanner, ok := e.fileInfo.scanner[key]
 		if !ok {
 			return fmt.Errorf("file key %v not found", key)
 		}
@@ -87,22 +170,9 @@ func (e *Env) setScannerSplit(key string) error {
 	return nil
 }
 
-// GetScanner returns the scanner with a specified name.
-func (e *Env) GetScanner(k string) (*bufio.Scanner, error) {
-	s, ok := e.scanner[k]
-	if !ok {
-		return nil, ErrUnknownSymbol
-	}
-	return s, nil
-}
-
 // CloseFile close a file.
 func (e *Env) CloseFile(k string) error {
-	if k == "" {
-		k = "-"
-	}
-
-	f, ok := e.readCloser[k]
+	f, ok := e.fileInfo.readCloser[k]
 	if !ok {
 		return ErrUnknownSymbol
 	}
@@ -112,7 +182,7 @@ func (e *Env) CloseFile(k string) error {
 			return e
 		}
 	}
-	delete(e.readCloser, k)
-	delete(e.scanner, k)
+	delete(e.fileInfo.readCloser, k)
+	delete(e.fileInfo.scanner, k)
 	return nil
 }

@@ -917,46 +917,118 @@ func TestGoa(t *testing.T) {
 		{
 			name: "getline",
 			tests: []test{
-				{files: []file{{"aaa.txt", "aaa aaa\n"}}, script: `
-		BEGIN{
-			while( (getline str < "aaa.txt")>0){
-				print str
-			}
-			close('aaa.txt')
-		}`, ok: "aaa aaa\n"},
-				{script: `
-		BEGIN{
-			getline AA
-			print AA
-		}`, in: "AAA BBB\n", ok: "AAA BBB\n"},
-				{script: `
-		BEGIN{
-			getline
-			print $2
-		}`, in: "AAA BBB\n", ok: "BBB\n"},
-				{script: `
-		BEGIN{
-			getline
-			print "BEGIN",$0
-		}
-		{
-			print "MAIN",$0
-		}
-		END{
-			getline
-			print "END",$0
-		}`, in: "AAA\nBBB\nCCC\nDDD\n", ok: "BEGIN AAA\nMAIN BBB\nMAIN CCC\nMAIN DDD\nEND DDD\n"},
+				{
+					files: []file{{"aaa.txt", "aaa aaa\n"}},
+					script: `
+						BEGIN{
+							while( (getline str < "aaa.txt")>0){
+								print str
+							}
+							close('aaa.txt')
+						}`,
+					ok: "aaa aaa\n",
+				},
+				{
+					prepare: func() {
+						datafile, err := ioutil.TempFile("", "example.*.data.ago")
+						if err != nil {
+							log.Fatal(err)
+						}
+						tempDataPath = datafile.Name()
+						fmt.Fprintf(datafile, "AAA\nBBB\nCCC\n")
+						os.Args = []string{
+							os.Args[0],
+							`	BEGIN{
+									getline str
+									print str
+								}
+								{
+									print
+								}`,
+							datafile.Name(),
+						}
+					},
+					cleanup: func() {
+						os.Remove(tempDataPath)
+					},
+					rc: 0,
+					ok: "AAA\nBBB\nCCC\n",
+				},
+				{
+					prepare: func() {
+						datafile, err := ioutil.TempFile("", "example.*.data.ago")
+						if err != nil {
+							log.Fatal(err)
+						}
+						tempDataPath = datafile.Name()
+						fmt.Fprintf(datafile, "AAA\nBBB\nCCC\n")
+						os.Args = []string{
+							os.Args[0],
+							`	BEGIN{
+									getline str < "` + datafile.Name() + `"
+									print str
+								}
+								{
+									print
+								}`,
+							datafile.Name(),
+						}
+					},
+					cleanup: func() {
+						os.Remove(tempDataPath)
+					},
+					rc: 0,
+					ok: "AAA\nAAA\nBBB\nCCC\n",
+				},
+				{
+					script: `
+						BEGIN{
+							getline AA
+							print AA
+						}`,
+					in: "AAA BBB\n",
+					ok: "AAA BBB\n",
+				},
+				{
+					script: `
+						BEGIN{
+							getline
+							print $2
+						}`,
+					in: "AAA BBB\n",
+					ok: "BBB\n",
+				},
+				{
+					script: `
+						BEGIN{
+							getline
+							print "BEGIN",$0
+						}
+						{
+							print "MAIN",$0
+						}
+						END{
+							getline
+							print "END",$0
+						}`,
+					in: "AAA\nBBB\nCCC\nDDD\n",
+					ok: "BEGIN AAA\nMAIN BBB\nMAIN CCC\nMAIN DDD\nEND DDD\n",
+				},
 				{script: `BEGIN{ "echo ABC DEF" | getline msg;print msg;}`, ok: "ABC DEF\n"},
 				{script: `BEGIN{ "NOT_A_COMMAND_XX" | getline msg;print msg;}`, rc: 1},
 				{script: `BEGIN{close('aaa')}`, in: "AAA\nBBB\n", ok: "error:unknown symbol\n"},
-				{files: []file{{"aaa.txt", "aaaXbbb"}}, script: `
-		BEGIN{
-			RS="X"
-			while( (getline str < "aaa.txt")>0){
-				print str
-			}
-			close('aaa.txt')
-		}`, ok: "aaa\nbbb\n"},
+				{
+					files: []file{{"aaa.txt", "aaaXbbb"}},
+					script: `
+						BEGIN{
+							RS="X"
+							while( (getline str < "aaa.txt")>0){
+								print str
+							}
+							close('aaa.txt')
+						}`,
+					ok: "aaa\nbbb\n",
+				},
 			},
 		},
 		{
@@ -1084,7 +1156,7 @@ ZZZ 1
 					prepare: func() { os.Args = []string{os.Args[0], "-f", "./xxaabbyyccccdd"} },
 					cleanup: func() { programFile = "" },
 					rc:      1,
-					ok:      "script file open error: open ./xxaabbyyccccdd: no such file or directory\n",
+					okRegex: "no such file or directory\n",
 				},
 				// test for data file
 				{
@@ -1150,12 +1222,12 @@ ZZZ 1
 						os.Remove(tempDataPath)
 					},
 					rc:      0,
-					okRegex: "2 ago /.*example.*ago.* /.*example.*ago.*\n2 ago /.*example.*ago.* /.*example.*ago.*\n",
+					okRegex: "3 ago /.*example.*ago.* /.*example.*ago.*\n",
 				},
 				{
 					prepare: func() { os.Args = []string{os.Args[0], "{print $1}", "./xxaabbyyccccdd"} },
 					rc:      1,
-					ok:      "input file open error: open ./xxaabbyyccccdd: no such file or directory\n",
+					okRegex: "no such file or directory\n",
 				},
 			},
 		},

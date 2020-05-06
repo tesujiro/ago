@@ -94,9 +94,11 @@ func _main() int {
 			files = args
 		}
 	}
-	if len(files) == 0 {
-		files = []string{""} // STDIN
-	}
+	/*
+		if len(files) == 0 {
+			files = []string{""} // STDIN
+		}
+	*/
 
 	if dbg {
 		fmt.Println("Start debug mode.")
@@ -112,7 +114,8 @@ func _main() int {
 	}
 
 	var ret int
-	runFile := func(env *vm.Env, file string) int {
+	//runFile := func(env *vm.Env, file string) int {
+	run := func(env *vm.Env) int {
 		var scriptReader io.Reader
 		if programFile != "" {
 			//fmt.Println("read from programFile:", programFile)
@@ -128,19 +131,22 @@ func _main() int {
 			scriptReader = strings.NewReader(script)
 		}
 
-		//TODO: refact: open file in runScript
-		var fileReader *os.File
-		if file != "" {
-			fileReader, err = os.Open(file)
-			if err != nil {
-				fmt.Println("input file open error:", err)
-				return 1
+		/*
+			//TODO: refact: open file in runScript
+			var fileReader *os.File
+			if file != "" {
+				fileReader, err = os.Open(file)
+				if err != nil {
+					fmt.Println("input file open error:", err)
+					return 1
+				}
+				defer fileReader.Close()
+			} else {
+				fileReader = os.Stdin
 			}
-			defer fileReader.Close()
-		} else {
-			fileReader = os.Stdin
-		}
-		return runScript(env, scriptReader, file, fileReader)
+			return runScript(env, scriptReader, file, fileReader)
+		*/
+		return runScript(env, scriptReader)
 	}
 
 	env := initEnv(files)
@@ -148,11 +154,17 @@ func _main() int {
 		env.Dump()
 	}
 
-	for _, file := range files {
-		ret = runFile(env, file)
-		if ret != 0 {
-			return ret
+	/*
+		for _, file := range files {
+			ret = runFile(env, file)
+			if ret != 0 {
+				return ret
+			}
 		}
+	*/
+	ret = run(env)
+	if ret != 0 {
+		return ret
 	}
 	return 0
 }
@@ -173,8 +185,10 @@ func initEnv(files []string) *vm.Env {
 	return env
 }
 
-func runScript(env *vm.Env, scriptReader io.Reader, file string, fileReader *os.File) int {
+//func runScript(env *vm.Env, scriptReader io.Reader, file string, fileReader *os.File) int {
+func runScript(env *vm.Env, scriptReader io.Reader) int {
 
+	//fmt.Println("runScript")
 	bytes, err := ioutil.ReadAll(scriptReader)
 	if err != nil {
 		fmt.Printf("Read error: %v\n", err)
@@ -210,14 +224,16 @@ func runScript(env *vm.Env, scriptReader io.Reader, file string, fileReader *os.
 		parser.Dump(ast)
 	}
 
-	var fileScanner *bufio.Scanner
-	rc := io.ReadCloser(fileReader)
-	fileScanner, err = env.SetFile(file, &rc)
-	if err != nil {
-		fmt.Printf("env error: %v \n", err)
-		return 1
-	}
-	env.SetFILENAME(file)
+	/*
+		var fileScanner *bufio.Scanner
+		rc := io.ReadCloser(fileReader)
+		fileScanner, err = env.SetFile(file, &rc)
+		if err != nil {
+			fmt.Printf("env error: %v \n", err)
+			return 1
+		}
+		env.SetFILENAME(file)
+	*/
 
 	var result interface{}
 
@@ -252,11 +268,13 @@ func runScript(env *vm.Env, scriptReader io.Reader, file string, fileReader *os.
 	}
 
 	if len(mainRules) == 0 && len(endRules) == 0 {
-		err = env.CloseFile(file)
-		if err != nil {
-			fmt.Printf("close file error: %v \n", err)
-			return 1
-		}
+		/*
+			err = env.CloseFile(file)
+			if err != nil {
+				fmt.Printf("close file error: %v \n", err)
+				return 1
+			}
+		*/
 
 		return 0
 	}
@@ -265,13 +283,24 @@ func runScript(env *vm.Env, scriptReader io.Reader, file string, fileReader *os.
 	env.SetNF()
 
 	// MAIN
-	//fileScanner := bufio.NewScanner(fileReader)
-	var number int
-	for fileScanner.Scan() {
-		number++
-		fileLine := fileScanner.Text()
-		env.IncNR()
-		env.SetFNR(number)
+	/*
+		var number int
+		for fileScanner.Scan() {
+			number++
+			fileLine := fileScanner.Text()
+			env.IncNR()
+			env.SetFNR(number)
+	*/
+	//var err error
+	for {
+		//fmt.Println("MAINLOOP")
+		fileLine, err := env.GetLine()
+		if err == io.EOF {
+			break
+		} else if err != nil {
+			fmt.Printf("error:%v\n", err)
+			return 1
+		}
 		env.SetFieldFromLine(fileLine)
 		if len(mainRules) > 0 {
 			result, err := vm.RunMainRules(mainRules, env)
@@ -305,11 +334,13 @@ func runScript(env *vm.Env, scriptReader io.Reader, file string, fileReader *os.
 		return 1
 	}
 
-	err = env.CloseFile(file)
-	if err != nil {
-		fmt.Printf("close file error: %v \n", err)
-		return 1
-	}
+	/*
+		err = env.CloseFile(file)
+		if err != nil {
+			fmt.Printf("close file error: %v \n", err)
+			return 1
+		}
+	*/
 
 	return 0
 }

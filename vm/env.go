@@ -28,12 +28,16 @@ type Env struct {
 	global  map[string]interface{}
 	funcArg map[string]interface{}
 	//importFunc map[string]func(*Env) (reflect.Value, error)
-	readCloser     map[string]*io.ReadCloser
-	scanner        map[string]*bufio.Scanner
+	fileInfo *FileInfo
+}
+
+type FileInfo struct {
 	files          []string
 	curFileIndex   int
 	curFileCloser  *io.ReadCloser
 	curFileScanner *bufio.Scanner
+	readCloser     map[string]*io.ReadCloser
+	scanner        map[string]*bufio.Scanner
 }
 
 // NewEnv is a Env constructor,
@@ -48,10 +52,12 @@ func NewEnv(files []string) *Env {
 		global:  global,
 		funcArg: make(map[string]interface{}),
 		//importFunc: make(map[string]func(*Env) (reflect.Value, error)),
-		readCloser:   make(map[string]*io.ReadCloser),
-		scanner:      make(map[string]*bufio.Scanner),
-		files:        files,
-		curFileIndex: 0,
+		fileInfo: &FileInfo{
+			files:        files,
+			curFileIndex: 0,
+			readCloser:   make(map[string]*io.ReadCloser),
+			scanner:      make(map[string]*bufio.Scanner),
+		},
 	}
 }
 
@@ -64,8 +70,7 @@ func (e *Env) NewEnv() *Env {
 		global:  e.global,
 		funcArg: make(map[string]interface{}),
 		//importFunc: e.importFunc,
-		readCloser: e.readCloser,
-		scanner:    e.scanner,
+		fileInfo: e.fileInfo,
 	}
 }
 

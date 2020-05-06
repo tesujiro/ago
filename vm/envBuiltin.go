@@ -26,9 +26,10 @@ type builtin struct {
 // newBuiltIn returns new builtin variables.
 func newBuiltIn(files []string) *builtin {
 	args := []string{os.Args[0]}
+	//fmt.Printf("len(files)=%v\n", len(files))
 	args = append(args, files...)
 	return &builtin{
-		ARGC:   len(files),
+		ARGC:   len(files) + 1,
 		ARGV:   args,
 		SUBSEP: string([]byte{0x1c}),
 		ORS:    "\n",
@@ -59,6 +60,16 @@ func (e *Env) SetFILENAME(s string) {
 // IncNR increments built in variable NR, number of records.
 func (e *Env) IncNR() {
 	e.builtin.NR++
+}
+
+// IncNR increments built in variable FNR, number of records.
+func (e *Env) IncFNR() {
+	e.builtin.FNR++
+}
+
+// SetNR sets built in variable FNR to 0.
+func (e *Env) ResetFNR() {
+	e.builtin.FNR = 0
 }
 
 // SetNR sets built in variable FNR, number of records.

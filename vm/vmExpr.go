@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"os"
 	"os/exec"
 	"reflect"
 	"regexp"
@@ -316,27 +315,20 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
+
 			commandLine := cmdInterface.(string)
 			redir = commandLine
-			//fmt.Println("command=", commandLine)
-			_, err = env.GetScanner(redir)
-			if err == ErrUnknownSymbol {
-				re := regexp.MustCompile("[ \t]+")
-				cmdArray := re.Split(commandLine, -1)
-				cmd := exec.Command(cmdArray[0], cmdArray[1:]...)
-				stdout, err := cmd.StdoutPipe()
-				if err != nil {
-					return nil, err
-				}
-				_, err = env.SetFile(redir, &stdout)
-				if err != nil {
-					return nil, err
-				}
-				err = cmd.Start()
-				if err != nil {
-					return nil, err
-				}
-			} else if err != nil {
+			re := regexp.MustCompile("[ \t]+")
+			cmdArray := re.Split(commandLine, -1)
+			cmd := exec.Command(cmdArray[0], cmdArray[1:]...)
+			stdout, err := cmd.StdoutPipe()
+			if err != nil {
+				return nil, err
+			}
+
+			env.fileInfo.scanner[redir] = bufio.NewScanner(io.Reader(stdout))
+			err = cmd.Start()
+			if err != nil {
 				return nil, err
 			}
 		} else {
@@ -346,33 +338,23 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 					return nil, err
 				}
 				redir = (redirInterface).(string)
-			} else {
-				redir = "-" // Stdin
 			}
 		}
 
-		var scanner *bufio.Scanner
+		var line string
 		var err error
-		scanner, err = env.GetScanner(redir)
-		if err == ErrUnknownSymbol {
-			// Open File if not opened yet.
-			f, err := os.Open(redir)
-			if err != nil {
-				return 0, err
-			}
-			rc := io.ReadCloser(f)
-			scanner, err = env.SetFile(redir, &rc)
-			if err != nil {
-				return 0, err
-			}
-		} else if err != nil {
-			return 0, err
+		if redir != "" {
+			line, err = env.GetLineFrom(redir)
+		} else {
+			line, err = env.GetLine()
 		}
-		b := scanner.Scan()
-		if !b {
+		if err == io.EOF {
 			return 0, nil
 		}
-		line := scanner.Text()
+		if err != nil {
+			return 0, err
+		}
+
 		if expr.Var == nil {
 			env.SetFieldFromLine(line)
 		} else {
