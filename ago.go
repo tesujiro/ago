@@ -47,10 +47,6 @@ var variables hash = hash{}
 
 const version = "0.0.0"
 
-func init() {
-	//flag.Var(&variables, "v", "followed by var=value, assign variable before execution")
-}
-
 func main() {
 	os.Exit(_main())
 }
@@ -94,11 +90,6 @@ func _main() int {
 			files = args
 		}
 	}
-	/*
-		if len(files) == 0 {
-			files = []string{""} // STDIN
-		}
-	*/
 
 	if dbg {
 		fmt.Println("Start debug mode.")
@@ -114,7 +105,6 @@ func _main() int {
 	}
 
 	var ret int
-	//runFile := func(env *vm.Env, file string) int {
 	run := func(env *vm.Env) int {
 		var scriptReader io.Reader
 		if programFile != "" {
@@ -131,21 +121,6 @@ func _main() int {
 			scriptReader = strings.NewReader(script)
 		}
 
-		/*
-			//TODO: refact: open file in runScript
-			var fileReader *os.File
-			if file != "" {
-				fileReader, err = os.Open(file)
-				if err != nil {
-					fmt.Println("input file open error:", err)
-					return 1
-				}
-				defer fileReader.Close()
-			} else {
-				fileReader = os.Stdin
-			}
-			return runScript(env, scriptReader, file, fileReader)
-		*/
 		return runScript(env, scriptReader)
 	}
 
@@ -154,14 +129,6 @@ func _main() int {
 		env.Dump()
 	}
 
-	/*
-		for _, file := range files {
-			ret = runFile(env, file)
-			if ret != 0 {
-				return ret
-			}
-		}
-	*/
 	ret = run(env)
 	if ret != 0 {
 		return ret
@@ -185,7 +152,6 @@ func initEnv(files []string) *vm.Env {
 	return env
 }
 
-//func runScript(env *vm.Env, scriptReader io.Reader, file string, fileReader *os.File) int {
 func runScript(env *vm.Env, scriptReader io.Reader) int {
 
 	//fmt.Println("runScript")
@@ -224,17 +190,6 @@ func runScript(env *vm.Env, scriptReader io.Reader) int {
 		parser.Dump(ast)
 	}
 
-	/*
-		var fileScanner *bufio.Scanner
-		rc := io.ReadCloser(fileReader)
-		fileScanner, err = env.SetFile(file, &rc)
-		if err != nil {
-			fmt.Printf("env error: %v \n", err)
-			return 1
-		}
-		env.SetFILENAME(file)
-	*/
-
 	var result interface{}
 
 	funcRules, beginRules, mainRules, endRules := vm.SeparateRules(ast)
@@ -268,14 +223,6 @@ func runScript(env *vm.Env, scriptReader io.Reader) int {
 	}
 
 	if len(mainRules) == 0 && len(endRules) == 0 {
-		/*
-			err = env.CloseFile(file)
-			if err != nil {
-				fmt.Printf("close file error: %v \n", err)
-				return 1
-			}
-		*/
-
 		return 0
 	}
 
@@ -283,15 +230,6 @@ func runScript(env *vm.Env, scriptReader io.Reader) int {
 	env.SetNF()
 
 	// MAIN
-	/*
-		var number int
-		for fileScanner.Scan() {
-			number++
-			fileLine := fileScanner.Text()
-			env.IncNR()
-			env.SetFNR(number)
-	*/
-	//var err error
 	for {
 		//fmt.Println("MAINLOOP")
 		fileLine, err := env.GetLine()
@@ -333,14 +271,6 @@ func runScript(env *vm.Env, scriptReader io.Reader) int {
 		fmt.Printf("error:%v\n", err)
 		return 1
 	}
-
-	/*
-		err = env.CloseFile(file)
-		if err != nil {
-			fmt.Printf("close file error: %v \n", err)
-			return 1
-		}
-	*/
 
 	return 0
 }

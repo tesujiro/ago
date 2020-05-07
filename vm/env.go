@@ -31,6 +31,7 @@ type Env struct {
 	fileInfo *FileInfo
 }
 
+// FileInfo provides information about input files.
 type FileInfo struct {
 	files          []string
 	curFileIndex   int
