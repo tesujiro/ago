@@ -3,6 +3,7 @@ package vm
 import (
 	"errors"
 	"fmt"
+	"io"
 	"reflect"
 	"sort"
 
@@ -45,6 +46,13 @@ func run(stmts []ast.Stmt, env *Env) (interface{}, error) {
 		case *ast.ContinueStmt:
 			return nil, ErrContinue
 		case *ast.NextStmt:
+			return result, ErrNext
+		case *ast.NextfileStmt:
+			err = env.NextFile()
+			if err != io.EOF && err != nil {
+				//fmt.Printf("Nextfile error !! err:%v\n", err)
+				return nil, err
+			}
 			return result, ErrNext
 		case *ast.ReturnStmt:
 			//fmt.Println("Return1")

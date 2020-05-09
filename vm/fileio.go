@@ -7,46 +7,59 @@ import (
 	"os"
 )
 
-// GetLine read one line from input files. If EOF and no file to read, return io.EOF.
-func (e *Env) GetLine() (string, error) {
-	openNextFile := func() error {
-		//fmt.Printf("curFileIndex=%v\n", e.fileInfo.curFileIndex)
-		var fileReader *os.File
-		var file string
-		//fmt.Printf("len(files)==%v\n", len(e.fileInfo.files))
-		if len(e.fileInfo.files) == 0 {
-			fileReader = os.Stdin
-			file = "-"
-		} else {
-			if e.fileInfo.curFileIndex >= len(e.fileInfo.files) {
-				return io.EOF
-			}
-			file = e.fileInfo.files[e.fileInfo.curFileIndex]
-			e.fileInfo.curFileIndex++
-			//fmt.Printf("file=%v\n", file)
-			var err error
-			fileReader, err = os.Open(file)
-			if err != nil {
-				return fmt.Errorf("open %v error: %v", file, err)
-			}
-		}
-		e.SetFILENAME(file)
-		e.ResetFNR()
-
-		readCloser := io.ReadCloser(fileReader)
-		e.fileInfo.curFileCloser = &readCloser
-		e.fileInfo.curFileScanner = bufio.NewScanner(io.Reader(readCloser))
-		err := e.setScannerSplit("")
-		if err != nil {
+func openNextFile(e *Env) error {
+	if e.fileInfo.curFileCloser != nil {
+		if err := (*e.fileInfo.curFileCloser).Close(); err != nil {
 			return err
 		}
-		//fmt.Println("openNextFile finished normally")
-		return nil
+		e.fileInfo.curFileCloser = nil
+		e.fileInfo.curFileScanner = nil
 	}
+	//fmt.Printf("curFileIndex=%v\n", e.fileInfo.curFileIndex)
+	var fileReader *os.File
+	var file string
+	//fmt.Printf("len(files)==%v\n", len(e.fileInfo.files))
+	if len(e.fileInfo.files) == 0 {
+		fileReader = os.Stdin
+		file = "-"
+	} else {
+		if e.fileInfo.curFileIndex >= len(e.fileInfo.files) {
+			//fmt.Println("return EOF")
+			return io.EOF
+		}
+		file = e.fileInfo.files[e.fileInfo.curFileIndex]
+		e.fileInfo.curFileIndex++
+		//fmt.Printf("file=%v\n", file)
+		var err error
+		fileReader, err = os.Open(file)
+		if err != nil {
+			return fmt.Errorf("open %v error: %v", file, err)
+		}
+	}
+	e.SetFILENAME(file)
+	e.ResetFNR()
 
+	readCloser := io.ReadCloser(fileReader)
+	e.fileInfo.curFileCloser = &readCloser
+	e.fileInfo.curFileScanner = bufio.NewScanner(io.Reader(readCloser))
+	err := e.setScannerSplit("")
+	if err != nil {
+		return err
+	}
+	//fmt.Println("openNextFile finished normally")
+	return nil
+}
+
+// GetLine read one line from input files. If EOF and no file to read, return io.EOF.
+func (e *Env) NextFile() error {
+	return openNextFile(e)
+}
+
+// GetLine read one line from input files. If EOF and no file to read, return io.EOF.
+func (e *Env) GetLine() (string, error) {
 	if e.fileInfo.curFileScanner == nil {
 		//fmt.Println("Getline openNextFile")
-		err := openNextFile()
+		err := openNextFile(e)
 		if err != nil {
 			return "", err
 		}
@@ -60,12 +73,7 @@ func (e *Env) GetLine() (string, error) {
 			// when read from Stdin
 			return "", io.EOF
 		}
-		if err := (*e.fileInfo.curFileCloser).Close(); err != nil {
-			return "", err
-		}
-		e.fileInfo.curFileCloser = nil
-		e.fileInfo.curFileScanner = nil
-		err := openNextFile()
+		err := openNextFile(e)
 		if err != nil {
 			return "", err
 		}

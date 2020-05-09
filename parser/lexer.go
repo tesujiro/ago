@@ -58,6 +58,7 @@ var opName = map[string]int{
 	"break":    BREAK,
 	"continue": CONTINUE,
 	"next":     NEXT,
+	"nextfile": NEXTFILE,
 	"in":       IN,
 	"true":     TRUE,
 	"false":    FALSE,

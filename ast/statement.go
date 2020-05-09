@@ -63,6 +63,10 @@ type ContinueStmt struct {
 type NextStmt struct {
 }
 
+// NextfileStmt provides "nextfile" statement.
+type NextfileStmt struct {
+}
+
 // MapLoopStmt provides "for ( id in MAP ) {}" statement.
 type MapLoopStmt struct {
 	KeyID string

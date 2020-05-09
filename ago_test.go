@@ -902,6 +902,68 @@ func TestGoa(t *testing.T) {
 				{script: `{if NR%2==0{next}}1`, in: "AAA\nBBB\nCCC\nDDD\n", ok: "AAA\nCCC\n"},
 				{script: `{for{if NR%2==0 {next};break;}}1`, in: "AAA\nBBB\nCCC\nDDD\n", ok: "AAA\nCCC\n"},
 				{script: `function skipper(){if NR%2==0 {next};return}{skipper()}1`, in: "AAA\nBBB\nCCC\nDDD\n", ok: "AAA\nCCC\n"},
+				{script: `{print;next;print "1"}`, in: "AAA\nBBB\n", ok: "AAA\nBBB\n"},
+			},
+		},
+		{
+			name: "nextfile",
+			tests: []test{
+				{
+					prepare: func() {
+						datafile, err := ioutil.TempFile("", "example.*.data.ago")
+						if err != nil {
+							log.Fatal(err)
+						}
+						tempDataPath = datafile.Name()
+						fmt.Fprintf(datafile, "AAA\nBBB\nCCC\n")
+						os.Args = []string{
+							os.Args[0],
+							`	{
+									if $1=="CCC" {
+										nextfile
+									}
+									print NR,FNR,$0
+								}`,
+							datafile.Name(),
+							datafile.Name(),
+						}
+					},
+					cleanup: func() {
+						os.Remove(tempDataPath)
+					},
+					rc: 0,
+					ok: "1 1 AAA\n2 2 BBB\n4 1 AAA\n5 2 BBB\n",
+				},
+				{
+					prepare: func() {
+						datafile, err := ioutil.TempFile("", "example.*.data.ago")
+						if err != nil {
+							log.Fatal(err)
+						}
+						tempDataPath = datafile.Name()
+						fmt.Fprintf(datafile, "AAA\nBBB\nCCC\n")
+						os.Args = []string{
+							os.Args[0],
+							`	BEGIN{
+									getline str
+									print str
+								}
+								{
+									if $1=="CCC" {
+										nextfile
+									}
+									print
+								}`,
+							datafile.Name(),
+							"A_FILE_NOT_EXISTS",
+						}
+					},
+					cleanup: func() {
+						os.Remove(tempDataPath)
+					},
+					rc:      1,
+					okRegex: "no such file or directory",
+				},
 			},
 		},
 		{
@@ -1347,6 +1409,7 @@ ZZZ 1
 				}
 				rc := _main()
 				if rc != test.rc && !strings.Contains(test.ok, "error") {
+					t.Errorf("Case:%v[%v] script: %v", section.name, caseNumber, test.script)
 					t.Errorf("return code want:%v get:%v case:%v\n", test.rc, rc, test.script)
 				}
 				if len(test.files) > 0 {

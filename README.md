@@ -55,7 +55,6 @@ Please note that the language and command args may change at any time.
 
 
 # Still not implemented
-* nextfile
 * var: CONVFMT
 * print error with line number
 * asort(),asort()

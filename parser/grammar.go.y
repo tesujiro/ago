@@ -53,7 +53,7 @@ var inRegExp bool
 %token <token> DELETE IN
 %token <token> BEGIN END PRINT PRINTF REGEXP
 %token <token> IF ELSE FOR WHILE DO BREAK CONTINUE
-%token <token> FUNC RETURN EXIT NEXT
+%token <token> FUNC RETURN EXIT NEXT NEXTFILE
 %token <token> CONCAT_OP GETLINE
 
 %right '=' PLUSEQ MINUSEQ MULEQ DIVEQ MODEQ POWEQ
@@ -224,6 +224,10 @@ stmt
 	| NEXT
 	{
 		$$ = &ast.NextStmt{}
+	}
+	| NEXTFILE
+	{
+		$$ = &ast.NextfileStmt{}
 	}
 	| FOR '(' IDENT IN IDENT ')' '{' opt_stmts '}'
 	{
