@@ -6,17 +6,17 @@
 
 If you are a gopher, you wrote a AWK script for some task.
 ```
-> awk '{if $1>10 {print}}' some.txt
+$ awk '{if $1>10 {print}}' some.txt
 awk: syntax error at source line 1
  context is
 	{if >>>  $ <<< 1>10 {print}}
->
+$
 ```
 Ago is an alternative AWK for gophers.
 ```
-> ago '{if $1>10 {print}}' some.txt
+$ ago '{if $1>10 {print}}' some.txt
 15 You are a gopher!!
->
+$
 ```
 # Installation
 ```
@@ -25,26 +25,26 @@ $ go get -u github.com/tesujiro/ago
 
 # Examples
 ```
-> echo A Long Time Ago | ago '{print "Hello, ",$NF,"!"}'
+$ echo A Long Time Ago | ago '{print "Hello, ",$NF,"!"}'
 Hello, Ago !
-> printf "AAA\nBBB\nAAA\DDD" | ago '/A+/{++N};END{print N}'
+$ printf "AAA\nBBB\nAAA\DDD" | ago '/A+/{++N};END{print N}'
 2
-> printf "AAA\nAAA\nDDD\nDDD\n" | ago '!A[$0]++'
+$ printf "AAA\nAAA\nDDD\nDDD\n" | ago '!A[$0]++'
 AAA
 DDD
-> echo AAA BBB CCC AAA ZZZ AAA CCC | ago '{ for i=1; i<=NF; i++{ COUNT[$i]++ }} END{for (key in COUNT){ print key, COUNT[key] }}'
+$ echo AAA BBB CCC AAA ZZZ AAA CCC | ago '{ for i=1; i<=NF; i++{ COUNT[$i]++ }} END{for (key in COUNT){ print key, COUNT[key] }}'
 AAA 3
 BBB 1
 CCC 2
 ZZZ 1
-> printf 'aaa,bbb,"ccc,ddd\neeee"\n' | ago -F , '{ ret=split($0,a,"\""); if(ret%2==0){ pLine=$0; pNF=NF; getline; NF=pNF+NF-1; $0=pLine $0}; print NF; print}'
+$ printf 'aaa,bbb,"ccc,ddd\neeee"\n' | ago -F , '{ ret=split($0,a,"\""); if(ret%2==0){ pLine=$0; pNF=NF; getline; NF=pNF+NF-1; $0=pLine $0}; print NF; print}'
 4
 aaa,bbb,"ccc,dddeeee"
-> echo 20 | ago 'BEGIN{ Factorial=func(x){ if x==1 {1} else { x*Factorial(x-1) }}} {print Factorial($1)}'
+$ echo 20 | ago 'BEGIN{ Factorial=func(x){ if x==1 {1} else { x*Factorial(x-1) }}} {print Factorial($1)}'
 2432902008176640000
-> echo 12 34| ago '{ print func(a, b){return b, a}($1, $2) }'
+$ echo 12 34| ago '{ print func(a, b){return b, a}($1, $2) }'
 34 12
->
+$
 
 ```
 
