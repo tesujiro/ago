@@ -343,9 +343,15 @@ func evalExpr(expr ast.Expr, env *Env) (interface{}, error) {
 
 		var line string
 		var err error
-		if redir != "" {
+		//if expr.Command == nil && expr.Redir != nil {
+		//fmt.Printf("redir=%v\n", redir)
+		//fmt.Printf("expr.Redir=%v\n", expr.Redir)
+		//fmt.Printf("expr.Command=%v\n", expr.Command)
+		if expr.Command != nil || expr.Redir != nil {
+			//fmt.Println("GetLineFrom")
 			line, err = env.GetLineFrom(redir)
 		} else {
+			//fmt.Println("GetLine")
 			line, err = env.GetLine()
 		}
 		if err == io.EOF {

@@ -908,6 +908,7 @@ func TestGoa(t *testing.T) {
 		{
 			name: "nextfile",
 			tests: []test{
+				{script: `{print;nextfile;print "1"}`, in: "AAA\nBBB\n", ok: "AAA\n"},
 				{
 					prepare: func() {
 						datafile, err := ioutil.TempFile("", "example.*.data.ago")
@@ -979,6 +980,8 @@ func TestGoa(t *testing.T) {
 		{
 			name: "getline",
 			tests: []test{
+				{script: `BEGIN{while((getline <"")>0){print}}`, okRegex: "cannot open", rc: 1},
+				{script: `BEGIN{while((getline <"no_such_file")>0){print}}`, okRegex: "no such", rc: 1},
 				{
 					files: []file{{"aaa.txt", "aaa aaa\n"}},
 					script: `

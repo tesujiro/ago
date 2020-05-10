@@ -8,13 +8,6 @@ import (
 )
 
 func openNextFile(e *Env) error {
-	if e.fileInfo.curFileCloser != nil {
-		if err := (*e.fileInfo.curFileCloser).Close(); err != nil {
-			return err
-		}
-		e.fileInfo.curFileCloser = nil
-		e.fileInfo.curFileScanner = nil
-	}
 	//fmt.Printf("curFileIndex=%v\n", e.fileInfo.curFileIndex)
 	var fileReader *os.File
 	var file string
@@ -23,6 +16,13 @@ func openNextFile(e *Env) error {
 		fileReader = os.Stdin
 		file = "-"
 	} else {
+		if e.fileInfo.curFileCloser != nil {
+			if err := (*e.fileInfo.curFileCloser).Close(); err != nil {
+				return err
+			}
+			e.fileInfo.curFileCloser = nil
+			e.fileInfo.curFileScanner = nil
+		}
 		if e.fileInfo.curFileIndex >= len(e.fileInfo.files) {
 			//fmt.Println("return EOF")
 			return io.EOF
@@ -88,14 +88,12 @@ func (e *Env) GetLineFrom(file string) (string, error) {
 	openFile := func(file string) error {
 		var fileReader *os.File
 		var err error
-		if file != "" {
-			fileReader, err = os.Open(file)
-			if err != nil {
-				return fmt.Errorf("open %v error: %v", file, err)
-			}
-		} else {
-			fileReader = os.Stdin
-			file = "-"
+		if file == "" {
+			return fmt.Errorf("cannot open null string file")
+		}
+		fileReader, err = os.Open(file)
+		if err != nil {
+			return fmt.Errorf("open %v error: %v", file, err)
 		}
 		readCloser := io.ReadCloser(fileReader)
 		e.fileInfo.readCloser[file] = &readCloser
@@ -107,6 +105,7 @@ func (e *Env) GetLineFrom(file string) (string, error) {
 		return nil
 	}
 
+	//fmt.Printf("filename:%v\n", file)
 	if e.fileInfo.scanner[file] == nil {
 		err := openFile(file)
 		if err != nil {
