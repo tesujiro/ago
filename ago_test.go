@@ -823,7 +823,8 @@ func TestGoa(t *testing.T) {
 				{script: `BEGIN{systime()}`, ok: ""},
 				// lib: system
 				{script: `BEGIN{system("echo aaa")}`, ok: "aaa\n"},
-				{script: "BEGIN{system(\"echox aaa\")}", okRegex: `not found`},
+				{script: `BEGIN{system("echox aaa")}`, okRegex: "not found"},
+				//{script: `BEGIN{system("cat NO_SUCH_FILE")}`, okRegex: "not found"},
 				{script: `BEGIN{print system("test 1 -eq 1")}`, ok: "0\n"},
 				{script: `BEGIN{print system("test 1 -eq 0")}`, ok: "1\n"},
 			},
@@ -1114,7 +1115,7 @@ func TestGoa(t *testing.T) {
 				{script: `END{print NR}`, in: "AAA\nBBB\nAAA\nDDD\n", ok: "4\n"},
 				{script: "{gsub(/[ \t]+/, \"\")}1", in: "AAA \tBBB\n", ok: "AAABBB\n"},
 				{script: "{sub(/[ \t]+/, \"\")}1", in: "AAA \tBBB\n", ok: "AAABBB\n"},
-				//{script: `A !~ $0 {A=$0}`, in: "AAA\nAAA\nAAA\nDDD\n\nAAA\n", ok: "AAA\nDDD\nAAA\n"},
+				{script: `A !~ $0 {print}{A=$0}`, in: "AAA\nAAA\nAAA\nDDD\n\nAAA\n", ok: "AAA\nDDD\nAAA\n"},
 				{script: `!A[$0]++`, in: "AAA\nAAA\nAAA\nDDD\nAAA\n", ok: "AAA\nDDD\n"},
 				{script: `!($0 in A){A[$0];print}`, in: "AAA\nAAA\nAAA\nDDD\nAAA\n", ok: "AAA\nDDD\n"},
 				{script: `{A[++C]=$0}END{for i=C;i>0;--i{print A[i]}}`, in: "AAA\nBBB\nAAA\nDDD\n", ok: "DDD\nAAA\nBBB\nAAA\n"},
@@ -1173,8 +1174,8 @@ ZZZ 1
 				{prepare: func() { os.Args = []string{os.Args[0], "-d"} }, script: "{}", in: "aaa\n", rc: 0, okRegex: "Start debug mode."},
 				{prepare: func() { os.Args = []string{os.Args[0], "-a"} }, script: `BEGIN{X["x"]=1}{print 1}END{}`, rc: 0, okRegex: `ast.NumExpr{Literal:"1"}`},
 				{prepare: func() { os.Args = []string{os.Args[0], "-g"} }, script: "BEGIN{a=1}END{print a}", in: "\n", rc: 0, ok: "1\n"},
-				//{prepare: func() { os.Args = []string{os.Args[0], "-c"} }, script: "BEGIN{}", rc: 0}, // TODO: remove .pprof file after test
-				//{prepare: func() { os.Args = []string{os.Args[0], "-m"} }, script: "BEGIN{}", rc: 0}, // TODO: remove .pprof file after test
+				{prepare: func() { os.Args = []string{os.Args[0], "-c"} }, script: "BEGIN{}", rc: 0},
+				{prepare: func() { os.Args = []string{os.Args[0], "-m"} }, script: "BEGIN{}", rc: 0},
 				{prepare: func() { os.Args = []string{os.Args[0], "-l"} }, script: "BEGIN{}", rc: 0, okRegex: "Start lexer debug mode"},
 				{prepare: func() { os.Args = []string{os.Args[0], "-v", "XX=xx"} }, rc: 0, script: "BEGIN{print XX}", ok: "xx\n"},
 				{prepare: func() { os.Args = []string{os.Args[0], "-v", "XX"} }, rc: 1, script: "BEGIN{print XX}", okRegex: "parameter must be KEY=VALUE format"},
