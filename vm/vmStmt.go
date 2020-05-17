@@ -195,41 +195,52 @@ func runSingleStmt(stmt ast.Stmt, env *Env) (interface{}, error) {
 		}
 		return nil, nil
 	case *ast.PrintStmt:
+		print := func(format string) (int, error) {
+			// make ast.CallExpr
+			callExpr := &ast.CallExpr{
+				Name:     "printf",
+				SubExprs: []ast.Expr{&ast.ParentExpr{SubExpr: &ast.StringExpr{Literal: format}}},
+			}
+			result, err := callFunc(callExpr, env)
+			if len(result.([]interface{})) == 0 {
+				return 0, err
+			}
+			return result.([]interface{})[0].(int), err
+		}
 		for i, expr := range stmt.Exprs {
 			result, err := evalExpr(expr, env)
 			if err != nil {
 				return nil, err
 			}
 			if 0 < i && i < len(stmt.Exprs) {
-				fmt.Printf("%v", env.builtin.OFS)
+				print(fmt.Sprintf("%v", env.builtin.OFS))
 			}
 			ofmt, _ := env.Get("OFMT")
 			switch reflect.ValueOf(result).Kind() {
 			case reflect.Float64:
-				fmt.Printf(ofmt.(string), result)
+				print(fmt.Sprintf(ofmt.(string), result))
 			case reflect.Int:
-				//fmt.Printf(ofmt.(string), float64(result.(int)))
-				fmt.Printf("%v", result)
+				print(fmt.Sprintf("%v", result))
 			case reflect.Int64:
-				//fmt.Printf(ofmt.(string), float64(result.(int64)))
-				fmt.Printf("%v", result)
+				print(fmt.Sprintf("%v", result))
 			case reflect.String, reflect.Bool:
-				fmt.Printf("%v", result)
+				print(fmt.Sprintf("%v", result))
 			case reflect.Slice:
 				len := reflect.ValueOf(result).Len()
 				for i := 0; i < len; i++ {
 					if i > 0 {
-						fmt.Printf("%v", env.builtin.OFS)
+						print(fmt.Sprintf("%v", env.builtin.OFS))
 					}
-					fmt.Printf("%v", reflect.ValueOf(result).Index(i))
+					print(fmt.Sprintf("%v", reflect.ValueOf(result).Index(i)))
 				}
 			case reflect.Invalid:
-				fmt.Printf("")
+				print("")
 			default:
 				return nil, fmt.Errorf("type %s does not support print operation", reflect.ValueOf(result).Kind().String())
 			}
 		}
-		fmt.Printf("%v", env.builtin.ORS)
+		//fmt.Printf("%v", env.builtin.ORS)
+		print(fmt.Sprintf("%v", env.builtin.ORS))
 	case *ast.IfStmt:
 		child := env.NewEnv()
 		result, err := evalExpr(stmt.If, child)
