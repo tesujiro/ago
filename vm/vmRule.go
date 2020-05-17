@@ -2,14 +2,78 @@ package vm
 
 import (
 	"fmt"
+	"io"
 	"reflect"
 
 	"github.com/tesujiro/ago/ast"
 	"github.com/tesujiro/ago/debug"
 )
 
-// SeparateRules classifies rules to func, begin, main and end rules.
-func SeparateRules(rules []ast.Rule) (Func, Begin, Main, End []ast.Rule) {
+// Run executes rules in the specified environment.
+func Run(rules []ast.Rule, env *Env) (interface{}, error) {
+	var result interface{}
+	var err error
+
+	funcRules, beginRules, mainRules, endRules := separateRules(rules)
+
+	// FUNC DEFINITION
+	if len(funcRules) > 0 {
+		result, err = runFuncRules(funcRules, env)
+		if err != nil {
+			return result, err
+		}
+	}
+
+	// BEGIN
+	result, err = runBeginRules(beginRules, env)
+	debug.Printf("%#v\n", result)
+	if err == ErrExit {
+		v, ok := result.(int)
+		if ok {
+			return v, nil
+		}
+		return v, err
+	}
+	if err != nil {
+		return result, err
+	}
+
+	if len(mainRules) == 0 && len(endRules) == 0 {
+		return result, nil
+	}
+
+	// reset variable
+	env.SetNF()
+
+	// MAIN
+	for {
+		//fmt.Println("MAINLOOP")
+		fileLine, err := env.GetLine()
+		if err == io.EOF {
+			break
+		} else if err != nil {
+			//fmt.Printf("error:%v\n", err)
+			return nil, err
+		}
+		env.SetFieldFromLine(fileLine)
+		if len(mainRules) > 0 {
+			result, err := runMainRules(mainRules, env)
+			if err == ErrNext {
+				continue
+			}
+			if err != nil {
+				return result, err
+			}
+		}
+	}
+
+	// END
+	result, err = runEndRules(endRules, env)
+	return result, err
+}
+
+// separateRules classifies rules to func, begin, main and end rules.
+func separateRules(rules []ast.Rule) (Func, Begin, Main, End []ast.Rule) {
 	for _, rule := range rules {
 		switch rule.Pattern.(type) {
 		case *ast.FuncPattern:
@@ -25,8 +89,8 @@ func SeparateRules(rules []ast.Rule) (Func, Begin, Main, End []ast.Rule) {
 	return
 }
 
-// RunFuncRules executes func rules with a specified env.
-func RunFuncRules(rules []ast.Rule, env *Env) (result interface{}, err error) {
+// runFuncRules executes func rules with a specified env.
+func runFuncRules(rules []ast.Rule, env *Env) (result interface{}, err error) {
 	for _, rule := range rules {
 		debug.Println("FUNC")
 
@@ -39,8 +103,8 @@ func RunFuncRules(rules []ast.Rule, env *Env) (result interface{}, err error) {
 	return env.toInt(result), nil
 }
 
-// RunBeginRules executes begin rules with a specified env.
-func RunBeginRules(rules []ast.Rule, env *Env) (result interface{}, err error) {
+// runBeginRules executes begin rules with a specified env.
+func runBeginRules(rules []ast.Rule, env *Env) (result interface{}, err error) {
 	for _, rule := range rules {
 		debug.Println("BEGIN")
 		childEnv := env.NewEnv()
@@ -52,8 +116,8 @@ func RunBeginRules(rules []ast.Rule, env *Env) (result interface{}, err error) {
 	return env.toInt(result), err
 }
 
-// RunMainRules executes main rules with a specified env.
-func RunMainRules(rules []ast.Rule, env *Env) (result interface{}, err error) {
+// runMainRules executes main rules with a specified env.
+func runMainRules(rules []ast.Rule, env *Env) (result interface{}, err error) {
 	for _, rule := range rules {
 		debug.Println(env.builtin.NR, ":MAIN")
 		childEnv := env.NewEnv()
@@ -123,8 +187,8 @@ func RunMainRules(rules []ast.Rule, env *Env) (result interface{}, err error) {
 	return env.toInt(result), err
 }
 
-// RunEndRules executes end rules with a specified env.
-func RunEndRules(rules []ast.Rule, env *Env) (result interface{}, err error) {
+// runEndRules executes end rules with a specified env.
+func runEndRules(rules []ast.Rule, env *Env) (result interface{}, err error) {
 	for _, rule := range rules {
 		debug.Println("END")
 		childEnv := env.NewEnv()

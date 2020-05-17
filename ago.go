@@ -190,87 +190,16 @@ func runScript(env *vm.Env, scriptReader io.Reader) int {
 		parser.Dump(ast)
 	}
 
-	var result interface{}
+	result, err := vm.Run(ast, env)
 
-	funcRules, beginRules, mainRules, endRules := vm.SeparateRules(ast)
-
-	// FUNC DEFINITION
-	if len(funcRules) > 0 {
-		result, err = vm.RunFuncRules(funcRules, env)
-		debug.Printf("%#v\n", result)
-		if err != nil {
-			fmt.Printf("error:%v\n", err)
-			return 1
-		}
-	}
-
-	// BEGIN
-	result, err = vm.RunBeginRules(beginRules, env)
-	debug.Printf("%#v\n", result)
-	if err == vm.ErrExit {
-		v, ok := result.(int)
-		if ok {
-			return v
-		}
-		return 1
-	}
-	if err != nil {
-		fmt.Printf("error:%v\n", err)
-		return 1
-	}
-	if dbg {
-		env.Dump()
-	}
-
-	if len(mainRules) == 0 && len(endRules) == 0 {
-		return 0
-	}
-
-	// reset variable
-	env.SetNF()
-
-	// MAIN
-	for {
-		//fmt.Println("MAINLOOP")
-		fileLine, err := env.GetLine()
-		if err == io.EOF {
-			break
-		} else if err != nil {
-			fmt.Printf("error:%v\n", err)
-			return 1
-		}
-		env.SetFieldFromLine(fileLine)
-		if len(mainRules) > 0 {
-			result, err := vm.RunMainRules(mainRules, env)
-			if err == vm.ErrNext {
-				continue
-			}
-			if err == vm.ErrExit {
-				return result.(int)
-			}
-			if err != nil {
-				fmt.Printf("error:%v\n", err)
-				return 1
-			}
-			//debug.Printf("ENV=%#v\n", env)
-			//debug.Printf("%#v\n", res)
-			if dbg {
-				env.Dump()
-			}
-			debug.Printf("%#v\n", result)
-		}
-	}
-
-	// END
-	result, err = vm.RunEndRules(endRules, env)
-	debug.Printf("%#v\n", result)
 	if err == vm.ErrExit {
 		return result.(int)
-	}
-	if err != nil {
+	} else if err != nil {
 		fmt.Printf("error:%v\n", err)
 		return 1
 	}
 
+	debug.Printf("%#v\n", result)
 	return 0
+
 }
