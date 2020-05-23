@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strings"
 )
 
 func openNextFile(e *Env) error {
@@ -50,6 +51,12 @@ func openNextFile(e *Env) error {
 	return nil
 }
 
+// SetPseudoStdin set pseudo stdin, read from string
+func (e *Env) SetPseudoStdin(data string) error {
+	e.fileInfo.curFileScanner = bufio.NewScanner(strings.NewReader(data))
+	return nil
+}
+
 // GetLine read one line from input files. If EOF and no file to read, return io.EOF.
 func (e *Env) NextFile() error {
 	return openNextFile(e)
@@ -57,6 +64,7 @@ func (e *Env) NextFile() error {
 
 // GetLine read one line from input files. If EOF and no file to read, return io.EOF.
 func (e *Env) GetLine() (string, error) {
+	//fmt.Println("GetLine")
 	if e.fileInfo.curFileScanner == nil {
 		//fmt.Println("Getline openNextFile")
 		err := openNextFile(e)
