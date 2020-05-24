@@ -201,6 +201,10 @@ stmt
 	{
 		$$ = &ast.CForLoopStmt{Stmt1: $2, Expr2: $4, Expr3: $6, Stmts: $8}
 	}
+	| FOR '(' opt_stmt ';' opt_expr ';' opt_expr ')' '{' opt_stmts '}'
+	{
+		$$ = &ast.CForLoopStmt{Stmt1: $3, Expr2: $5, Expr3: $7, Stmts: $10}
+	}
 	| WHILE '{' opt_stmts '}'
 	{
 		$$ = &ast.LoopStmt{Stmts: $3}

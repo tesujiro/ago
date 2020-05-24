@@ -482,6 +482,7 @@ func TestGoa(t *testing.T) {
 				// while statement == for statement
 				{script: `BEGIN{a=0;b=0;while{ a=a+1;if a==10 { break }; if b==5 {continue};b= b+1 };print b}`, ok: "5\n"},
 				{script: `BEGIN{a=0;while a<=10 { a= a+1 };print a}`, ok: "11\n"},
+				{script: `BEGIN{a=0;while (a<=10) { a= a+1 };print a}`, ok: "11\n"},
 				{script: `BEGIN{a=0;while a { a= a+1 };print a}`, ok: "0\n"},
 				{script: `BEGIN{a=1;while a { a= a-1 };print a}`, ok: "0\n"},
 				{script: `BEGIN{s="";while s { s= s+1 };print s}`, ok: "\n"},
@@ -494,6 +495,7 @@ func TestGoa(t *testing.T) {
 			name: "for;;{} Statement",
 			tests: []test{
 				{script: `BEGIN{for i=1;i<=3;++i{print i}}`, ok: "1\n2\n3\n"},
+				{script: `BEGIN{for (i=1;i<=3;++i){print i}}`, ok: "1\n2\n3\n"},
 				{script: `BEGIN{for 1;i<=3;++i{print i}}`, ok: "\n1\n2\n3\n"},
 				{script: `BEGIN{for 1;1;++i{print i;if i==3{break}}}`, ok: "\n1\n2\n3\n"},
 				{script: `BEGIN{for ;1;++i{print i;if i==3{break}}}`, ok: "\n1\n2\n3\n"},
