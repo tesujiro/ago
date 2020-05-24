@@ -205,6 +205,10 @@ stmt
 	{
 		$$ = &ast.CForLoopStmt{Stmt1: $3, Expr2: $5, Expr3: $7, Stmts: $10}
 	}
+	| FOR '(' opt_stmt ';' opt_expr ';' opt_expr ')' stmt
+	{
+		$$ = &ast.CForLoopStmt{Stmt1: $3, Expr2: $5, Expr3: $7, Stmts: []ast.Stmt{$9}}
+	}
 	| WHILE '{' opt_stmts '}'
 	{
 		$$ = &ast.LoopStmt{Stmts: $3}
@@ -212,6 +216,10 @@ stmt
 	| WHILE expr '{' opt_stmts '}'
 	{
 		$$ = &ast.LoopStmt{Stmts: $4, Expr: $2}
+	}
+	| WHILE '(' expr ')' stmt 
+	{
+		$$ = &ast.LoopStmt{Stmts: []ast.Stmt{$5}, Expr: $3}
 	}
 	| DO '{' opt_stmts '}' WHILE '(' expr ')'
 	{
