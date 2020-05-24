@@ -259,9 +259,17 @@ stmt_if
 	{
 	    $$ = &ast.IfStmt{If: $2, Then: $4, Else: nil}
 	}
+	| IF '(' expr ')' stmt
+	{
+	    $$ = &ast.IfStmt{If: $3, Then: []ast.Stmt{$5}, Else: nil}
+	}
 	| stmt_if ELSE IF expr '{' opt_stmts '}'
 	{
 	        $$.(*ast.IfStmt).ElseIf = append($$.(*ast.IfStmt).ElseIf, &ast.IfStmt{If: $4, Then: $6} )
+	}
+	| stmt_if ELSE IF '(' expr ')' stmt
+	{
+	        $$.(*ast.IfStmt).ElseIf = append($$.(*ast.IfStmt).ElseIf, &ast.IfStmt{If: $5, Then: []ast.Stmt{$7}} )
 	}
 	| stmt_if ELSE '{' opt_stmts '}'
 	{
@@ -270,6 +278,15 @@ stmt_if
 		} else {
 			//$$.(*ast.IfStmt).Else = append($$.(*ast.IfStmt).Else, $4...)
 			$$.(*ast.IfStmt).Else = $4
+		}
+	}
+	| stmt_if ELSE stmt
+	{
+		if $$.(*ast.IfStmt).Else != nil {
+			yylex.Error("multiple else statement")
+		} else {
+			//$$.(*ast.IfStmt).Else = append($$.(*ast.IfStmt).Else, $4...)
+			$$.(*ast.IfStmt).Else = []ast.Stmt{$3}
 		}
 	}
 

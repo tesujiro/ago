@@ -443,6 +443,7 @@ func TestGoa(t *testing.T) {
 			name: "if Statement",
 			tests: []test{
 				{script: `BEGIN{a=1;if a==1 { a=2 ;print a;}}`, ok: "2\n"},
+				{script: `BEGIN{a=1;if (a==1) { a=2 ;print a;}}`, ok: "2\n"},
 				{script: `BEGIN{a=1;if 100 { a=2 ;print a;}}`, ok: "2\n"},
 				{script: `BEGIN{a=1;if 1.23 { a=2 ;print a;}}`, ok: "2\n"},
 				{script: `BEGIN{a=1;if 0 { a=2 ;print a;}}`, ok: ""},
@@ -464,8 +465,9 @@ func TestGoa(t *testing.T) {
 				{script: `BEGIN{if a==1/0 { print a;}}`, ok: "error:devision by zero\n"},
 				{script: `BEGIN{a[1]=1;if a { print a;}}`, ok: "error:convert if condition:convert interface{} to bool failed\n"},
 				{script: `BEGIN{a=1;if a==0 { print a}else if a/0 { print a}}`, ok: "error:devision by zero\n"},
-				{script: `BEGIN{a[1]=1;if a[1]==0 { print a}else if a { print a}}`, ok: "error:convert else if condition:convert interface{} to bool failed\n"},
+				{script: `BEGIN{a[1]=1;if a[1]==0 { print a}else if a { print a}}`, ok: "error:convert if condition:convert interface{} to bool failed\n"},
 				{script: `BEGIN{a=1;if a==0 { print a}else if a==1 { print a/0}}`, ok: "error:devision by zero\n"},
+				{script: `{if ($1 <= 10) print "A" else if ($1 <= 25) print "B" else print "C"}`, in: "10\n20\n30\n40\n", ok: "A\nB\nC\nC\n"},
 			},
 		},
 		{
