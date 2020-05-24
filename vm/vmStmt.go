@@ -238,7 +238,10 @@ func runSingleStmt(stmt ast.Stmt, env *Env) (interface{}, error) {
 		if len(result.([]interface{})) == 0 {
 			return 0, err
 		}
-		return result.([]interface{})[0].(int), err
+		if err != nil {
+			return result.([]interface{})[0].(int), err
+		}
+		return nil, err
 	case *ast.IfStmt:
 		child := env.NewEnv()
 		result, err := evalExpr(stmt.If, child)
