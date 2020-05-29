@@ -401,19 +401,26 @@ func evalAssExpr(lexp ast.Expr, val interface{}, env *Env) (interface{}, error) 
 		}
 		index := int(indexF)
 
-		if valInt, ok := val.(int); ok {
-			val = fmt.Sprintf("%v", valInt)
-		} else if valFloat, ok := val.(float64); ok {
+		kind := reflect.ValueOf(val).Kind()
+		var f Field
+		switch kind {
+		case reflect.Int:
+			f = NewField(fmt.Sprintf("%v", val.(int)))
+		case reflect.Float64:
 			ofmt, _ := env.Get("OFMT")
-			val = fmt.Sprintf(ofmt.(string), valFloat)
-		}
-		//fmt.Printf("evalAssExpr FieldExpr: index:%v \tval:%v\n", index, val) //TODO
-		valString, ok := val.(string)
-		if !ok {
+			f = NewField(fmt.Sprintf(ofmt.(string), val.(float64)))
+		case reflect.String:
+			f = NewStringField(val.(string))
+		case reflect.Struct:
+			var ok bool
+			if f, ok = val.(Field); !ok {
+				return nil, fmt.Errorf("field value is not string :%v", reflect.TypeOf(val))
+			}
+		default:
 			return nil, fmt.Errorf("field value is not string :%v", reflect.TypeOf(val))
 		}
 
-		err = env.SetField(index, valString)
+		err = env.SetField(index, f)
 		if err != nil {
 			//fmt.Println("fieldExpr SetField error") //TODO
 			return nil, err

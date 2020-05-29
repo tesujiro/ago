@@ -70,7 +70,7 @@ func (env *Env) strictToFloat(val interface{}) (float64, error) {
 		// "0x11.xx" -> 17  //TODO
 		//digit := `(\-|\+)?\d+(\.\d*)?`
 		//digit := `(\-|\+)?\d+(\.\d*)?|(\-|\+)?\.\d+`
-		digit := `(\-|\+)?\d+(\.\d*)?((e|E)(\-|\+)?\d+)?|(\-|\+)?\.\d+((e|E)(\-|\+)?\d+)?`
+		digit := `(\-|\+)?\d+(\.\d*)?((e|E)(\-|\+)?\d+)?|(\-|\+)?\.\d+((e|E)(\-|\+)?\d+)?` // TODO: digitRegex
 		re := regexp.MustCompile(`^` + digit)
 		numStr := re.FindString(val.(string))
 		if len(numStr) == 0 {
@@ -83,6 +83,13 @@ func (env *Env) strictToFloat(val interface{}) (float64, error) {
 			return 0, err
 		}
 		return num, err
+	case reflect.Struct:
+		//fmt.Printf("val= %T\n", val)
+		if f, ok := val.(Field); ok {
+			return f.Number(), nil
+		}
+		return 0, fmt.Errorf("cannot convert to float:%v", reflect.ValueOf(val).Kind())
+		//return val.(reflect.Value).Interface().(Field).Number(), nil
 	default:
 		return 0, fmt.Errorf("cannot convert to float:%v", reflect.ValueOf(val).Kind())
 	}
@@ -106,6 +113,14 @@ func (env *Env) strictToBool(val interface{}) (bool, error) {
 		return val.(float64) != 0, nil
 	case reflect.String:
 		return val.(string) != "", nil
+	case reflect.Struct:
+		if f, ok := val.(Field); ok {
+			if f.Type == NumberType {
+				return f.Number() != 0, nil
+			}
+			return f.String() != "", nil
+		}
+		return false, fmt.Errorf("convert interface{} to bool failed")
 	default:
 		return false, fmt.Errorf("convert interface{} to bool failed")
 	}
@@ -122,6 +137,13 @@ func (env *Env) toString(val interface{}) string {
 		return val.(string)
 	case reflect.Int64, reflect.Int32, reflect.Int16, reflect.Int8, reflect.Int:
 		return fmt.Sprintf("%v", val)
+	case reflect.Struct:
+		//fmt.Printf("val= %T\n", val)
+		if f, ok := val.(Field); ok {
+			return f.String()
+		}
+		return ""
+		//return val.(reflect.Value).Interface().(Field).Number(), nil
 	case reflect.Float64, reflect.Float32:
 		ofmt, _ := env.Get("OFMT")
 		return fmt.Sprintf(ofmt.(string), val)

@@ -194,6 +194,8 @@ func importLength(env *vm.Env) {
 			return len(toStr(env, v))
 		case reflect.String:
 			return len(toStr(env, v))
+		case reflect.Struct:
+			return len(toStr(env, v))
 		case reflect.Map:
 			s := v.Interface().(map[interface{}]interface{})
 			return len(s)
@@ -263,7 +265,12 @@ func importSubGsub(env *vm.Env) {
 
 		} else {
 			//TODO: error
-			vVal, _ = env.GetFieldZero()
+			f0, err := env.GetFieldZero()
+			if err != nil {
+				fmt.Printf("err=%v\n", err)
+				return 0
+			}
+			vVal = f0.String()
 		}
 		// MAIN
 		//regexStr := "(" + regexpToStr(before) + ")" // add parenthes for '&' meta chars
@@ -279,7 +286,7 @@ func importSubGsub(env *vm.Env) {
 			}
 		} else {
 			//TODO: error
-			_ = env.SetField(0, result)
+			_ = env.SetField(0, vm.NewField(result))
 		}
 		return len(match)
 	}

@@ -23,9 +23,45 @@ func evalBoolOp(env *Env, op string, left, right interface{}) (interface{}, erro
 	return boolRight, nil
 }
 
+/*
+func isString(val interface{}) bool {
+	kind := reflect.ValueOf(val).Kind()
+	if kind == reflect.String {
+		return true
+	}
+	if kind == reflect.Struct {
+		if f, ok := val.(Field); ok && f.Type == StringType {
+			return true
+		}
+	}
+	return false
+}
+*/
+
+func isNumber(val interface{}) bool {
+	kind := reflect.ValueOf(val).Kind()
+	if kind == reflect.Float64 || kind == reflect.Int {
+		return true
+	}
+	if kind == reflect.Struct {
+		if f, ok := val.(Field); ok && f.Type == NumberType {
+			//debug.Printf("isNumber(%T)-->true\n", val)
+			return true
+		}
+	}
+	//debug.Printf("isNumber(%T)-->false\n", val)
+	return false
+}
+
+func isArray(val interface{}) bool {
+	kind := reflect.ValueOf(val).Kind()
+	if kind == reflect.Map {
+		return true
+	}
+	return false
+}
+
 func compareEqual(env *Env, op string, left, right interface{}) (interface{}, error) {
-	lKind := reflect.ValueOf(left).Kind()
-	rKind := reflect.ValueOf(right).Kind()
 	compEq := func(op string, l, r interface{}) bool {
 		if op == "==" {
 			return l == r
@@ -33,22 +69,16 @@ func compareEqual(env *Env, op string, left, right interface{}) (interface{}, er
 		return l != r
 	}
 	switch {
-	case lKind == reflect.String && rKind == reflect.String:
-		return compEq(op, left, right), nil
-	case lKind == reflect.Float64 || rKind == reflect.Float64:
-		return compEq(op, env.toFloat64(left), env.toFloat64(right)), nil
-	case lKind == reflect.Int || rKind == reflect.Int:
-		return compEq(op, env.toString(left), env.toString(right)), nil
-	case lKind == reflect.Map || rKind == reflect.Map:
+	case isArray(left) || isArray(right):
 		return nil, fmt.Errorf("can't read value of array")
+	case isNumber(left) || isNumber(right):
+		return compEq(op, env.toFloat64(left), env.toFloat64(right)), nil
 	default:
 		return compEq(op, env.toString(left), env.toString(right)), nil
 	}
 }
 
 func compareInequal(env *Env, op string, left, right interface{}) (interface{}, error) {
-	lKind := reflect.ValueOf(left).Kind()
-	rKind := reflect.ValueOf(right).Kind()
 	compNumber := func(op string, l, r float64) bool {
 		//fmt.Printf("op=%v\tl=%v\tr=%v\n", op, l, r)
 		switch op {
@@ -74,13 +104,13 @@ func compareInequal(env *Env, op string, left, right interface{}) (interface{}, 
 			return l <= r
 		}
 	}
-	//fmt.Printf("lKind=%v\trKind=%v\n", lKind, rKind)
-	if lKind == reflect.Map || rKind == reflect.Map {
+	switch {
+	case isArray(left) || isArray(right):
 		return nil, fmt.Errorf("can't read value of array")
-	} else if lKind == reflect.String || rKind == reflect.String {
-		return compString(op, env.toString(left), env.toString(right)), nil
-	} else {
+	case isNumber(left) && isNumber(right):
 		return compNumber(op, env.toFloat64(left), env.toFloat64(right)), nil
+	default:
+		return compString(op, env.toString(left), env.toString(right)), nil
 	}
 }
 

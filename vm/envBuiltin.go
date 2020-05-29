@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"regexp"
-	"strconv"
 )
 
 type builtin struct {
@@ -19,7 +18,8 @@ type builtin struct {
 	//CONVFMT
 	RLENGTH, RSTART int
 	RS              string
-	field           []string
+	//field           []string
+	field           []Field
 	inStartStopLoop bool
 }
 
@@ -104,54 +104,57 @@ func (e *Env) SetRSTART(i int) {
 }
 
 // GetField gets the field 0 value or $0.
-func (e *Env) GetFieldZero() (string, error) {
+func (e *Env) GetFieldZero() (Field, error) {
 	return e.builtin.field[0], nil
 }
 
 // GetField gets the field value with specified index. ex: $1, $NF, $i
-func (e *Env) GetField(i int) (interface{}, error) {
+func (e *Env) GetField(i int) (Field, error) {
 	if i < 0 || i >= len(e.builtin.field) {
-		return "", nil
+		return Field{}, nil
 	}
 	field := e.builtin.field[i]
-	digit := `(\-|\+)?\d+(\.\d*)?([e|E]\d+)?|(\-|\+)?\.\d+([e|E]\d+)?`
-	re := regexp.MustCompile(`^` + digit + `$`)
-	numStr := re.FindString(field)
-	if len(numStr) == 0 || numStr != field {
-		return field, nil
-	}
-	fnum, _ := strconv.ParseFloat(numStr, 64)
-	inum, err := strconv.ParseInt(numStr, 10, 64)
-	if err == nil {
-		return inum, nil
-	}
-	return fnum, nil
+	return field, nil
+	/*
+		digit := `(\-|\+)?\d+(\.\d*)?([e|E]\d+)?|(\-|\+)?\.\d+([e|E]\d+)?`
+		re := regexp.MustCompile(`^` + digit + `$`)
+		numStr := re.FindString(field)
+		if len(numStr) == 0 || numStr != field {
+			return field, nil
+		}
+		fnum, _ := strconv.ParseFloat(numStr, 64)
+		inum, err := strconv.ParseInt(numStr, 10, 64)
+		if err == nil {
+			return inum, nil
+		}
+		return fnum, nil
+	*/
 }
 
 // SetFieldZero sets the value of the field zero or $0.
 func (e *Env) SetFieldZero() error {
-	str := e.builtin.field[1]
+	str := e.builtin.field[1].String()
 	for i := 2; i < len(e.builtin.field); i++ {
-		str += e.builtin.OFS + e.builtin.field[i]
+		str += e.builtin.OFS + e.builtin.field[i].String()
 	}
-	e.builtin.field[0] = str
+	e.builtin.field[0] = NewField(str)
 	e.SetNF()
 	return nil
 }
 
 // SetField sets the value of the field with the specified index.
-func (e *Env) SetField(index int, str string) error {
+func (e *Env) SetField(index int, fval Field) error {
 	if index < 0 {
 		return fmt.Errorf("Field Index Out of Range:%v", index)
 	}
 	if index >= len(e.builtin.field) {
-		newField := make([]string, index+1)
+		newField := make([]Field, index+1)
 		for i := 1; i < len(e.builtin.field); i++ {
 			newField[i] = e.builtin.field[i]
 		}
 		e.builtin.field = newField
 	}
-	e.builtin.field[index] = str
+	e.builtin.field[index] = fval
 	if index > 0 {
 		e.SetFieldZero()
 	}
@@ -172,9 +175,9 @@ func (e *Env) SetFieldFromLine(line string) {
 		if e.builtin.FS == " " && len(result) == 2 && result[0] == "" && result[1] == "" {
 			result = result[:0]
 		}
-		e.builtin.field = make([]string, len(result)+1)
+		e.builtin.field = make([]Field, len(result)+1)
 		for i, f := range result {
-			e.builtin.field[i+1] = f
+			e.builtin.field[i+1] = NewField(f)
 		}
 	}
 	switch e.builtin.FS {
@@ -193,7 +196,7 @@ func (e *Env) SetFieldFromLine(line string) {
 		//fmt.Printf("line %v:FS[%v]\n", e.builtin.NR, e.builtin.FS)
 		split(e.builtin.FS, line)
 	}
-	e.builtin.field[0] = line
+	e.builtin.field[0] = NewField(line)
 	e.SetNF()
 
 	return

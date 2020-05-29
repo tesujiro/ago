@@ -167,6 +167,21 @@ func TestGoa(t *testing.T) {
 			},
 		},
 		{
+			name: "Input File",
+			tests: []test{
+				{script: `{print $1}`, in: "aaa\n100\n1.00\nx100\n100x\n", ok: "aaa\n100\n1.00\nx100\n100x\n", rc: 0},
+				{script: `{print $1 + 1}`, in: "aaa\n100\n1.00\nx100\n100x\n", ok: "1\n101\n2\n1\n101\n", rc: 0},
+				{script: `{print $1 "z"}`, in: "aaa\n100\n1.00\nx100\n100x\n", ok: "aaaz\n100z\n1.00z\nx100z\n100xz\n", rc: 0},
+				{script: `{print ($1 > 5)}`, in: "aaa\n100\n1.00\nx100\n100x\n", ok: "true\ntrue\nfalse\ntrue\nfalse\n", rc: 0},
+				{script: `{print ($1 > "5")}`, in: "aaa\n100\n1.00\nx100\n100x\n", ok: "true\nfalse\nfalse\ntrue\nfalse\n", rc: 0},
+				{script: `{TOTAL+=$1}END{print TOTAL}`, in: "aaa\n100\n1.00\nx100\n100x\n", ok: "201\n", rc: 0},
+				{script: `BEGIN{$1=100;print ($1 > 5)}`, ok: "true\n", rc: 0},
+				{script: `BEGIN{$1=100;print ($1 > "5")}`, ok: "false\n", rc: 0},
+				{script: `BEGIN{$1="100";print ($1 > 5)}`, ok: "false\n", rc: 0},
+				{script: `BEGIN{$1="100";print ($1 > "5")}`, ok: "false\n", rc: 0},
+			},
+		},
+		{
 			name: "Basic Error",
 			tests: []test{
 				{script: `BEGIN{a`, okRegex: "Syntax error: syntax error", rc: 1},
@@ -334,13 +349,13 @@ func TestGoa(t *testing.T) {
 				{script: `BEGIN{a=1.1;b=2;print a<b}`, ok: "true\n"},
 				{script: `BEGIN{a="11";b=2;print a<b}`, ok: "true\n"},
 				{script: `BEGIN{a="11";b="2";print a<b}`, ok: "true\n"},
-				{script: `{print $1<2}`, in: "11\n", ok: "false\n"},
+				{script: `{print $1<2}`, in: "11\n", ok: "false\n"}, //TODO:
 				{script: `BEGIN{a=1;b=0.1;print a>b}`, ok: "true\n"},
 				{script: `BEGIN{a="1";b="0.1";print a>b}`, ok: "true\n"},
 				{script: `BEGIN{a="1";b="0.1";print a>=b}`, ok: "true\n"},
 				{script: `BEGIN{a="1";b="0.1";print a<b}`, ok: "false\n"},
 				{script: `BEGIN{a="1";b="0.1";print a<=b}`, ok: "false\n"},
-				{script: `BEGIN{print 2<10;print "2"<10;print "2"<"10"}`, ok: "true\nfalse\nfalse\n"},
+				{script: `BEGIN{print 2<10;print "2"<10;print "2"<"10"}`, ok: "true\nfalse\nfalse\n"}, //TODO:
 				{script: `BEGIN{a=1;print a==1}`, ok: "true\n"},
 				{script: `BEGIN{a=1;b=2;print a==1&&b==2}`, ok: "true\n"},
 				{script: `BEGIN{a=1;b=2;print a==2&&b==2}`, ok: "false\n"},
