@@ -1,6 +1,6 @@
 #!/bin/bash
 
-for sc_awk in `ls *-awk.sh`
+for sc_awk in `ls *-awk.sh 2>/dev/null`
 do
     sc_ago=`echo $sc_awk | sed -e 's/-awk.sh/-ago.sh/'`
     #if [[ ! -f $sc_awk ]];
@@ -12,7 +12,7 @@ do
     then
 	#echo "ERROR: $sc_ago does not exist"
 	#continue;
-	sed -e 's/^awk/ago -g/' $sc_awk > $sc_ago
+	sed -e 's/^awk/ago/' $sc_awk > $sc_ago
 	chmod u+x $sc_ago
     fi
     diff <(./$sc_awk) <(./$sc_ago)
@@ -32,15 +32,14 @@ do
 
     if [[ ! -f $sc_ago ]];
     then
-        sc_ago=$sc_awk
+	sc_ago=$sc_awk
     fi
-    diff <(awk -f $sc_awk $FILE) <(ago -g -f $sc_ago $FILE)
+    diff <(awk -f $sc_awk $FILE) <(ago -f $sc_ago $FILE)
     result=$?
     if [ $result -ne 0 ];
     then
-        echo "ERROR: $sc_awk $sc_ago"
-        continue
+	echo "ERROR: $sc_awk $sc_ago"
+	continue
     fi
     echo "Passed: $sc_awk $sc_ago"
 done
-

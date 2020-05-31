@@ -1,1 +1,1 @@
-ago -g -f reverse emp.data
+ago -f reverse emp.data
