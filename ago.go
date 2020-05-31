@@ -56,7 +56,7 @@ func _main() int {
 	f.StringVar(&fs, "F", " ", "Field separator")
 	f.StringVar(&programFile, "f", "", "Program file")
 	f.BoolVar(&dbg, "d", false, "debug option")
-	f.BoolVar(&globalVar, "g", false, "global variable option")
+	f.BoolVar(&globalVar, "g", true, "global variable option")
 	f.BoolVar(&dbglexer, "l", false, "debug lexer option")
 	f.BoolVar(&astDump, "a", false, "AST dump option")
 	f.BoolVar(&memProf, "m", false, "Memory Profile")
@@ -143,6 +143,8 @@ func initEnv(files []string) *vm.Env {
 
 	if globalVar {
 		vm.SetGlobalVariables()
+	} else {
+		vm.UnsetGlobalVariables()
 	}
 
 	for k, v := range variables {

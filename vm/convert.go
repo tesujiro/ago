@@ -70,8 +70,8 @@ func (env *Env) strictToFloat(val interface{}) (float64, error) {
 		// "0x11.xx" -> 17  //TODO
 		//digit := `(\-|\+)?\d+(\.\d*)?`
 		//digit := `(\-|\+)?\d+(\.\d*)?|(\-|\+)?\.\d+`
-		digit := `(\-|\+)?\d+(\.\d*)?((e|E)(\-|\+)?\d+)?|(\-|\+)?\.\d+((e|E)(\-|\+)?\d+)?` // TODO: digitRegex
-		re := regexp.MustCompile(`^` + digit)
+		//digit := `(\-|\+)?\d+(\.\d*)?((e|E)(\-|\+)?\d+)?|(\-|\+)?\.\d+((e|E)(\-|\+)?\d+)?`
+		re := regexp.MustCompile(`^` + digitRegexp)
 		numStr := re.FindString(val.(string))
 		if len(numStr) == 0 {
 			return 0, fmt.Errorf("cannot convert to float:%v", reflect.ValueOf(val).Kind())

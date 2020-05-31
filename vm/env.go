@@ -91,6 +91,11 @@ func SetGlobalVariables() {
 	globalVars = true
 }
 
+// UnsetGlobalVariables set default variable scopes to be local.
+func UnsetGlobalVariables() {
+	globalVars = false
+}
+
 func isGlobalVarName(s string) bool {
 	if globalVars {
 		return true
