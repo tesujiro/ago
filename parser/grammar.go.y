@@ -41,7 +41,7 @@ var inRegExp bool
 %type <expr>		simple_variable
 %type <expr>		opt_expr
 %type <expr>		regexp_literal
-%type <expr>		input_redir
+%type <expr>		opt_input_redir
 %type <exprs>		exprs
 %type <exprs>		variables
 %type <exprs>		opt_exprs
@@ -64,7 +64,7 @@ var inRegExp bool
 %left OROR
 %left ANDAND
 %left GETLINE
-//%nonassoc ',' vars
+//%nonassoc ','
 %left '~' NOTTILDE
 %left EQEQ NEQ
 %left '>' '<' GE LE
@@ -353,6 +353,56 @@ expr
 	{
 		$$ = &ast.AssExpr{Left: []ast.Expr{$1}, Right: []ast.Expr{$3}}
 	}
+	/* RELATION EXPRESSION */
+	| simp_expr EQEQ simp_expr
+	{
+		$$ = &ast.BinOpExpr{Left: $1, Operator: "==", Right: $3}
+	}
+	| simp_expr NEQ simp_expr
+	{
+		$$ = &ast.BinOpExpr{Left: $1, Operator: "!=", Right: $3}
+	}
+	| simp_expr '>' simp_expr
+	{
+		$$ = &ast.BinOpExpr{Left: $1, Operator: ">", Right: $3}
+	}
+	| simp_expr GE simp_expr
+	{
+		$$ = &ast.BinOpExpr{Left: $1, Operator: ">=", Right: $3}
+	}
+	| simp_expr '<' simp_expr
+	{
+		$$ = &ast.BinOpExpr{Left: $1, Operator: "<", Right: $3}
+	}
+	| simp_expr LE simp_expr
+	{
+		$$ = &ast.BinOpExpr{Left: $1, Operator: "<=", Right: $3}
+	}
+	| simp_expr IN IDENT
+	{
+		$$ = &ast.ContainKeyExpr{KeyExpr: $1, MapID: $3.Literal}
+	}
+	/* REGEXP */
+	| simp_expr '~' regexp_literal
+	{
+		$$ = &ast.MatchExpr{Expr: $1, RegExpr: $3}
+	}
+        | simp_expr '~' common_expr
+	{
+		$$ = &ast.MatchExpr{Expr: $1, RegExpr: $3}
+	}
+	| simp_expr NOTTILDE regexp_literal
+	{
+		$$ = &ast.UnaryExpr{Operator: "!", Expr: &ast.MatchExpr{Expr: $1, RegExpr: $3}}
+	}
+	| simp_expr NOTTILDE common_expr
+	{
+		$$ = &ast.UnaryExpr{Operator: "!", Expr: &ast.MatchExpr{Expr: $1, RegExpr: $3}}
+	}
+	| regexp_literal
+	{
+		$$ = &ast.MatchExpr{Expr: &defaultExpr, RegExpr: $1}
+	}
 	/* COMPOSITE EXPRESSION */
 	| variable PLUSEQ expr
 	{
@@ -405,7 +455,7 @@ expr
 	{
 		$$ = &ast.GetlineExpr{Command: $1, Var: $4}
 	}
-	| GETLINE opt_variable input_redir
+	| GETLINE opt_variable opt_input_redir
 	{
 		$$ = &ast.GetlineExpr{Var: $2, Redir: $3}
 	}
@@ -451,60 +501,6 @@ simp_expr
 	{
 		$$ = &ast.BinOpExpr{Left: $1, Operator: "^", Right: $3}
 	}
-	/* RELATION EXPRESSION */
-	| simp_expr EQEQ simp_expr
-	{
-		$$ = &ast.BinOpExpr{Left: $1, Operator: "==", Right: $3}
-	}
-	| simp_expr NEQ simp_expr
-	{
-		$$ = &ast.BinOpExpr{Left: $1, Operator: "!=", Right: $3}
-	}
-	| simp_expr '>' simp_expr
-	{
-		$$ = &ast.BinOpExpr{Left: $1, Operator: ">", Right: $3}
-	}
-	| simp_expr GE simp_expr
-	{
-		$$ = &ast.BinOpExpr{Left: $1, Operator: ">=", Right: $3}
-	}
-	| simp_expr '<' simp_expr
-	{
-		$$ = &ast.BinOpExpr{Left: $1, Operator: "<", Right: $3}
-	}
-	| simp_expr LE simp_expr
-	{
-		$$ = &ast.BinOpExpr{Left: $1, Operator: "<=", Right: $3}
-	}
-	| simp_expr IN IDENT
-	{
-		$$ = &ast.ContainKeyExpr{KeyExpr: $1, MapID: $3.Literal}
-	}
-	/* REGEXP */
-/*
-*/
-	| simp_expr '~' regexp_literal
-	{
-		$$ = &ast.MatchExpr{Expr: $1, RegExpr: $3}
-	}
-        | simp_expr '~' common_expr
-	{
-		$$ = &ast.MatchExpr{Expr: $1, RegExpr: $3}
-	}
-	| simp_expr NOTTILDE regexp_literal
-	{
-		$$ = &ast.UnaryExpr{Operator: "!", Expr: &ast.MatchExpr{Expr: $1, RegExpr: $3}}
-	}
-	| simp_expr NOTTILDE common_expr
-	{
-		$$ = &ast.UnaryExpr{Operator: "!", Expr: &ast.MatchExpr{Expr: $1, RegExpr: $3}}
-	}
-/*
-*/
-	| regexp_literal
-	{
-		$$ = &ast.MatchExpr{Expr: &defaultExpr, RegExpr: $1}
-	}
 	/* COMPOSITE EXPRESSION */
 	| simp_expr PLUSPLUS
 	{
@@ -526,8 +522,14 @@ regexp_literal
 		//fmt.Println("FINISH")
 		$$ = &ast.StringExpr{Literal: $3.Literal}
 	}
+/*
+	| common_expr
+	{
+		$$ = $1
+	}
+*/
 
-input_redir
+opt_input_redir
 	: /* empty */
 	{
 		$$ = nil
