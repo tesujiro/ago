@@ -460,6 +460,18 @@ expr
 		$$ = &ast.GetlineExpr{Var: $2, Redir: $3}
 	}
 
+regexp_literal
+	: '/' /* REGEXP contiunes next */
+	{
+		//fmt.Println("YACC: want regexp!!")
+		inRegExp=true
+	}
+	REGEXP
+	{
+		//fmt.Println("FINISH")
+		$$ = &ast.StringExpr{Literal: $3.Literal}
+	}
+
 common_expr
 	: simp_expr
 	{
@@ -510,24 +522,6 @@ simp_expr
 	{
 		$$ = &ast.CompExpr{Left: $1, Operator: "--", After:true}
 	}
-
-regexp_literal
-	: '/' /* REGEXP contiunes next */
-	{
-		//fmt.Println("YACC: want regexp!!")
-		inRegExp=true
-	}
-	REGEXP
-	{
-		//fmt.Println("FINISH")
-		$$ = &ast.StringExpr{Literal: $3.Literal}
-	}
-/*
-	| common_expr
-	{
-		$$ = $1
-	}
-*/
 
 opt_input_redir
 	: /* empty */

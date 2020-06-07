@@ -368,8 +368,8 @@ var yyR1 = [...]int{
 	9, 9, 9, 9, 12, 23, 23, 21, 21, 10,
 	10, 10, 10, 10, 10, 10, 10, 10, 10, 10,
 	10, 10, 10, 10, 10, 10, 10, 10, 10, 10,
-	10, 10, 10, 10, 10, 11, 11, 13, 13, 13,
-	13, 13, 13, 13, 13, 13, 29, 19, 20, 20,
+	10, 10, 10, 10, 10, 29, 19, 11, 11, 13,
+	13, 13, 13, 13, 13, 13, 13, 13, 20, 20,
 	14, 14, 14, 14, 14, 14, 14, 14, 14, 14,
 	14, 14, 14, 14, 14, 14, 22, 22, 15, 15,
 	16, 16, 17, 17, 24, 24, 24, 5, 5, 18,
@@ -384,8 +384,8 @@ var yyR2 = [...]int{
 	7, 9, 5, 5, 3, 0, 1, 1, 4, 3,
 	3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
 	3, 1, 3, 3, 3, 3, 3, 3, 5, 3,
-	3, 2, 1, 4, 3, 1, 2, 1, 3, 3,
-	3, 3, 3, 3, 2, 2, 0, 3, 0, 2,
+	3, 2, 1, 4, 3, 0, 3, 1, 2, 1,
+	3, 3, 3, 3, 3, 3, 2, 2, 0, 2,
 	2, 4, 4, 4, 7, 3, 2, 2, 1, 1,
 	1, 1, 1, 1, 2, 2, 1, 4, 0, 1,
 	1, 2, 4, 1, 0, 1, 4, 0, 1, 0,
@@ -425,21 +425,21 @@ var yyChk = [...]int{
 var yyDef = [...]int{
 
 	121, -2, 1, 122, 123, 127, 2, 0, 121, 0,
-	7, 8, 9, -2, 103, 75, 61, 45, 72, 108,
-	110, 0, 77, 86, 113, 0, 0, 0, 0, 98,
+	7, 8, 9, -2, 103, 77, 61, 45, 72, 108,
+	110, 0, 79, 75, 113, 0, 0, 0, 0, 98,
 	99, 100, 101, 102, 0, 0, 124, 121, 4, 5,
 	0, 114, 0, 0, 0, 0, 0, 121, 0, 0,
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 84, 85, 71, 45, 46, 47, 0, 0, 76,
+	0, 86, 87, 71, 45, 46, 47, 0, 0, 78,
 	0, 103, 88, -2, 0, 111, 45, 0, 0, 45,
 	90, 0, 96, 97, 104, 105, 3, 114, 0, 115,
 	10, 0, 69, 70, 11, 13, -2, 14, 16, 17,
 	0, 19, 21, 117, 0, 0, 30, 31, 32, 33,
 	45, 119, -2, 0, 0, 49, 62, 63, 64, 65,
 	66, 67, 50, 51, 52, 53, 54, 55, 56, 57,
-	58, 75, 59, 60, 78, 79, 80, 81, 82, 83,
-	0, 47, 121, 108, 45, 74, 0, 0, 0, 87,
+	58, 77, 59, 60, 80, 81, 82, 83, 84, 85,
+	0, 47, 121, 108, 45, 74, 0, 0, 0, 76,
 	0, 95, 0, 0, 121, 0, 0, 18, 20, 125,
 	-2, 16, 0, 117, 118, -2, 0, -2, 35, 36,
 	120, 0, 121, 125, 0, 92, 0, 73, 89, 93,
@@ -1205,12 +1205,14 @@ yydefault:
 	case 75:
 		yyDollar = yyS[yypt-1 : yypt+1]
 		{
-			yyVAL.expr = yyDollar[1].expr
+			//fmt.Println("YACC: want regexp!!")
+			inRegExp = true
 		}
 	case 76:
-		yyDollar = yyS[yypt-2 : yypt+1]
+		yyDollar = yyS[yypt-3 : yypt+1]
 		{
-			yyVAL.expr = &ast.BinOpExpr{Left: yyDollar[1].expr, Operator: "CAT", Right: yyDollar[2].expr}
+			//fmt.Println("FINISH")
+			yyVAL.expr = &ast.StringExpr{Literal: yyDollar[3].token.Literal}
 		}
 	case 77:
 		yyDollar = yyS[yypt-1 : yypt+1]
@@ -1218,56 +1220,54 @@ yydefault:
 			yyVAL.expr = yyDollar[1].expr
 		}
 	case 78:
-		yyDollar = yyS[yypt-3 : yypt+1]
+		yyDollar = yyS[yypt-2 : yypt+1]
 		{
-			yyVAL.expr = &ast.BinOpExpr{Left: yyDollar[1].expr, Operator: "+", Right: yyDollar[3].expr}
+			yyVAL.expr = &ast.BinOpExpr{Left: yyDollar[1].expr, Operator: "CAT", Right: yyDollar[2].expr}
 		}
 	case 79:
-		yyDollar = yyS[yypt-3 : yypt+1]
+		yyDollar = yyS[yypt-1 : yypt+1]
 		{
-			yyVAL.expr = &ast.BinOpExpr{Left: yyDollar[1].expr, Operator: "-", Right: yyDollar[3].expr}
+			yyVAL.expr = yyDollar[1].expr
 		}
 	case 80:
 		yyDollar = yyS[yypt-3 : yypt+1]
 		{
-			yyVAL.expr = &ast.BinOpExpr{Left: yyDollar[1].expr, Operator: "*", Right: yyDollar[3].expr}
+			yyVAL.expr = &ast.BinOpExpr{Left: yyDollar[1].expr, Operator: "+", Right: yyDollar[3].expr}
 		}
 	case 81:
 		yyDollar = yyS[yypt-3 : yypt+1]
 		{
-			yyVAL.expr = &ast.BinOpExpr{Left: yyDollar[1].expr, Operator: "/", Right: yyDollar[3].expr}
+			yyVAL.expr = &ast.BinOpExpr{Left: yyDollar[1].expr, Operator: "-", Right: yyDollar[3].expr}
 		}
 	case 82:
 		yyDollar = yyS[yypt-3 : yypt+1]
 		{
-			yyVAL.expr = &ast.BinOpExpr{Left: yyDollar[1].expr, Operator: "%", Right: yyDollar[3].expr}
+			yyVAL.expr = &ast.BinOpExpr{Left: yyDollar[1].expr, Operator: "*", Right: yyDollar[3].expr}
 		}
 	case 83:
 		yyDollar = yyS[yypt-3 : yypt+1]
 		{
-			yyVAL.expr = &ast.BinOpExpr{Left: yyDollar[1].expr, Operator: "^", Right: yyDollar[3].expr}
+			yyVAL.expr = &ast.BinOpExpr{Left: yyDollar[1].expr, Operator: "/", Right: yyDollar[3].expr}
 		}
 	case 84:
+		yyDollar = yyS[yypt-3 : yypt+1]
+		{
+			yyVAL.expr = &ast.BinOpExpr{Left: yyDollar[1].expr, Operator: "%", Right: yyDollar[3].expr}
+		}
+	case 85:
+		yyDollar = yyS[yypt-3 : yypt+1]
+		{
+			yyVAL.expr = &ast.BinOpExpr{Left: yyDollar[1].expr, Operator: "^", Right: yyDollar[3].expr}
+		}
+	case 86:
 		yyDollar = yyS[yypt-2 : yypt+1]
 		{
 			yyVAL.expr = &ast.CompExpr{Left: yyDollar[1].expr, Operator: "++", After: true}
 		}
-	case 85:
+	case 87:
 		yyDollar = yyS[yypt-2 : yypt+1]
 		{
 			yyVAL.expr = &ast.CompExpr{Left: yyDollar[1].expr, Operator: "--", After: true}
-		}
-	case 86:
-		yyDollar = yyS[yypt-1 : yypt+1]
-		{
-			//fmt.Println("YACC: want regexp!!")
-			inRegExp = true
-		}
-	case 87:
-		yyDollar = yyS[yypt-3 : yypt+1]
-		{
-			//fmt.Println("FINISH")
-			yyVAL.expr = &ast.StringExpr{Literal: yyDollar[3].token.Literal}
 		}
 	case 88:
 		yyDollar = yyS[yypt-0 : yypt+1]
