@@ -56,25 +56,28 @@ var inRegExp bool
 %token <token> FUNC RETURN EXIT NEXT NEXTFILE
 %token <token> CONCAT_OP GETLINE
 
-%right '=' PLUSEQ MINUSEQ MULEQ DIVEQ MODEQ POWEQ
+//%left ';'
+%right '='
+%right PLUSEQ MINUSEQ MULEQ DIVEQ MODEQ POWEQ
 %right '?' ':'
 %left IN
 %left OROR
 %left ANDAND
 %left GETLINE
-%nonassoc ',' vars
+//%nonassoc ',' vars
 %left '~' NOTTILDE
 %left EQEQ NEQ
 %left '>' '<' GE LE
 
 %left CONCAT_OP
 %left STRING NUMBER
+//%nonassoc IDENT TRUE FALSE PRINTF FUNC NIL
 %left '+' '-'
 %left '*' '/' '%'
 %right '!' UNARY
 %left POW
 %left PLUSPLUS MINUSMINUS
-%left '$'
+%right '$'
 %nonassoc '['
 %left '(' ')'
 
@@ -205,9 +208,9 @@ stmt
 	{
 		$$ = &ast.CForLoopStmt{Stmt1: $3, Expr2: $5, Expr3: $7, Stmts: $10}
 	}
-	| FOR '(' opt_stmt ';' opt_expr ';' opt_expr ')' stmt
+	| FOR '(' opt_stmt ';' opt_expr ';' opt_expr ')' opt_semi stmt 
 	{
-		$$ = &ast.CForLoopStmt{Stmt1: $3, Expr2: $5, Expr3: $7, Stmts: []ast.Stmt{$9}}
+		$$ = &ast.CForLoopStmt{Stmt1: $3, Expr2: $5, Expr3: $7, Stmts: []ast.Stmt{$10}}
 	}
 	| WHILE '{' opt_stmts '}'
 	{
@@ -217,10 +220,12 @@ stmt
 	{
 		$$ = &ast.LoopStmt{Stmts: $4, Expr: $2}
 	}
-	| WHILE '(' expr ')' stmt 
+/*
+	| WHILE '(' expr ')' opt_term stmt opt_term
 	{
-		$$ = &ast.LoopStmt{Stmts: []ast.Stmt{$5}, Expr: $3}
+		$$ = &ast.LoopStmt{Stmts: []ast.Stmt{$6}, Expr: $3}
 	}
+*/
 	| DO '{' opt_stmts '}' WHILE '(' expr ')'
 	{
 		$$ = &ast.DoLoopStmt{Stmts: $3, Expr: $7}
@@ -257,17 +262,44 @@ stmt
 stmt_if
 	: IF expr '{' opt_stmts '}'
 	{
+	    //fmt.Println("stmt_if:1")
 	    $$ = &ast.IfStmt{If: $2, Then: $4, Else: nil}
+	}
+	| IF '(' expr ')' stmt opt_term
+	{
+	    $$ = &ast.IfStmt{If: $3, Then: []ast.Stmt{$5}, Else: nil}
+	}
+	| IF expr opt_semi stmt opt_term
+	{
+	    $$ = &ast.IfStmt{If: $2, Then: []ast.Stmt{$4}, Else: nil}
+	}
+/*
+	| IF '(' expr ')' stmt opt_term
+	{
+	    //fmt.Println("stmt_if:2")
+	    $$ = &ast.IfStmt{If: $3, Then: []ast.Stmt{$5}, Else: nil}
+	}
+	| IF expr stmt opt_term
+	{
+	    //fmt.Println("stmt_if:2")
+	    $$ = &ast.IfStmt{If: $2, Then: []ast.Stmt{$3}, Else: nil}
 	}
 	| IF '(' expr ')' opt_term stmt opt_term
 	{
+	    //fmt.Println("stmt_if:2")
 	    $$ = &ast.IfStmt{If: $3, Then: []ast.Stmt{$6}, Else: nil}
 	}
+	| IF '(' expr ')' opt_semi stmt opt_semi
+	{
+	    //fmt.Println("stmt_if:2")
+	    $$ = &ast.IfStmt{If: $3, Then: []ast.Stmt{$6}, Else: nil}
+	}
+*/
 	| stmt_if ELSE IF expr '{' opt_stmts '}'
 	{
 	        $$.(*ast.IfStmt).ElseIf = append($$.(*ast.IfStmt).ElseIf, &ast.IfStmt{If: $4, Then: $6} )
 	}
-	| stmt_if ELSE IF '(' expr ')' opt_term stmt opt_term
+	| stmt_if ELSE IF '(' expr ')' opt_semi stmt opt_term
 	{
 	        $$.(*ast.IfStmt).ElseIf = append($$.(*ast.IfStmt).ElseIf, &ast.IfStmt{If: $5, Then: []ast.Stmt{$8}} )
 	}
@@ -280,7 +312,7 @@ stmt_if
 			$$.(*ast.IfStmt).Else = $4
 		}
 	}
-	| stmt_if ELSE opt_term stmt opt_term
+	| stmt_if ELSE opt_semi stmt opt_term
 	{
 		if $$.(*ast.IfStmt).Else != nil {
 			yylex.Error("multiple else statement")
@@ -449,6 +481,8 @@ simp_expr
 		$$ = &ast.ContainKeyExpr{KeyExpr: $1, MapID: $3.Literal}
 	}
 	/* REGEXP */
+/*
+*/
 	| simp_expr '~' regexp_literal
 	{
 		$$ = &ast.MatchExpr{Expr: $1, RegExpr: $3}
@@ -465,6 +499,8 @@ simp_expr
 	{
 		$$ = &ast.UnaryExpr{Operator: "!", Expr: &ast.MatchExpr{Expr: $1, RegExpr: $3}}
 	}
+/*
+*/
 	| regexp_literal
 	{
 		$$ = &ast.MatchExpr{Expr: &defaultExpr, RegExpr: $1}
@@ -480,7 +516,7 @@ simp_expr
 	}
 
 regexp_literal
-	: a_slash /* REGEXP contiunes next */
+	: '/' /* REGEXP contiunes next */
 	{
 		//fmt.Println("YACC: want regexp!!")
 		inRegExp=true
@@ -505,10 +541,6 @@ non_post_simp_expr
 	: '!' simp_expr %prec UNARY
 	{
 		$$ = &ast.UnaryExpr{Operator: "!", Expr:$2}
-	}
-	| regexp_literal
-	{
-		$$ = $1
 	}
 	/* FUNCTION CALL */
 	| IDENT '(' opt_exprs ')'
@@ -661,12 +693,16 @@ term
 	: semi
 	| term semi
 
+opt_semi
+	: /* empty */
+	| semi
+
 semi
 	: ';'  /* go/scanner return semi when EOL */
 
+/*
 a_slash
 	: '/'
-/*
 opt_nls
 	: 
 	| nls
