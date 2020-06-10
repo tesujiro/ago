@@ -66,8 +66,8 @@ var inRegExp bool
 %left GETLINE
 //%nonassoc ','
 %left '~' NOTTILDE
-%left EQEQ NEQ
-%left '>' '<' GE LE
+%nonassoc EQEQ NEQ
+%nonassoc '>' '<' GE LE
 
 %left CONCAT_OP
 %left STRING NUMBER
@@ -358,48 +358,48 @@ expr
 		$$ = &ast.AssExpr{Left: []ast.Expr{$1}, Right: []ast.Expr{$3}}
 	}
 	/* RELATION EXPRESSION */
-	| simp_expr EQEQ simp_expr
+	| expr EQEQ expr
 	{
 		$$ = &ast.BinOpExpr{Left: $1, Operator: "==", Right: $3}
 	}
-	| simp_expr NEQ simp_expr
+	| expr NEQ expr
 	{
 		$$ = &ast.BinOpExpr{Left: $1, Operator: "!=", Right: $3}
 	}
-	| simp_expr '>' simp_expr
+	| expr '>' expr
 	{
 		$$ = &ast.BinOpExpr{Left: $1, Operator: ">", Right: $3}
 	}
-	| simp_expr GE simp_expr
+	| expr GE expr
 	{
 		$$ = &ast.BinOpExpr{Left: $1, Operator: ">=", Right: $3}
 	}
-	| simp_expr '<' simp_expr
+	| expr '<' expr
 	{
 		$$ = &ast.BinOpExpr{Left: $1, Operator: "<", Right: $3}
 	}
-	| simp_expr LE simp_expr
+	| expr LE expr
 	{
 		$$ = &ast.BinOpExpr{Left: $1, Operator: "<=", Right: $3}
 	}
-	| simp_expr IN IDENT
+	| expr IN IDENT
 	{
 		$$ = &ast.ContainKeyExpr{KeyExpr: $1, MapID: $3.Literal}
 	}
 	/* REGEXP */
-	| simp_expr '~' regexp_literal
+	| expr '~' regexp_literal
 	{
 		$$ = &ast.MatchExpr{Expr: $1, RegExpr: $3}
 	}
-        | simp_expr '~' common_expr
+        | expr '~' common_expr
 	{
 		$$ = &ast.MatchExpr{Expr: $1, RegExpr: $3}
 	}
-	| simp_expr NOTTILDE regexp_literal
+	| expr NOTTILDE regexp_literal
 	{
 		$$ = &ast.UnaryExpr{Operator: "!", Expr: &ast.MatchExpr{Expr: $1, RegExpr: $3}}
 	}
-	| simp_expr NOTTILDE common_expr
+	| expr NOTTILDE common_expr
 	{
 		$$ = &ast.UnaryExpr{Operator: "!", Expr: &ast.MatchExpr{Expr: $1, RegExpr: $3}}
 	}
@@ -407,7 +407,7 @@ expr
 	{
 		$$ = &ast.MatchExpr{Expr: &defaultExpr, RegExpr: $1}
 	}
-	/* COMPOSITE EXPRESSION */
+	/* COMPOSITE ASSIGN OPERATION */
 	| variable PLUSEQ expr
 	{
 		$$ = &ast.CompExpr{Left: $1, Operator: "+=", Right: $3}
@@ -433,15 +433,18 @@ expr
 		$$ = &ast.CompExpr{Left: $1, Operator: "^=", Right: $3}
 	}
 	/* TERNARY OPERATOR */
+	//| expr '?' expr ':' expr
 	| expr '?' expr ':' expr
 	{
 		$$ = &ast.TriOpExpr{Cond: $1, Then: $3, Else: $5}
 	}
 	/* BOOL EXPRESSION */
+	//| expr OROR expr
 	| expr OROR expr
 	{
 		$$ = &ast.BinOpExpr{Left: $1, Operator: "||", Right: $3}
 	}
+	//| expr ANDAND expr
 	| expr ANDAND expr
 	{
 		$$ = &ast.BinOpExpr{Left: $1, Operator: "&&", Right: $3}
