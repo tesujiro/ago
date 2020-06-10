@@ -533,6 +533,7 @@ func TestGoa(t *testing.T) {
 			name: "for;;{} Statement",
 			tests: []test{
 				{script: `BEGIN{for i=1;i<=3;++i{print i}}`, ok: "1\n2\n3\n"},
+				{script: `BEGIN{for i=1;i<=3;i=i+1{print i}}`, ok: "1\n2\n3\n"},
 				{script: `BEGIN{for (i=1;i<=3;++i){print i}}`, ok: "1\n2\n3\n"},
 				{script: `BEGIN{for (i=1;i<=3;++i) print i}`, ok: "1\n2\n3\n"},
 				{script: `BEGIN{for (i=1;i<=3;++i) print i; print "100"}`, ok: "1\n2\n3\n100\n"},
