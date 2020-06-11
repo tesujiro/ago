@@ -56,22 +56,21 @@ var inRegExp bool
 %token <token> FUNC RETURN EXIT NEXT NEXTFILE
 %token <token> CONCAT_OP GETLINE
 
-//%left ';'
-%right '='
-%right PLUSEQ MINUSEQ MULEQ DIVEQ MODEQ POWEQ
+%nonassoc LOWEST
+%right PLUSEQ MINUSEQ MULEQ DIVEQ MODEQ POWEQ '='
 %right '?' ':'
 %left IN
 %left OROR
 %left ANDAND
 %left GETLINE
-//%nonassoc ','
+%nonassoc ','
 %left '~' NOTTILDE
 %nonassoc EQEQ NEQ
 %nonassoc '>' '<' GE LE
 
 %left CONCAT_OP
 %left STRING NUMBER
-//%nonassoc IDENT TRUE FALSE PRINTF FUNC NIL
+%nonassoc IDENT TRUE FALSE PRINTF FUNC NIL
 %left '+' '-'
 %left '*' '/' '%'
 %right '!' UNARY
@@ -269,6 +268,11 @@ stmt_if
 	    //fmt.Println("stmt_if:1")
 	    $$ = &ast.IfStmt{If: $2, Then: $4, Else: nil}
 	}
+	| IF expr opt_semi stmt opt_semi opt_semi
+	{
+	    $$ = &ast.IfStmt{If: $2, Then: []ast.Stmt{$4}, Else: nil}
+	}
+/*
 	| IF '(' expr ')' stmt opt_semi
 	{
 	    $$ = &ast.IfStmt{If: $3, Then: []ast.Stmt{$5}, Else: nil}
@@ -282,21 +286,29 @@ stmt_if
 	{
 	    $$ = &ast.IfStmt{If: $3, Then: []ast.Stmt{$6}, Else: nil}
 	}
+*/
 	| stmt_if ELSE IF expr '{' opt_stmts '}'
 	{
 	        $$.(*ast.IfStmt).ElseIf = append($$.(*ast.IfStmt).ElseIf, &ast.IfStmt{If: $4, Then: $6} )
 	}
+/*
 	//| stmt_if ELSE IF '(' expr ')' stmt 
 	| stmt_if ELSE IF '(' expr ')' stmt opt_term
 	//| stmt_if ELSE IF '(' expr ')' stmt opt_semi
 	{
 	        $$.(*ast.IfStmt).ElseIf = append($$.(*ast.IfStmt).ElseIf, &ast.IfStmt{If: $5, Then: []ast.Stmt{$7}} )
 	}
-	| stmt_if ELSE IF '(' expr ')' semi stmt opt_semi opt_semi
+	| stmt_if ELSE IF '(' expr ')' opt_semi stmt opt_semi opt_semi
+	//| stmt_if ELSE IF '(' expr ')' semi stmt opt_semi opt_semi
 	//| stmt_if ELSE IF '(' expr ')' opt_semi stmt opt_term
 	//| stmt_if ELSE IF '(' expr ')' opt_semi stmt opt_semi opt_semi
 	{
 	        $$.(*ast.IfStmt).ElseIf = append($$.(*ast.IfStmt).ElseIf, &ast.IfStmt{If: $5, Then: []ast.Stmt{$8}} )
+	}
+*/
+	| stmt_if ELSE IF expr opt_semi stmt opt_semi opt_semi
+	{
+	        $$.(*ast.IfStmt).ElseIf = append($$.(*ast.IfStmt).ElseIf, &ast.IfStmt{If: $4, Then: []ast.Stmt{$6}} )
 	}
 	| stmt_if ELSE '{' opt_stmts '}'
 	{
@@ -333,17 +345,17 @@ multi_val_expr
 	}
 
 opt_exprs
-	: /* empty */
+	: %prec LOWEST/* empty */
 	{
 		$$ = []ast.Expr{}
 	}
-	| exprs
+	| exprs %prec LOWEST
 	{
 		$$ = $1
 	}
 
 exprs
-	: expr
+	: expr %prec LOWEST
 	{
 		$$ = []ast.Expr{$1}
 	}
@@ -387,6 +399,8 @@ expr
 		$$ = &ast.ContainKeyExpr{KeyExpr: $1, MapID: $3.Literal}
 	}
 	/* REGEXP */
+	//TODO:
+	//| expr '~' expr
 	| expr '~' regexp_literal
 	{
 		$$ = &ast.MatchExpr{Expr: $1, RegExpr: $3}
@@ -395,6 +409,8 @@ expr
 	{
 		$$ = &ast.MatchExpr{Expr: $1, RegExpr: $3}
 	}
+	//TODO:
+	//| expr NOTTILDE expr
 	| expr NOTTILDE regexp_literal
 	{
 		$$ = &ast.UnaryExpr{Operator: "!", Expr: &ast.MatchExpr{Expr: $1, RegExpr: $3}}
@@ -403,6 +419,8 @@ expr
 	{
 		$$ = &ast.UnaryExpr{Operator: "!", Expr: &ast.MatchExpr{Expr: $1, RegExpr: $3}}
 	}
+/*	//TODO: remove regexp_literal
+*/
 	| regexp_literal
 	{
 		$$ = &ast.MatchExpr{Expr: &defaultExpr, RegExpr: $1}
@@ -453,7 +471,7 @@ expr
 	{
 		$$ = &ast.CallExpr{Name: "printf", SubExprs:$2}
 	}
-	| common_expr
+	| common_expr %prec LOWEST
 	{
 		$$ = $1
 	}
@@ -480,7 +498,7 @@ regexp_literal
 	}
 
 common_expr
-	: simp_expr
+	: simp_expr %prec LOWEST
 	{
 		$$ = $1
 	}
@@ -491,7 +509,7 @@ common_expr
 	}
 
 simp_expr
-	: non_post_simp_expr
+	: non_post_simp_expr %prec LOWEST
 	{
 		$$ = $1
 	}
@@ -545,6 +563,13 @@ non_post_simp_expr
 	{
 		$$ = &ast.UnaryExpr{Operator: "!", Expr:$2}
 	}
+/*
+	| regexp_literal
+	{
+		//fmt.Println("regexp_literal in non_post_simp_expr")
+		$$ = $1
+	}
+*/
 	/* FUNCTION CALL */
 	| IDENT '(' opt_exprs ')'
 	{
@@ -649,7 +674,7 @@ simple_variable
 	{
 		$$ = &ast.ItemExpr{Expr: $1, Index:$3}
 	}
-	| IDENT
+	| IDENT %prec LOWEST
 	{
 		$$ = &ast.IdentExpr{Literal: $1.Literal}
 	}
