@@ -4,7 +4,7 @@
 [![Coverage](https://codecov.io/gh/tesujiro/ago/branch/master/graph/badge.svg)](https://codecov.io/gh/tesujiro/ago)
 [![Go Report Card](https://goreportcard.com/badge/github.com/tesujiro/ago)](https://goreportcard.com/report/github.com/tesujiro/ago)
 
-If you are a gopher, you wrote a AWK script for some task.
+If you are a gopher, you might write a AWK script for some task.
 ```
 $ awk '{if $1>10 {print}}' some.txt
 awk: syntax error at source line 1
