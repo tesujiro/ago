@@ -502,6 +502,8 @@ func TestGoa(t *testing.T) {
 				{script: "{if ($1 <= 10)\nprint \"A\"\n else if ($1 <= 25) print \"B\"\n else print \"C\"}", in: "10\n20\n30\n40\n", ok: "A\nB\nC\nC\n"},
 				{script: "{if ($1 <= 10)\nprint \"A\";\nelse if ($1 <= 25)\nprint \"B\";\n else print \"C\";\n}", in: "10\n20\n30\n40\n", ok: "A\nB\nC\nC\n"},
 				{script: `{if ($1 > 10) {i=i+1;} }END{print i}`, in: "10\n20\n30\n40\n", ok: "3\n"},
+				{script: `{if $1<=20{total+=$1}}END{print total}`, in: "10\n20\n30\n40\n", ok: "30\n"},
+				//{script: `{if ($1<=20)total+=$1}END{print total}`, in: "10\n20\n30\n40\n", ok: "30\n"},
 			},
 		},
 		{
@@ -1534,12 +1536,12 @@ ZZZ 1
 					_, err = writeToIn.WriteString(scanner.Text() + "\n")
 					if err != nil {
 						t.Errorf("Case:%v[%v] script: %v", section.name, caseNumber, test.script)
-						t.Fatalf("Stdin WriteString(%v) error:%v", scanner.Text(), err)
+						t.Errorf("Stdin WriteString(%v) error:%v", scanner.Text(), err)
 					}
 				}
 				if err := scanner.Err(); err != nil {
 					t.Errorf("Case:%v[%v] script: %v", section.name, caseNumber, test.script)
-					t.Fatalf("Scan error:%v", err)
+					t.Errorf("Scan error:%v", err)
 				}
 				//readFromIn.Close() //NG
 				writeToIn.Close()

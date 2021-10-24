@@ -79,6 +79,7 @@ var inRegExp bool
 %right '$'
 %nonassoc '['
 %left '(' ')'
+%nonassoc HIGHEST
 
 %%
 
@@ -272,40 +273,10 @@ stmt_if
 	{
 	    $$ = &ast.IfStmt{If: $2, Then: []ast.Stmt{$4}, Else: nil}
 	}
-/*
-	| IF '(' expr ')' stmt opt_semi
-	{
-	    $$ = &ast.IfStmt{If: $3, Then: []ast.Stmt{$5}, Else: nil}
-	}
-	| IF '(' expr ')' semi stmt
-	{
-	    $$ = &ast.IfStmt{If: $3, Then: []ast.Stmt{$6}, Else: nil}
-	}
-	| IF '(' expr ')' semi stmt semi opt_semi
-	//| IF '(' expr ')' semi stmt opt_semi
-	{
-	    $$ = &ast.IfStmt{If: $3, Then: []ast.Stmt{$6}, Else: nil}
-	}
-*/
 	| stmt_if ELSE IF expr '{' opt_stmts '}'
 	{
 	        $$.(*ast.IfStmt).ElseIf = append($$.(*ast.IfStmt).ElseIf, &ast.IfStmt{If: $4, Then: $6} )
 	}
-/*
-	//| stmt_if ELSE IF '(' expr ')' stmt 
-	| stmt_if ELSE IF '(' expr ')' stmt opt_term
-	//| stmt_if ELSE IF '(' expr ')' stmt opt_semi
-	{
-	        $$.(*ast.IfStmt).ElseIf = append($$.(*ast.IfStmt).ElseIf, &ast.IfStmt{If: $5, Then: []ast.Stmt{$7}} )
-	}
-	| stmt_if ELSE IF '(' expr ')' opt_semi stmt opt_semi opt_semi
-	//| stmt_if ELSE IF '(' expr ')' semi stmt opt_semi opt_semi
-	//| stmt_if ELSE IF '(' expr ')' opt_semi stmt opt_term
-	//| stmt_if ELSE IF '(' expr ')' opt_semi stmt opt_semi opt_semi
-	{
-	        $$.(*ast.IfStmt).ElseIf = append($$.(*ast.IfStmt).ElseIf, &ast.IfStmt{If: $5, Then: []ast.Stmt{$8}} )
-	}
-*/
 	| stmt_if ELSE IF expr opt_semi stmt opt_semi opt_semi
 	{
 	        $$.(*ast.IfStmt).ElseIf = append($$.(*ast.IfStmt).ElseIf, &ast.IfStmt{If: $4, Then: []ast.Stmt{$6}} )
@@ -319,17 +290,7 @@ stmt_if
 			$$.(*ast.IfStmt).Else = $4
 		}
 	}
-/*
-	| stmt_if ELSE stmt opt_term
-	{
-		if $$.(*ast.IfStmt).Else != nil {
-			yylex.Error("multiple else statement")
-		} else {
-			$$.(*ast.IfStmt).Else = []ast.Stmt{$3}
-		}
-	}
-*/
-	| stmt_if ELSE opt_semi stmt opt_term
+	| stmt_if ELSE opt_semi stmt opt_semi
 	{
 		if $$.(*ast.IfStmt).Else != nil {
 			yylex.Error("multiple else statement")
